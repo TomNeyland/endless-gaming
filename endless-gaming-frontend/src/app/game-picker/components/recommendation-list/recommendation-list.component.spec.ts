@@ -7,6 +7,7 @@ import { PreferenceService } from '../../services/preference.service';
 describe('RecommendationListComponent', () => {
   let component: RecommendationListComponent;
   let fixture: ComponentFixture<RecommendationListComponent>;
+  let mockPreferenceService: jasmine.SpyObj<PreferenceService>;
 
   const mockRecommendations: GameRecommendation[] = [
     {
@@ -60,8 +61,17 @@ describe('RecommendationListComponent', () => {
   ];
 
   beforeEach(async () => {
+    // Create mock PreferenceService
+    mockPreferenceService = jasmine.createSpyObj('PreferenceService', ['rankGames']);
+    
+    // Configure default behavior - return mock recommendations when rankGames is called
+    mockPreferenceService.rankGames.and.returnValue(mockRecommendations);
+    
     await TestBed.configureTestingModule({
-      imports: [RecommendationListComponent]
+      imports: [RecommendationListComponent],
+      providers: [
+        { provide: PreferenceService, useValue: mockPreferenceService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(RecommendationListComponent);
@@ -94,10 +104,9 @@ describe('RecommendationListComponent', () => {
 
   describe('template rendering with recommendations', () => {
     beforeEach(() => {
-      // Set recommendations before any lifecycle hooks run
-      component.recommendations = mockRecommendations;
+      // Set input games - the component will use the mocked service to generate recommendations
       component.games = mockRecommendations.map(r => r.game);
-      fixture.detectChanges();
+      fixture.detectChanges(); // This triggers ngOnInit which calls the mocked rankGames
     });
 
     it('should display list header when recommendations available', () => {
@@ -186,7 +195,8 @@ describe('RecommendationListComponent', () => {
 
   describe('template rendering without recommendations', () => {
     beforeEach(() => {
-      component.recommendations = [];
+      // Don't set any games - component will have empty recommendations
+      component.games = [];
       fixture.detectChanges();
     });
 
@@ -203,10 +213,9 @@ describe('RecommendationListComponent', () => {
 
   describe('user interactions', () => {
     beforeEach(() => {
-      // Set recommendations before any lifecycle hooks run
-      component.recommendations = mockRecommendations;
+      // Set input games - the component will use the mocked service to generate recommendations
       component.games = mockRecommendations.map(r => r.game);
-      fixture.detectChanges();
+      fixture.detectChanges(); // This triggers ngOnInit which calls the mocked rankGames
     });
 
     it('should handle recommendation item clicks', () => {
@@ -231,16 +240,22 @@ describe('RecommendationListComponent', () => {
 
   describe('component methods', () => {
     it('should implement hasRecommendations method', () => {
-      component.recommendations = mockRecommendations;
+      // Set games and initialize to get recommendations from service
+      component.games = mockRecommendations.map(r => r.game);
+      component.ngOnInit();
       expect(component.hasRecommendations()).toBe(true);
       
-      component.recommendations = [];
+      // Reset with no games
+      component.games = [];
+      component.ngOnInit();
       expect(component.hasRecommendations()).toBe(false);
     });
 
     it('should implement getDisplayRecommendations method', () => {
-      component.recommendations = mockRecommendations;
-      expect(component.getDisplayRecommendations()).toBe(mockRecommendations);
+      // Set games and initialize to get recommendations from service
+      component.games = mockRecommendations.map(r => r.game);
+      component.ngOnInit();
+      expect(component.getDisplayRecommendations()).toEqual(mockRecommendations);
     });
 
     it('should implement formatScore method', () => {
@@ -275,8 +290,9 @@ describe('RecommendationListComponent', () => {
   describe('maxRecommendations limiting', () => {
     it('should limit displayed recommendations based on maxRecommendations', () => {
       component.maxRecommendations = 2;
-      component.recommendations = mockRecommendations;
-      expect(component.getDisplayRecommendations().length).toBe(3); // Still returns all, but template would limit
+      component.games = mockRecommendations.map(r => r.game);
+      component.ngOnInit();
+      expect(component.getDisplayRecommendations().length).toBe(2); // Should be limited by maxRecommendations
     });
   });
 
