@@ -4,12 +4,15 @@ Flask application factory for the Endless Gaming backend.
 This module creates and configures the Flask application using the
 application factory pattern for better testability and configuration.
 """
+import os
 from flask import Flask, g
 from flask_caching import Cache
 from flask_cors import CORS
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.config import Config
+from sqlalchemy import text
+from datetime import datetime
+from app.config import Config, config
 
 # Initialize extensions
 cache = Cache()
@@ -19,16 +22,23 @@ cors = CORS()
 SessionLocal = None
 
 
-def create_app(config_class=Config):
+def create_app(config_name=None):
     """
     Application factory function.
     
     Args:
-        config_class: Configuration class to use (defaults to Config)
+        config_name: Configuration name to use ('development', 'testing', 'production')
+                    If None, uses FLASK_ENV environment variable or defaults to 'default'
         
     Returns:
         Flask: Configured Flask application instance
     """
+    # Determine configuration based on environment
+    if config_name is None:
+        config_name = os.environ.get('FLASK_ENV', 'default')
+    
+    config_class = config.get(config_name, config['default'])
+    
     app = Flask(__name__)
     app.config.from_object(config_class)
     
@@ -43,11 +53,36 @@ def create_app(config_class=Config):
     
     # Initialize extensions
     cache.init_app(app)
-    cors.init_app(app)
+    cors.init_app(app, origins=app.config['CORS_ORIGINS'])
     
     # Register blueprints
     from app.discovery import bp as discovery_bp
     app.register_blueprint(discovery_bp, url_prefix='/discovery')
+    
+    # Health check endpoint for DigitalOcean App Platform
+    @app.route('/health')
+    def health_check():
+        """Health check endpoint for load balancer monitoring."""
+        try:
+            # Test database connectivity
+            session = SessionLocal()
+            session.execute(text('SELECT 1'))
+            session.close()
+            
+            return {
+                'status': 'healthy',
+                'timestamp': datetime.utcnow().isoformat(),
+                'environment': app.config.get('FLASK_ENV', 'unknown'),
+                'database': 'connected'
+            }, 200
+        except Exception as e:
+            app.logger.error(f"Health check failed: {e}")
+            return {
+                'status': 'unhealthy',
+                'error': str(e),
+                'environment': app.config.get('FLASK_ENV', 'unknown'),
+                'database': 'disconnected'
+            }, 503
     
     return app
 
