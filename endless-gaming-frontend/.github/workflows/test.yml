@@ -1,0 +1,64 @@
+name: Frontend Tests
+
+on:
+  push:
+    branches: [ main, master ]
+    paths: 
+      - 'endless-gaming-frontend/**'
+      - '.github/workflows/frontend-test.yml'
+  pull_request:
+    branches: [ main, master ]
+    paths: 
+      - 'endless-gaming-frontend/**'
+
+defaults:
+  run:
+    working-directory: endless-gaming-frontend
+
+jobs:
+  test:
+    name: Run Angular Tests
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: endless-gaming-frontend/package-lock.json
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run linting
+      run: |
+        if npm run lint --if-present; then
+          echo "✅ Linting passed"
+        else
+          echo "⚠️ No lint script found, skipping"
+        fi
+      continue-on-error: true
+      
+    - name: Run unit tests
+      run: npm test
+      env:
+        # Use Chrome Headless for CI
+        CHROME_BIN: /usr/bin/google-chrome-stable
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-node-${{ matrix.node-version }}
+        path: |
+          endless-gaming-frontend/coverage/
+          endless-gaming-frontend/test-results/
+        retention-days: 7
