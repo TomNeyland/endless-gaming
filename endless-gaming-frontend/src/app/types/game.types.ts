@@ -30,7 +30,8 @@ export interface ChoiceEvent {
   leftId: number;   // App ID of left game
   rightId: number;  // App ID of right game
   pick: 'left' | 'right' | 'skip';  // User's choice
-  ts: number;       // Timestamp in epoch milliseconds
+  timestamp: number;       // Timestamp in epoch milliseconds
+  userId?: string;  // Optional user ID for analytics
 }
 
 /**
@@ -40,6 +41,7 @@ export interface ChoiceEvent {
 export interface SparseVector {
   indices: Uint16Array;  // Tag indices (references tag dictionary)
   values: Float32Array;  // Normalized tag values
+  size: number;          // Total vector dimension
 }
 
 /**
@@ -78,9 +80,9 @@ export interface GamePair {
  * User preference state that gets persisted to IndexedDB.
  */
 export interface UserPreferenceState {
-  weightVector: Float32Array;  // Dense weight vector (one per tag)
+  weightVector: number[];      // Dense weight vector (serializable)
   comparisonCount: number;     // Number of comparisons made
-  lastUpdated: number;         // Timestamp of last update
+  tagDict: TagDictionary | null; // Associated tag dictionary
 }
 
 /**
@@ -88,8 +90,8 @@ export interface UserPreferenceState {
  * Used for sparse vector operations.
  */
 export interface TagDictionary {
-  tagToIndex: Map<string, number>;
-  indexToTag: Map<number, string>;
+  tagToIndex: { [tag: string]: number };
+  indexToTag: string[];
   size: number;
 }
 

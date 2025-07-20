@@ -47,17 +47,23 @@ export class GameDataService {
    * Caches data in IndexedDB for offline access.
    */
   loadMasterData(): Observable<GameRecord[]> {
+    // Check in-memory cache first for immediate response
+    if (this.isCacheValid()) {
+      return of(this.allGamesCache);
+    }
+    
+    // Try IndexedDB cache, then fetch from backend if needed
     return from(this.getCachedData()).pipe(
       switchMap(cachedData => {
-        if (cachedData && this.isCacheValid()) {
+        if (cachedData && cachedData.length > 0) {
           this.populateInMemoryCache(cachedData);
           return of(cachedData);
         }
         return this.fetchFromBackend();
       }),
       catchError(error => {
-        console.error('Failed to load master data:', error);
-        return throwError(() => error);
+        console.error('Cache check failed, fetching from backend:', error);
+        return this.fetchFromBackend();
       })
     );
   }
@@ -112,6 +118,9 @@ export class GameDataService {
 
   private async getCachedData(): Promise<GameRecord[] | null> {
     try {
+      // In test environment, IndexedDB might not work properly, so fall back gracefully
+      if (!this.db) return null;
+      
       const cacheEntry = await this.db.cache.get(this.CACHE_KEY);
       if (!cacheEntry) return null;
       
@@ -123,23 +132,21 @@ export class GameDataService {
       
       return cacheEntry.data;
     } catch (error) {
-      console.error('Error reading from cache:', error);
+      // In tests, IndexedDB operations might fail - this is OK, just fetch from backend
+      console.warn('Cache read failed, will fetch from backend:', error);
       return null;
     }
   }
 
   private fetchFromBackend(): Observable<GameRecord[]> {
     return this.http.get<GameRecord[]>(this.API_URL).pipe(
-      switchMap(data => 
-        from(this.cacheData(data)).pipe(
-          map(() => data),
-          catchError(cacheError => {
-            console.warn('Cache failed, but data loaded:', cacheError);
-            return of(data);
-          })
-        )
-      ),
-      tap(data => this.populateInMemoryCache(data)),
+      tap(data => {
+        // Cache data asynchronously without blocking the response
+        this.cacheData(data).catch(error => 
+          console.warn('Cache failed, but data loaded:', error)
+        );
+        this.populateInMemoryCache(data);
+      }),
       catchError(error => {
         console.error('Backend fetch failed:', error);
         return throwError(() => error);
