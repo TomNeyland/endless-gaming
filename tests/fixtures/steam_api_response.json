@@ -1,0 +1,18 @@
+{
+  "applist": {
+    "apps": [
+      {
+        "appid": 10,
+        "name": "Counter-Strike"
+      },
+      {
+        "appid": 20,
+        "name": "Team Fortress Classic"
+      },
+      {
+        "appid": 30,
+        "name": "Day of Defeat"
+      }
+    ]
+  }
+}
