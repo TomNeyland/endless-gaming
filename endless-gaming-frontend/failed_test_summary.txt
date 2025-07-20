@@ -1,0 +1,83 @@
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService auto flush functionality should handle auto flush errors gracefully FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService auto flush functionality should start auto flush FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService flushChoices should handle multiple choices in batch FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService flushChoices should include user ID in request FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService flushChoices should send queued choices to backend FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService getQueuedCount should update when choices are queued FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService getQueuedCount should update when queue is flushed FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService integration scenarios should handle rapid queueing and flushing FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService integration scenarios should handle typical usage pattern FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService integration scenarios should maintain user session across operations FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent component methods should implement hasValidPair method FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent component methods should implement selectLeft method FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent component methods should implement selectRight method FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent component methods should implement skip method FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent template rendering should display no pair message when no pair provided FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent template rendering should render all choice buttons FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent template rendering should render game names correctly FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent user interactions should emit choice when right button clicked FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent user interactions should record choice and emit event when left button clicked FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent user interactions should record choice when right button clicked FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent user interactions should record choice when skip button clicked FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService clearCache should clear cached data FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService getAllGames should return all cached games FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService getGameById should return game by app ID FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService getGameById should return null for non-existent game ID FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService getGameById should return null if no data is loaded FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService integration scenarios should handle multiple concurrent load requests FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService integration scenarios should reload data after cache clear FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService isCacheValid should return false after cache is cleared FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService isCacheValid should return true after successful data load FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService loadMasterData should cache data in IndexedDB after successful fetch FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService loadMasterData should fetch master data from backend API FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService loadMasterData should handle HTTP errors gracefully FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent component methods should implement onComparisonsComplete method FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent component methods should implement onError method FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent component methods should implement onStartComparisons method FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent component methods should implement resetGamePicker method FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent component methods should implement startGamePicker method FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent state transitions should display error state FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent state transitions should transition to comparing state FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent state transitions should transition to recommendations state FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent template rendering should render only comparing content in comparing state FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent template rendering should render only error content in error state FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent template rendering should render only recommendations content in recommendations state FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent user interactions should handle restart button click in recommendations state FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getChoiceHistory should include complete choice information FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getChoiceHistory should preserve chronological order FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getChoiceHistory should record all choices FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getNextPair should not return same game pair multiple times FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getNextPair should return different pairs on subsequent calls FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getNextPair should return null when no more pairs available FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getProgress should handle completion FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getProgress should not change total during session FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getProgress should update current progress with choices FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService hasMorePairs should return false when target reached FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService hasMorePairs should update correctly as choices are made FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService initializeWithGames should reset existing state FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService integration scenarios should handle complete comparison session FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService integration scenarios should handle reset and restart FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService integration scenarios should work with small game sets FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService recordChoice should handle all choice types FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService recordChoice should handle multiple choices FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService recordChoice should maintain choice history FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService recordChoice should record user choice FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService resetProgress should clear choice history FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService resetProgress should make pairs available again FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService resetProgress should preserve game list FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService resetProgress should reset current progress to zero FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent component methods should implement getMaxWeight method FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent input handling should accept null preference summary initially FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with empty preferences should display no preferences messages when tags are empty FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with partial preferences should display liked tags and no dislikes message FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with preferences should display disliked tag items FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with preferences should display liked and disliked sections FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with preferences should display liked tag items FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with preferences should display main title FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with preferences should display section titles with icons FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with preferences should display summary container when preferences available FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with preferences should display weight bars for all tags FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ProgressBarComponent completion state should display checkmark in completion message FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ProgressBarComponent completion state should display completion message when progress is complete FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ProgressBarComponent template rendering without progress should display no progress message when progress is null FAILED[39m
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ProgressBarComponent various progress states should handle complete progress state FAILED[39m

@@ -1,0 +1,369 @@
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ProgressBarComponent various progress states should handle complete progress state FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 3 of 274[31m (1 FAILED)[39m (0 secs / 0.043 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 4 of 274[31m (1 FAILED)[39m (0 secs / 0.046 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ProgressBarComponent completion state should display completion message when progress is complete FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 5 of 274[31m (2 FAILED)[39m (0 secs / 0.051 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ProgressBarComponent completion state should display checkmark in completion message FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 6 of 274[31m (3 FAILED)[39m (0 secs / 0.054 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 7 of 274[31m (3 FAILED)[39m (0 secs / 0.057 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 8 of 274[31m (3 FAILED)[39m (0 secs / 0.059 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 9 of 274[31m (3 FAILED)[39m (0 secs / 0.062 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 10 of 274[31m (3 FAILED)[39m (0 secs / 0.064 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 11 of 274[31m (3 FAILED)[39m (0 secs / 0.066 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 12 of 274[31m (3 FAILED)[39m (0 secs / 0.068 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 13 of 274[31m (3 FAILED)[39m (0 secs / 0.07 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 14 of 274[31m (3 FAILED)[39m (0 secs / 0.072 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 15 of 274[31m (3 FAILED)[39m (0 secs / 0.073 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 16 of 274[31m (3 FAILED)[39m (0 secs / 0.074 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 17 of 274[31m (3 FAILED)[39m (0 secs / 0.075 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 18 of 274[31m (3 FAILED)[39m (0 secs / 0.077 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ProgressBarComponent template rendering without progress should display no progress message when progress is null FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 19 of 274[31m (4 FAILED)[39m (0 secs / 0.08 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 20 of 274[31m (4 FAILED)[39m (0 secs / 0.082 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 21 of 274[31m (4 FAILED)[39m (0 secs / 0.083 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 22 of 274[31m (4 FAILED)[39m (0 secs / 0.085 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 23 of 274[31m (4 FAILED)[39m (0 secs / 0.086 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 24 of 274[31m (4 FAILED)[39m (0 secs / 0.087 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 25 of 274[31m (4 FAILED)[39m (0 secs / 0.088 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 26 of 274[31m (4 FAILED)[39m (0 secs / 0.122 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 27 of 274[31m (4 FAILED)[39m (0 secs / 0.127 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 28 of 274[31m (4 FAILED)[39m (0 secs / 0.131 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 29 of 274[31m (4 FAILED)[39m (0 secs / 0.134 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 30 of 274[31m (4 FAILED)[39m (0 secs / 0.139 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 31 of 274[31m (4 FAILED)[39m (0 secs / 0.143 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 32 of 274[31m (4 FAILED)[39m (0 secs / 0.148 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 33 of 274[31m (4 FAILED)[39m (0 secs / 0.154 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 34 of 274[31m (4 FAILED)[39m (0 secs / 0.16 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 35 of 274[31m (4 FAILED)[39m (0 secs / 0.164 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 36 of 274[31m (4 FAILED)[39m (0 secs / 0.168 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 37 of 274[31m (4 FAILED)[39m (0 secs / 0.17 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 38 of 274[31m (4 FAILED)[39m (0 secs / 0.172 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 39 of 274[31m (4 FAILED)[39m (0 secs / 0.174 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 40 of 274[31m (4 FAILED)[39m (0 secs / 0.176 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 41 of 274[31m (4 FAILED)[39m (0 secs / 0.178 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 42 of 274[31m (4 FAILED)[39m (0 secs / 0.179 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 43 of 274[31m (4 FAILED)[39m (0 secs / 0.183 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 44 of 274[31m (4 FAILED)[39m (0 secs / 0.186 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 45 of 274[31m (4 FAILED)[39m (0 secs / 0.187 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 46 of 274[31m (4 FAILED)[39m (0 secs / 0.188 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 47 of 274[31m (4 FAILED)[39m (0 secs / 0.189 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 48 of 274[31m (4 FAILED)[39m (0 secs / 0.19 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 49 of 274[31m (4 FAILED)[39m (0 secs / 0.191 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 50 of 274[31m (4 FAILED)[39m (0 secs / 0.192 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 51 of 274[31m (4 FAILED)[39m (0 secs / 0.193 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 52 of 274[31m (4 FAILED)[39m (0 secs / 0.194 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService loadMasterData should cache data in IndexedDB after successful fetch FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 53 of 274[31m (5 FAILED)[39m (0 secs / 0.228 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService loadMasterData should handle HTTP errors gracefully FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 54 of 274[31m (6 FAILED)[39m (0 secs / 0.232 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService loadMasterData should fetch master data from backend API FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 55 of 274[31m (7 FAILED)[39m (0 secs / 0.236 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService getGameById should return null if no data is loaded FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 56 of 274[31m (8 FAILED)[39m (0 secs / 0.241 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService getGameById should return game by app ID FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 57 of 274[31m (9 FAILED)[39m (0 secs / 0.245 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService getGameById should return null for non-existent game ID FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 58 of 274[31m (10 FAILED)[39m (0 secs / 0.248 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 59 of 274[31m (10 FAILED)[39m (0 secs / 0.252 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService getAllGames should return all cached games FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 60 of 274[31m (11 FAILED)[39m (0 secs / 0.257 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 61 of 274[31m (11 FAILED)[39m (0 secs / 0.26 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 62 of 274[31m (11 FAILED)[39m (0 secs / 0.265 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService clearCache should clear cached data FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 63 of 274[31m (12 FAILED)[39m (0 secs / 0.269 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService integration scenarios should reload data after cache clear FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 64 of 274[31m (13 FAILED)[39m (0 secs / 0.273 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService integration scenarios should handle multiple concurrent load requests FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 65 of 274[31m (14 FAILED)[39m (0 secs / 0.277 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 66 of 274[31m (14 FAILED)[39m (0 secs / 0.28 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService isCacheValid should return false after cache is cleared FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 67 of 274[31m (15 FAILED)[39m (0 secs / 0.284 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameDataService isCacheValid should return true after successful data load FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 68 of 274[31m (16 FAILED)[39m (0 secs / 0.289 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 69 of 274[31m (16 FAILED)[39m (0 secs / 0.29 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 70 of 274[31m (16 FAILED)[39m (0 secs / 0.292 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 71 of 274[31m (16 FAILED)[39m (0 secs / 0.294 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 72 of 274[31m (16 FAILED)[39m (0 secs / 0.296 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 73 of 274[31m (16 FAILED)[39m (0 secs / 0.297 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 74 of 274[31m (16 FAILED)[39m (0 secs / 0.299 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 75 of 274[31m (16 FAILED)[39m (0 secs / 0.301 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 76 of 274[31m (16 FAILED)[39m (0 secs / 0.302 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 77 of 274[31m (16 FAILED)[39m (0 secs / 0.304 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 78 of 274[31m (16 FAILED)[39m (0 secs / 0.306 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 79 of 274[31m (16 FAILED)[39m (0 secs / 0.308 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 80 of 274[31m (16 FAILED)[39m (0 secs / 0.31 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 81 of 274[31m (16 FAILED)[39m (0 secs / 0.311 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 82 of 274[31m (16 FAILED)[39m (0 secs / 0.312 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 83 of 274[31m (16 FAILED)[39m (0 secs / 0.313 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 84 of 274[31m (16 FAILED)[39m (0 secs / 0.315 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 85 of 274[31m (16 FAILED)[39m (0 secs / 0.316 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 86 of 274[31m (16 FAILED)[39m (0 secs / 0.317 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 87 of 274[31m (16 FAILED)[39m (0 secs / 0.319 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 88 of 274[31m (16 FAILED)[39m (0 secs / 0.321 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 89 of 274[31m (16 FAILED)[39m (0 secs / 0.323 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 90 of 274[31m (16 FAILED)[39m (0 secs / 0.324 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 91 of 274[31m (16 FAILED)[39m (0 secs / 0.325 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 92 of 274[31m (16 FAILED)[39m (0 secs / 0.326 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 93 of 274[31m (16 FAILED)[39m (0 secs / 0.327 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 94 of 274[31m (16 FAILED)[39m (0 secs / 0.328 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 95 of 274[31m (16 FAILED)[39m (0 secs / 0.329 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 96 of 274[31m (16 FAILED)[39m (0 secs / 0.33 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 97 of 274[31m (16 FAILED)[39m (0 secs / 0.331 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 98 of 274[31m (16 FAILED)[39m (0 secs / 0.332 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 99 of 274[31m (16 FAILED)[39m (0 secs / 0.333 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 100 of 274[31m (16 FAILED)[39m (0 secs / 0.334 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 101 of 274[31m (16 FAILED)[39m (0 secs / 0.335 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 102 of 274[31m (16 FAILED)[39m (0 secs / 0.335 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 103 of 274[31m (16 FAILED)[39m (0 secs / 0.336 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 104 of 274[31m (16 FAILED)[39m (0 secs / 0.337 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 105 of 274[31m (16 FAILED)[39m (0 secs / 0.338 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 106 of 274[31m (16 FAILED)[39m (0 secs / 0.339 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 107 of 274[31m (16 FAILED)[39m (0 secs / 0.34 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 108 of 274[31m (16 FAILED)[39m (0 secs / 0.341 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 109 of 274[31m (16 FAILED)[39m (0 secs / 0.342 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 110 of 274[31m (16 FAILED)[39m (0 secs / 0.343 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 111 of 274[31m (16 FAILED)[39m (0 secs / 0.344 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 112 of 274[31m (16 FAILED)[39m (0 secs / 0.346 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 113 of 274[31m (16 FAILED)[39m (0 secs / 0.347 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 114 of 274[31m (16 FAILED)[39m (0 secs / 0.348 secs)
+[1A[2KWARN: [36m'Spec 'PreferenceService getPreferenceSummary should update when preferences change' has no expectations.'[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 114 of 274[31m (16 FAILED)[39m (0 secs / 0.348 secs)
+WARN: 'Spec 'PreferenceService getPreferenceSummary should update when preferences change' has no expectations.'
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 115 of 274[31m (16 FAILED)[39m (0 secs / 0.349 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 116 of 274[31m (16 FAILED)[39m (0 secs / 0.35 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 117 of 274[31m (16 FAILED)[39m (0 secs / 0.351 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 118 of 274[31m (16 FAILED)[39m (0 secs / 0.352 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 119 of 274[31m (16 FAILED)[39m (0 secs / 0.353 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 120 of 274[31m (16 FAILED)[39m (0 secs / 0.353 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 121 of 274[31m (16 FAILED)[39m (0 secs / 0.354 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 122 of 274[31m (16 FAILED)[39m (0 secs / 0.355 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 123 of 274[31m (16 FAILED)[39m (0 secs / 0.356 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with preferences should display summary container when preferences available FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 124 of 274[31m (17 FAILED)[39m (0 secs / 0.367 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with preferences should display liked and disliked sections FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 125 of 274[31m (18 FAILED)[39m (0 secs / 0.369 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with preferences should display main title FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 126 of 274[31m (19 FAILED)[39m (0 secs / 0.371 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with preferences should display section titles with icons FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 127 of 274[31m (20 FAILED)[39m (0 secs / 0.374 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with preferences should display disliked tag items FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 128 of 274[31m (21 FAILED)[39m (0 secs / 0.377 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with preferences should display liked tag items FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 129 of 274[31m (22 FAILED)[39m (0 secs / 0.38 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with preferences should display weight bars for all tags FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 130 of 274[31m (23 FAILED)[39m (0 secs / 0.382 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 131 of 274[31m (23 FAILED)[39m (0 secs / 0.384 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 132 of 274[31m (23 FAILED)[39m (0 secs / 0.386 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent component methods should implement getMaxWeight method FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 133 of 274[31m (24 FAILED)[39m (0 secs / 0.389 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 134 of 274[31m (24 FAILED)[39m (0 secs / 0.39 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 135 of 274[31m (24 FAILED)[39m (0 secs / 0.392 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 136 of 274[31m (24 FAILED)[39m (0 secs / 0.393 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 137 of 274[31m (24 FAILED)[39m (0 secs / 0.394 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 138 of 274[31m (24 FAILED)[39m (0 secs / 0.395 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 139 of 274[31m (24 FAILED)[39m (0 secs / 0.396 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent input handling should accept null preference summary initially FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 140 of 274[31m (25 FAILED)[39m (0 secs / 0.398 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 141 of 274[31m (25 FAILED)[39m (0 secs / 0.399 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 142 of 274[31m (25 FAILED)[39m (0 secs / 0.4 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with partial preferences should display liked tags and no dislikes message FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 143 of 274[31m (26 FAILED)[39m (0 secs / 0.401 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PreferenceSummaryComponent template rendering with empty preferences should display no preferences messages when tags are empty FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 144 of 274[31m (27 FAILED)[39m (0 secs / 0.403 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 145 of 274[31m (27 FAILED)[39m (0 secs / 0.404 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 146 of 274[31m (27 FAILED)[39m (0 secs / 0.423 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 147 of 274[31m (27 FAILED)[39m (0 secs / 0.425 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 148 of 274[31m (27 FAILED)[39m (0 secs / 0.426 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 149 of 274[31m (27 FAILED)[39m (0 secs / 0.426 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 150 of 274[31m (27 FAILED)[39m (0 secs / 0.426 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 151 of 274[31m (27 FAILED)[39m (0 secs / 0.427 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 152 of 274[31m (27 FAILED)[39m (0 secs / 0.428 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 153 of 274[31m (27 FAILED)[39m (0 secs / 0.429 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 154 of 274[31m (27 FAILED)[39m (0 secs / 0.429 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 155 of 274[31m (27 FAILED)[39m (0 secs / 0.43 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 156 of 274[31m (27 FAILED)[39m (0 secs / 0.431 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 157 of 274[31m (27 FAILED)[39m (0 secs / 0.432 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 158 of 274[31m (27 FAILED)[39m (0 secs / 0.433 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 159 of 274[31m (27 FAILED)[39m (0 secs / 0.434 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 160 of 274[31m (27 FAILED)[39m (0 secs / 0.435 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 161 of 274[31m (27 FAILED)[39m (0 secs / 0.436 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 162 of 274[31m (27 FAILED)[39m (0 secs / 0.437 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 163 of 274[31m (27 FAILED)[39m (0 secs / 0.438 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 164 of 274[31m (27 FAILED)[39m (0 secs / 0.439 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 165 of 274[31m (27 FAILED)[39m (0 secs / 0.439 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 166 of 274[31m (27 FAILED)[39m (0 secs / 0.44 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 167 of 274[31m (27 FAILED)[39m (0 secs / 0.441 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 168 of 274[31m (27 FAILED)[39m (0 secs / 0.441 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 169 of 274[31m (27 FAILED)[39m (0 secs / 0.442 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 170 of 274[31m (27 FAILED)[39m (0 secs / 0.442 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 171 of 274[31m (27 FAILED)[39m (0 secs / 0.442 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 172 of 274[31m (27 FAILED)[39m (0 secs / 0.443 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 173 of 274[31m (27 FAILED)[39m (0 secs / 0.444 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 174 of 274[31m (27 FAILED)[39m (0 secs / 0.445 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 175 of 274[31m (27 FAILED)[39m (0 secs / 0.447 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 176 of 274[31m (27 FAILED)[39m (0 secs / 0.448 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 177 of 274[31m (27 FAILED)[39m (0 secs / 0.449 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 178 of 274[31m (27 FAILED)[39m (0 secs / 0.451 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService integration scenarios should maintain user session across operations FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 179 of 274[31m (28 FAILED)[39m (0 secs / 0.452 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService integration scenarios should handle rapid queueing and flushing FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 180 of 274[31m (29 FAILED)[39m (0 secs / 0.453 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService integration scenarios should handle typical usage pattern FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 181 of 274[31m (30 FAILED)[39m (0 secs / 0.455 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 182 of 274[31m (30 FAILED)[39m (0 secs / 0.456 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 183 of 274[31m (30 FAILED)[39m (0 secs / 0.456 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 184 of 274[31m (30 FAILED)[39m (0 secs / 0.456 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 185 of 274[31m (30 FAILED)[39m (0 secs / 0.457 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 186 of 274[31m (30 FAILED)[39m (0 secs / 0.458 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 187 of 274[31m (30 FAILED)[39m (0 secs / 0.459 secs)
+[1A[2KWARN: [36m'Spec 'ChoiceApiService auto flush functionality should not flush when offline' has no expectations.'[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 187 of 274[31m (30 FAILED)[39m (0 secs / 0.459 secs)
+WARN: 'Spec 'ChoiceApiService auto flush functionality should not flush when offline' has no expectations.'
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 188 of 274[31m (30 FAILED)[39m (0 secs / 0.461 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService auto flush functionality should handle auto flush errors gracefully FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 189 of 274[31m (31 FAILED)[39m (0 secs / 0.463 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService auto flush functionality should start auto flush FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 190 of 274[31m (32 FAILED)[39m (0 secs / 0.465 secs)
+[1A[2KWARN: [36m'Spec 'ChoiceApiService auto flush functionality should stop auto flush' has no expectations.'[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 190 of 274[31m (32 FAILED)[39m (0 secs / 0.465 secs)
+WARN: 'Spec 'ChoiceApiService auto flush functionality should stop auto flush' has no expectations.'
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 191 of 274[31m (32 FAILED)[39m (0 secs / 0.466 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 192 of 274[31m (32 FAILED)[39m (0 secs / 0.467 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 193 of 274[31m (32 FAILED)[39m (0 secs / 0.468 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 194 of 274[31m (32 FAILED)[39m (0 secs / 0.468 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 195 of 274[31m (32 FAILED)[39m (0 secs / 0.468 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService flushChoices should include user ID in request FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 196 of 274[31m (33 FAILED)[39m (0 secs / 0.469 secs)
+Chrome 138.0.0.0 (Linux x86_64): Executed 196 of 274[31m (33 FAILED)[39m (0 secs / 0.469 secs)
+[1A[2KWARN: [36m'Spec 'ChoiceApiService flushChoices should handle HTTP errors gracefully' has no expectations.'[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 196 of 274[31m (33 FAILED)[39m (0 secs / 0.469 secs)
+WARN: 'Spec 'ChoiceApiService flushChoices should handle HTTP errors gracefully' has no expectations.'
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 197 of 274[31m (33 FAILED)[39m (0 secs / 0.47 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 198 of 274[31m (33 FAILED)[39m (0 secs / 0.471 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService flushChoices should send queued choices to backend FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 199 of 274[31m (34 FAILED)[39m (0 secs / 0.472 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService flushChoices should handle multiple choices in batch FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 200 of 274[31m (35 FAILED)[39m (0 secs / 0.474 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 201 of 274[31m (35 FAILED)[39m (0 secs / 0.475 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 202 of 274[31m (35 FAILED)[39m (0 secs / 0.476 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 203 of 274[31m (35 FAILED)[39m (0 secs / 0.477 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) ChoiceApiService getQueuedCount should update when choices are queued FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 204 of 274[31m (36 FAILED)[39m (0 secs / 0.478 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService integration scenarios should handle complete comparison session FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 205 of 274[31m (37 FAILED)[39m (0 secs / 0.488 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService integration scenarios should work with small game sets FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 206 of 274[31m (38 FAILED)[39m (0 secs / 0.489 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService integration scenarios should handle reset and restart FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 207 of 274[31m (39 FAILED)[39m (0 secs / 0.49 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getChoiceHistory should preserve chronological order FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 208 of 274[31m (40 FAILED)[39m (0 secs / 0.491 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getChoiceHistory should record all choices FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 209 of 274[31m (41 FAILED)[39m (0 secs / 0.492 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getChoiceHistory should include complete choice information FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 210 of 274[31m (42 FAILED)[39m (0 secs / 0.493 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 211 of 274[31m (42 FAILED)[39m (0 secs / 0.493 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService resetProgress should make pairs available again FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 212 of 274[31m (43 FAILED)[39m (0 secs / 0.494 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService resetProgress should clear choice history FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 213 of 274[31m (44 FAILED)[39m (0 secs / 0.494 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService resetProgress should reset current progress to zero FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 214 of 274[31m (45 FAILED)[39m (0 secs / 0.495 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService resetProgress should preserve game list FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 215 of 274[31m (46 FAILED)[39m (0 secs / 0.496 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getProgress should update current progress with choices FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 216 of 274[31m (47 FAILED)[39m (0 secs / 0.497 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getProgress should not change total during session FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 217 of 274[31m (48 FAILED)[39m (0 secs / 0.498 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getProgress should handle completion FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 218 of 274[31m (49 FAILED)[39m (0 secs / 0.499 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 219 of 274[31m (49 FAILED)[39m (0 secs / 0.499 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 220 of 274[31m (49 FAILED)[39m (0 secs / 0.499 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService hasMorePairs should return false when target reached FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 221 of 274[31m (50 FAILED)[39m (0 secs / 0.5 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService hasMorePairs should update correctly as choices are made FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 222 of 274[31m (51 FAILED)[39m (0 secs / 0.501 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 223 of 274[31m (51 FAILED)[39m (0 secs / 0.502 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 224 of 274[31m (51 FAILED)[39m (0 secs / 0.503 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 225 of 274[31m (51 FAILED)[39m (0 secs / 0.504 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService initializeWithGames should reset existing state FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 226 of 274[31m (52 FAILED)[39m (0 secs / 0.505 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 227 of 274[31m (52 FAILED)[39m (0 secs / 0.505 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService recordChoice should record user choice FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 228 of 274[31m (53 FAILED)[39m (0 secs / 0.505 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService recordChoice should handle all choice types FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 229 of 274[31m (54 FAILED)[39m (0 secs / 0.507 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService recordChoice should maintain choice history FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 230 of 274[31m (55 FAILED)[39m (0 secs / 0.507 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService recordChoice should handle multiple choices FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 231 of 274[31m (56 FAILED)[39m (0 secs / 0.508 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 232 of 274[31m (56 FAILED)[39m (0 secs / 0.509 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getNextPair should return different pairs on subsequent calls FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 233 of 274[31m (57 FAILED)[39m (0 secs / 0.511 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getNextPair should return null when no more pairs available FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 234 of 274[31m (58 FAILED)[39m (0 secs / 0.512 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) PairService getNextPair should not return same game pair multiple times FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 235 of 274[31m (59 FAILED)[39m (0 secs / 0.513 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 236 of 274[31m (59 FAILED)[39m (0 secs / 0.514 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 237 of 274[31m (59 FAILED)[39m (0 secs / 0.523 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 238 of 274[31m (59 FAILED)[39m (0 secs / 0.525 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 239 of 274[31m (59 FAILED)[39m (0 secs / 0.526 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 240 of 274[31m (59 FAILED)[39m (0 secs / 0.527 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 241 of 274[31m (59 FAILED)[39m (0 secs / 0.528 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent template rendering should render game names correctly FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 242 of 274[31m (60 FAILED)[39m (0 secs / 0.53 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent template rendering should render all choice buttons FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 243 of 274[31m (61 FAILED)[39m (0 secs / 0.532 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent template rendering should display no pair message when no pair provided FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 244 of 274[31m (62 FAILED)[39m (0 secs / 0.534 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 245 of 274[31m (62 FAILED)[39m (0 secs / 0.536 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 246 of 274[31m (62 FAILED)[39m (0 secs / 0.537 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent user interactions should record choice and emit event when left button clicked FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 247 of 274[31m (63 FAILED)[39m (0 secs / 0.539 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent user interactions should record choice when right button clicked FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 248 of 274[31m (64 FAILED)[39m (0 secs / 0.541 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent user interactions should record choice when skip button clicked FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 249 of 274[31m (65 FAILED)[39m (0 secs / 0.543 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent user interactions should emit choice when right button clicked FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 250 of 274[31m (66 FAILED)[39m (0 secs / 0.544 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 251 of 274[31m (66 FAILED)[39m (0 secs / 0.546 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 252 of 274[31m (66 FAILED)[39m (0 secs / 0.548 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent component methods should implement skip method FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 253 of 274[31m (67 FAILED)[39m (0 secs / 0.55 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent component methods should implement hasValidPair method FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 254 of 274[31m (68 FAILED)[39m (0 secs / 0.552 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent component methods should implement selectLeft method FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 255 of 274[31m (69 FAILED)[39m (0 secs / 0.554 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GameComparisonComponent component methods should implement selectRight method FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 256 of 274[31m (70 FAILED)[39m (0 secs / 0.556 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 257 of 274[31m (70 FAILED)[39m (0 secs / 0.557 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent component methods should implement startGamePicker method FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 258 of 274[31m (71 FAILED)[39m (0 secs / 0.563 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent component methods should implement onError method FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 259 of 274[31m (72 FAILED)[39m (0 secs / 0.564 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent component methods should implement onStartComparisons method FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 260 of 274[31m (73 FAILED)[39m (0 secs / 0.565 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent component methods should implement onComparisonsComplete method FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 261 of 274[31m (74 FAILED)[39m (0 secs / 0.567 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent component methods should implement resetGamePicker method FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 262 of 274[31m (75 FAILED)[39m (0 secs / 0.568 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 263 of 274[31m (75 FAILED)[39m (0 secs / 0.57 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent user interactions should handle restart button click in recommendations state FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 264 of 274[31m (76 FAILED)[39m (0 secs / 0.571 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent template rendering should render only comparing content in comparing state FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 265 of 274[31m (77 FAILED)[39m (0 secs / 0.573 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent template rendering should render only recommendations content in recommendations state FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 266 of 274[31m (78 FAILED)[39m (0 secs / 0.575 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 267 of 274[31m (78 FAILED)[39m (0 secs / 0.577 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent template rendering should render only error content in error state FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 268 of 274[31m (79 FAILED)[39m (0 secs / 0.579 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent state transitions should display error state FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 269 of 274[31m (80 FAILED)[39m (0 secs / 0.581 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent state transitions should transition to comparing state FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 270 of 274[31m (81 FAILED)[39m (0 secs / 0.582 secs)
+[1A[2K[31mChrome 138.0.0.0 (Linux x86_64) GamePickerPageComponent state transitions should transition to recommendations state FAILED[39m
+Chrome 138.0.0.0 (Linux x86_64): Executed 271 of 274[31m (82 FAILED)[39m (0 secs / 0.583 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 272 of 274[31m (82 FAILED)[39m (0 secs / 0.584 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 273 of 274[31m (82 FAILED)[39m (0 secs / 0.585 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 274 of 274[31m (82 FAILED)[39m (0 secs / 0.587 secs)
+[1A[2KChrome 138.0.0.0 (Linux x86_64): Executed 274 of 274[31m (82 FAILED)[39m (0.726 secs / 0.587 secs)
+[31mTOTAL: 82 FAILED, 192 SUCCESS[39m
