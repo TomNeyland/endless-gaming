@@ -1,128 +1,210 @@
+// Material Design game comparison with gaming theme
 .game-comparison {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+
   .comparison-container {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
-    gap: 2rem;
-    align-items: center;
-    max-width: 1000px;
-    margin: 0 auto;
+    gap: 32px;
+    align-items: flex-start;
     
-    .game-choice {
+    .game-section {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 1rem;
+      gap: 20px;
       
-      .placeholder-card {
+      .comparison-card {
         width: 100%;
-        max-width: 300px;
-        padding: 2rem;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        text-align: center;
-        background: white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        max-width: 380px;
+        transition: transform 0.2s ease-in-out;
         
-        h3 {
-          margin: 0 0 1rem 0;
-          color: #333;
-        }
-        
-        p {
-          margin: 0;
-          color: #666;
+        &:hover {
+          transform: scale(1.02);
         }
       }
       
       .choice-btn {
-        padding: 1rem 2rem;
-        border: none;
-        border-radius: 4px;
-        font-size: 1.1rem;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
+        min-width: 200px;
+        height: 48px;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.5px;
+        border-radius: 24px !important;
+        box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3) !important;
         
-        &.left-btn {
-          background-color: #3498db;
-          color: white;
-          
-          &:hover {
-            background-color: #2980b9;
-          }
+        mat-icon {
+          margin-right: 8px;
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
         }
         
-        &.right-btn {
-          background-color: #e74c3c;
-          color: white;
-          
-          &:hover {
-            background-color: #c0392b;
-          }
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(25, 118, 210, 0.4) !important;
+        }
+        
+        &:disabled {
+          opacity: 0.6;
+          transform: none;
+          box-shadow: none !important;
         }
       }
     }
     
+    // VS Section with Material Card
     .vs-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
+      min-width: 160px;
+      background: var(--gaming-surface) !important;
+      border: 1px solid rgba(255, 152, 0, 0.2) !important;
       
-      .vs-text {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #333;
-        padding: 1rem;
-        background: #f8f9fa;
-        border-radius: 50%;
-        width: 80px;
-        height: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      
-      .skip-btn {
-        padding: 0.75rem 1.5rem;
-        background-color: #6c757d;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        font-size: 0.9rem;
-        cursor: pointer;
+      mat-card-content {
+        padding: 24px !important;
         
-        &:hover {
-          background-color: #5a6268;
+        .vs-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 20px;
+          
+          .vs-text {
+            color: var(--gaming-accent) !important;
+            font-weight: 900 !important;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 2px;
+          }
+          
+          .skip-btn {
+            min-width: 120px;
+            height: 40px;
+            border-radius: 20px !important;
+            font-size: 0.9rem !important;
+            font-weight: 500 !important;
+            border: 2px solid var(--gaming-accent) !important;
+            color: var(--gaming-accent) !important;
+            
+            mat-icon {
+              margin-right: 6px;
+              font-size: 18px;
+              width: 18px;
+              height: 18px;
+            }
+            
+            &:hover {
+              background: rgba(255, 152, 0, 0.1) !important;
+              transform: translateY(-1px);
+            }
+          }
         }
       }
     }
   }
   
-  .no-pair-message {
-    text-align: center;
-    padding: 3rem;
-    color: #666;
-    font-size: 1.2rem;
+  // No pairs state
+  .no-pairs {
+    max-width: 500px;
+    margin: 48px auto;
+    background: var(--gaming-surface) !important;
+    
+    mat-card-content {
+      padding: 48px 32px !important;
+      
+      .no-pairs-content {
+        text-align: center;
+        color: var(--gaming-text-primary) !important;
+        
+        mat-icon {
+          font-size: 64px;
+          width: 64px;
+          height: 64px;
+          margin-bottom: 24px;
+          color: var(--gaming-accent);
+          opacity: 0.8;
+        }
+        
+        h3 {
+          margin: 0 0 16px 0;
+          color: var(--gaming-text-primary) !important;
+        }
+        
+        p {
+          margin: 0;
+          color: var(--gaming-text-secondary) !important;
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 1024px) {
+  .game-comparison {
+    padding: 16px;
+    
+    .comparison-container {
+      gap: 24px;
+      
+      .game-section .comparison-card {
+        max-width: 320px;
+      }
+    }
   }
 }
 
 @media (max-width: 768px) {
-  .game-comparison .comparison-container {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    gap: 1.5rem;
-    
-    .vs-section {
-      order: 2;
+  .game-comparison {
+    .comparison-container {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto;
+      gap: 32px;
+      text-align: center;
       
-      .vs-text {
-        transform: rotate(90deg);
+      .vs-section {
+        order: 2;
+        margin: 0 auto;
+        max-width: 200px;
+        
+        .vs-content .vs-text {
+          font-size: 2rem !important;
+        }
+      }
+      
+      .right-game {
+        order: 3;
+      }
+      
+      .game-section {
+        .choice-btn {
+          min-width: 240px;
+          height: 52px;
+          font-size: 1.1rem !important;
+        }
       }
     }
+  }
+}
+
+@media (max-width: 480px) {
+  .game-comparison {
+    padding: 12px;
     
-    .right-choice {
-      order: 3;
+    .comparison-container {
+      gap: 24px;
+      
+      .game-section {
+        .comparison-card {
+          max-width: 100%;
+        }
+        
+        .choice-btn {
+          min-width: 200px;
+          font-size: 1rem !important;
+        }
+      }
     }
   }
 }

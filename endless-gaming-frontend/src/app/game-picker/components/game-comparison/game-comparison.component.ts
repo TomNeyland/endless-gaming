@@ -1,5 +1,8 @@
 import { Component, EventEmitter, Output, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
 import { GameRecord, GamePair } from '../../../types/game.types';
 import { PairService } from '../../services/pair.service';
 import { GameCardComponent } from '../game-card/game-card.component';
@@ -13,7 +16,7 @@ import { GameCardComponent } from '../game-card/game-card.component';
 @Component({
   selector: 'app-game-comparison',
   standalone: true,
-  imports: [CommonModule, GameCardComponent],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatCardModule, GameCardComponent],
   templateUrl: './game-comparison.component.html',
   styleUrl: './game-comparison.component.scss'
 })
