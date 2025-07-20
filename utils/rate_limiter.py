@@ -15,6 +15,7 @@ class APIEndpoint(Enum):
     STEAM_WEB_API = "steam_web_api"
     STEAM_STORE_API = "steam_store_api"
     STEAMSPY_API = "steamspy_api"
+    STEAMSPY_ALL_API = "steamspy_all_api"
 
 
 class SimpleRateLimiter:
@@ -33,6 +34,7 @@ class SimpleRateLimiter:
             APIEndpoint.STEAM_WEB_API: AsyncLimiter(100000, 86400),  # 100k/day
             APIEndpoint.STEAM_STORE_API: AsyncLimiter(200, 300),     # 200/5min
             APIEndpoint.STEAMSPY_API: AsyncLimiter(60, 60),          # 60/minute
+            APIEndpoint.STEAMSPY_ALL_API: AsyncLimiter(1, 60),       # 1/minute
         }
         
         # HTTP client for making requests
@@ -53,8 +55,10 @@ class SimpleRateLimiter:
             return "100000/day"
         elif endpoint == APIEndpoint.STEAM_STORE_API:
             return "200/5minutes"
-        else:  # STEAMSPY_API
+        elif endpoint == APIEndpoint.STEAMSPY_API:
             return "60/minute"
+        else:  # STEAMSPY_ALL_API
+            return "1/minute"
     
     def throttle(self, endpoint: APIEndpoint) -> None:
         """
