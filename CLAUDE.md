@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a production-ready Python system for collecting comprehensive game data from Steam and SteamSpy APIs, storing it in a database, and maintaining it through scheduled updates. Built with Poetry for dependency management and designed for large-scale data collection (23k+ games) with proper rate limiting and error handling.
+Endless Gaming is a comprehensive Steam gaming platform with a production-ready data collection engine as its foundation. The current implementation focuses on collecting and processing game data from Steam and SteamSpy APIs, with future plans for game recommendation and discovery features. Built with Poetry for dependency management and designed for large-scale data collection (30k+ games) with proper rate limiting, error handling, and multiple deployment options.
 
 ## Technology Stack
 
@@ -37,16 +37,33 @@ poetry run pytest -v                       # Verbose output
 poetry run pytest -k "test_name"          # Run specific test
 ```
 
-### Data Collection (CLI Implemented)
+### Data Collection
 ```bash
-# Production-ready CLI scripts with rich interface
-poetry run python scripts/collect_games.py                      # Collect games by popularity + metadata
-poetry run python scripts/collect_games.py --full-refresh       # Rebuild entire database
-poetry run python scripts/collect_games.py --update-metadata    # Update metadata only
-poetry run python scripts/collect_games.py --batch-size 1000    # Override batch size (default: 1000)
-poetry run python scripts/collect_games.py --max-pages 5        # Limit to first 5 pages (5000 games)
-poetry run python scripts/collect_games.py status               # Show database statistics
-poetry run python scripts/setup_db.py                           # Initialize/manage database
+# Main data collection CLI with interleaved processing (page -> metadata -> page)
+poetry run python scripts/collect_games.py collect                      # Collect games by popularity + metadata
+poetry run python scripts/collect_games.py collect --max-pages 5        # Limit to first 5 pages (5000 games)
+poetry run python scripts/collect_games.py collect --update-metadata    # Update metadata only for existing games
+poetry run python scripts/collect_games.py collect --batch-size 1000    # Override batch size (default: 1000)
+poetry run python scripts/collect_games.py status                       # Show database statistics
+poetry run python scripts/setup_db.py                                   # Initialize/manage database
+
+# Docker deployment
+docker-compose run --rm endless-gaming python scripts/collect_games.py collect --max-pages 2
+
+# DigitalOcean App Platform deployment (scheduled cron jobs)
+doctl apps create --spec .do/app.yaml                          # Development environment
+doctl apps create --spec .do/app-production.yaml              # Production environment
+```
+
+### Database Management
+```bash
+# Alembic migrations
+alembic upgrade head                    # Apply all migrations
+alembic revision --autogenerate -m "description"  # Create new migration
+alembic downgrade -1                   # Rollback one migration
+
+# Direct database operations
+poetry run python -c "from models import Base; from sqlalchemy import create_engine; Base.metadata.create_all(create_engine('sqlite:///steam_games.db'))"
 ```
 
 ## Architecture Overview
@@ -90,17 +107,19 @@ tests/               # Comprehensive test suite (89 tests total)
 - SteamSpy API: 60/minute (for individual metadata calls)
 - SteamSpy /all API: 1/minute (primary collection method, returns 1000 games per page)
 
-**Data Flow Architecture**: 
-1. `SteamSpyAllCollector.collect_and_save_games()` - fetches games by popularity from SteamSpy /all (1000 per page)
-2. `ParallelMetadataFetcher.process_games_parallel()` - coordinates parallel metadata collection
-3. `SteamSpyMetadataCollector.collect_metadata_for_games()` - fetches individual metadata with enhanced progress display
-4. Database operations use upsert logic (create new, update existing, deactivate missing)
+**Data Flow Architecture (Interleaved Processing)**: 
+1. `SteamSpyAllCollector.fetch_games_page()` - fetches single page of 1000 games from SteamSpy /all
+2. `SteamSpyAllCollector.save_games_to_database()` - saves games immediately with upsert logic
+3. `SteamSpyMetadataCollector.collect_metadata_for_games()` - fetches metadata for games from that page
+4. Each game's metadata is saved individually and displayed immediately: "✅ <gamename> (<top 3 tags>)"
+5. Process repeats for next page (interleaved: page → metadata → page → metadata)
 
-**Concurrency Pattern**: Hybrid batch + queue approach:
-- Process games in configurable batches (default 1000 to match SteamSpy page size)
-- Within each batch, use `asyncio.gather()` for concurrent API calls
+**Concurrency Pattern**: Hybrid batch + immediate save approach:
+- Fetch games in pages of 1000 (matches SteamSpy page size)
+- Within metadata collection, use `asyncio.gather()` for concurrent API calls
+- Each game saved to database immediately after metadata fetch (not batched)
 - Rate limiter automatically throttles requests across all concurrent workers
-- Enhanced progress display shows "<gamename> (<top 3 tags>)" during metadata collection
+- Real-time progress display with game names and top 3 tags
 
 ### Database Models (SQLAlchemy 2.0)
 
@@ -225,3 +244,91 @@ Set environment variables for production:
 **Note**: The primary collection method now uses SteamSpy's `/all` endpoint, so `STEAM_API_KEY` is no longer required for standard operations.
 
 All other settings have sensible defaults via `config.py` with pydantic-settings.
+
+## Deployment Patterns
+
+### Local Development
+```bash
+# Initialize database and collect sample data
+poetry run python scripts/setup_db.py
+poetry run python scripts/collect_games.py collect --max-pages 2
+
+# Watch real-time progress
+# Output: "Counter-Strike: Global Offensive (FPS, Shooter, Multiplayer)"
+```
+
+### Docker Deployment
+```bash
+# Build and run with docker-compose
+docker-compose up --build
+docker-compose run --rm endless-gaming python scripts/collect_games.py collect --max-pages 5
+
+# Production with PostgreSQL
+docker-compose --profile production up -d postgres
+docker-compose run --rm endless-gaming python scripts/setup_db.py
+docker-compose --profile production up endless-gaming
+```
+
+### DigitalOcean App Platform (Production)
+The platform uses **scheduled cron jobs** for cost-effective data collection:
+
+**Development Environment** (`.do/app.yaml`):
+- Daily collection at 6 AM UTC: ~15,000 games (15 pages)
+- Basic-xxs instances for cost optimization
+- Managed PostgreSQL with automatic backups
+
+**Production Environment** (`.do/app-production.yaml`):
+- Daily collection at 2 AM UTC: ~30,000 games (30 pages)  
+- Weekly maintenance checks on Sundays
+- Larger instances (basic-s) for faster processing
+- Enhanced database configuration
+
+**Key Commands**:
+```bash
+# Deploy to DigitalOcean
+doctl apps create --spec .do/app.yaml
+doctl apps logs <APP_ID> --follow
+
+# Monitor scheduled jobs
+doctl apps logs <APP_ID> --type job
+```
+
+### CI/CD Integration
+GitHub Actions provides comprehensive testing and deployment:
+
+**Test Pipeline** (`.github/workflows/test.yml`):
+- Matrix testing across Python versions
+- Comprehensive test suite execution
+- Coverage reporting
+
+**CI/CD Pipeline** (`.github/workflows/ci.yml`):
+- Linting with ruff (if available)
+- Type checking with mypy (if available)
+- Docker build verification
+- Security scanning with bandit/safety
+- Auto-deployment ready (commented sections for production)
+
+## Interleaved Collection Architecture
+
+The main CLI implements an interleaved collection pattern optimized for user experience:
+
+```python
+async def collect_interleaved(session, max_pages=None, batch_size=1000, max_concurrent=3):
+    """
+    Interleaved collection: page -> metadata -> page -> metadata
+    
+    1. Fetch page 1 from SteamSpy /all (1000 games, popularity order)
+    2. Immediately collect metadata for all 1000 games
+    3. Each game saved and displayed as: "✅ GameName (Tag1, Tag2, Tag3)"
+    4. Fetch page 2 and repeat
+    
+    This provides immediate feedback and ensures games are available
+    in the database as soon as they're processed.
+    """
+```
+
+**Benefits**:
+- Real-time progress visibility
+- Immediate data availability
+- Better error recovery (partial collections still useful)
+- Optimal user experience during long-running operations
