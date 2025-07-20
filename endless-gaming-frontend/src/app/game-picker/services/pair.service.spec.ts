@@ -401,5 +401,168 @@ describe('PairService', () => {
     // Removed chronological order test - edge case
   });
 
+  describe('preference-guided sampling', () => {
+    let mockPreferenceService: jasmine.SpyObj<PreferenceService>;
+
+    beforeEach(() => {
+      // Create fresh preference service mock for these tests
+      mockPreferenceService = jasmine.createSpyObj('PreferenceService', [
+        'updatePreferences',
+        'calculateGameScore',
+        'resetPreferences',
+        'initializeModel'
+      ]);
+      mockPreferenceService.calculateGameScore.and.returnValue(0.5);
+
+      // Configure TestBed with fresh mock
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: PreferenceService, useValue: mockPreferenceService }
+        ]
+      });
+      
+      // Get fresh service instance
+      service = TestBed.inject(PairService);
+      service.initializeWithGames(mockGames);
+    });
+
+    describe('getHighPreferenceGames', () => {
+      it('should return empty array for invalid percentiles', () => {
+        // Access private method for testing
+        const getHighPreferenceGames = (service as any).getHighPreferenceGames.bind(service);
+        
+        expect(getHighPreferenceGames(0)).toEqual([]);
+        expect(getHighPreferenceGames(-0.1)).toEqual([]);
+        expect(getHighPreferenceGames(1.1)).toEqual([]);
+      });
+
+      it('should return top percentile of games', () => {
+        // Mock preference scores for different games
+        mockPreferenceService.calculateGameScore.and.callFake((game: GameRecord) => {
+          const scores: { [key: number]: number } = {
+            730: 0.8, // Counter-Strike: highest score
+            570: 0.6, // Dota 2: medium score  
+            440: 0.4, // Team Fortress: lowest score
+          };
+          return scores[game.appId] || 0;
+        });
+
+        const getHighPreferenceGames = (service as any).getHighPreferenceGames.bind(service);
+        
+        // Test top 50% (should return top 2 games out of 4)
+        const top50 = getHighPreferenceGames(0.5);
+        expect(top50.length).toBe(2);
+        expect(top50[0].appId).toBe(730); // Counter-Strike (highest)
+        expect(top50[1].appId).toBe(570); // Dota 2 (second highest)
+        
+        // Test top 25% (should return top 1 game out of 4)
+        const top25 = getHighPreferenceGames(0.25);
+        expect(top25.length).toBe(1);
+        expect(top25[0].appId).toBe(730); // Counter-Strike only
+      });
+    });
+
+    describe('getPreferenceGuidedPair', () => {
+      it('should fall back to uncertainty sampling when no preference data', () => {
+        // Mock empty preference games result
+        spyOn((service as any), 'getHighPreferenceGames').and.returnValue([]);
+        const uncertaintySpyResult = jasmine.createSpyObj('GamePair', ['left', 'right']);
+        spyOn((service as any), 'getUncertaintyBasedPair').and.returnValue(uncertaintySpyResult);
+
+        const getPreferenceGuidedPair = (service as any).getPreferenceGuidedPair.bind(service);
+        const result = getPreferenceGuidedPair();
+
+        expect(result).toBe(uncertaintySpyResult);
+        expect((service as any).getUncertaintyBasedPair).toHaveBeenCalled();
+      });
+
+      it('should use progressive targeting based on comparison count', () => {
+        const getHighPreferenceGamesSpy = spyOn((service as any), 'getHighPreferenceGames').and.returnValue([mockGames[0]]);
+        const getPreferenceGuidedPair = (service as any).getPreferenceGuidedPair.bind(service);
+
+        // Mock different comparison counts to test progressive targeting
+        (service as any).choiceHistory = new Array(5); // 5 comparisons
+        getPreferenceGuidedPair();
+        expect(getHighPreferenceGamesSpy).toHaveBeenCalledWith(0.5); // Top 50%
+
+        (service as any).choiceHistory = new Array(10); // 10 comparisons  
+        getPreferenceGuidedPair();
+        expect(getHighPreferenceGamesSpy).toHaveBeenCalledWith(0.3); // Top 30%
+
+        (service as any).choiceHistory = new Array(16); // 16 comparisons
+        getPreferenceGuidedPair();
+        expect(getHighPreferenceGamesSpy).toHaveBeenCalledWith(0.2); // Top 20%
+      });
+
+      it('should find best uncertainty pairing with preferred games', () => {
+        // Mock high preference games
+        const preferredGame = mockGames[0]; // Counter-Strike
+        const candidateGame = mockGames[1]; // Dota 2
+        spyOn((service as any), 'getHighPreferenceGames').and.returnValue([preferredGame]);
+        
+        // Mock uncertainty calculation
+        spyOn((service as any), 'calculateUncertainty').and.returnValue(0.8);
+        
+        const getPreferenceGuidedPair = (service as any).getPreferenceGuidedPair.bind(service);
+        const result = getPreferenceGuidedPair();
+
+        expect(result).toBeTruthy();
+        expect(result.left).toBe(preferredGame);
+        expect(result.right).toBe(candidateGame);
+      });
+
+      it('should skip already used pairs and find alternative', () => {
+        const preferredGame = mockGames[0]; // Counter-Strike
+        spyOn((service as any), 'getHighPreferenceGames').and.returnValue([preferredGame]);
+        
+        // Mark one pair as already used
+        const pairKey1 = `${Math.min(preferredGame.appId, mockGames[1].appId)}-${Math.max(preferredGame.appId, mockGames[1].appId)}`;
+        (service as any).usedPairs.add(pairKey1);
+        
+        // Mock uncertainty calculation to prefer a specific pair
+        spyOn((service as any), 'calculateUncertainty').and.callFake((game1: any, game2: any) => {
+          if (game2.appId === mockGames[2].appId) return 0.9; // Prefer Team Fortress pairing
+          return 0.5;
+        });
+        
+        const getPreferenceGuidedPair = (service as any).getPreferenceGuidedPair.bind(service);
+        const result = getPreferenceGuidedPair();
+
+        expect(result).toBeTruthy();
+        expect(result.left).toBe(preferredGame);
+        expect(result.right.appId).toBe(440); // Should find Team Fortress (highest uncertainty)
+      });
+    });
+
+    describe('getNextPair integration', () => {
+      it('should use random pairs for bootstrap phase', () => {
+        const testPair = jasmine.createSpyObj('GamePair', ['left', 'right']);
+        const randomPairSpy = spyOn((service as any), 'getRandomPair').and.returnValue(testPair);
+        
+        // Clear choice history to ensure bootstrap phase
+        (service as any).choiceHistory = [];
+        
+        const result = service.getNextPair();
+        
+        expect(randomPairSpy).toHaveBeenCalled();
+        expect(result).toBe(testPair);
+      });
+
+      it('should transition to preference-guided after bootstrap', () => {
+        const testPair = jasmine.createSpyObj('GamePair', ['left', 'right']);
+        const guidedPairSpy = spyOn((service as any), 'getPreferenceGuidedPair').and.returnValue(testPair);
+        
+        // Set choice history to trigger preference-guided phase
+        (service as any).choiceHistory = new Array(4); // 4 comparisons (past bootstrap)
+        
+        const result = service.getNextPair();
+        
+        expect(guidedPairSpy).toHaveBeenCalled();
+        expect(result).toBe(testPair);
+      });
+    });
+  });
+
   // Removed integration scenarios - edge cases
 });

@@ -50,9 +50,9 @@ export class PairService {
       return this.getRandomPair();
     }
 
-    // Uncertainty sampling phase
-    console.log('🎲 PairService: Uncertainty sampling phase');
-    return this.getUncertaintyBasedPair();
+    // Preference-guided sampling phase (comparisons 4+)
+    console.log('🎲 PairService: Preference-guided sampling phase');
+    return this.getPreferenceGuidedPair();
   }
 
   /**
@@ -237,6 +237,66 @@ export class PairService {
   }
 
   /**
+   * Get preference-guided pair using hybrid sampling approach.
+   * One game from high-preference pool, second game for maximum uncertainty.
+   */
+  private getPreferenceGuidedPair(): GamePair | null {
+    if (this.games.length < 2) {
+      return null;
+    }
+
+    // Determine preference pool size based on comparison count (progressive targeting)
+    let preferencePercentile: number;
+    if (this.choiceHistory.length < 7) {
+      preferencePercentile = 0.5; // Top 50% (moderate targeting)
+    } else if (this.choiceHistory.length < 15) {
+      preferencePercentile = 0.3; // Top 30% (higher targeting)
+    } else {
+      preferencePercentile = 0.2; // Top 20% (maximum targeting)
+    }
+
+    const highPreferenceGames = this.getHighPreferenceGames(preferencePercentile);
+    if (highPreferenceGames.length === 0) {
+      // Fallback to regular uncertainty sampling if no preference data
+      return this.getUncertaintyBasedPair();
+    }
+
+    let bestPair: GamePair | null = null;
+    let maxUncertainty = -1;
+
+    // For each high-preference game, find the best uncertainty-based pairing
+    for (const preferredGame of highPreferenceGames) {
+      for (const candidateGame of this.games) {
+        // Skip pairing with itself
+        if (candidateGame.appId === preferredGame.appId) {
+          continue;
+        }
+
+        const pair = { left: preferredGame, right: candidateGame };
+        const pairKey = this.createPairKey(pair);
+
+        // Skip already used pairs
+        if (this.usedPairs.has(pairKey)) {
+          continue;
+        }
+
+        const uncertainty = this.calculateUncertainty(preferredGame, candidateGame);
+        if (uncertainty > maxUncertainty) {
+          maxUncertainty = uncertainty;
+          bestPair = pair;
+        }
+      }
+    }
+
+    // If no good preference-guided pairs found, fall back to uncertainty sampling
+    if (!bestPair || maxUncertainty < this.MIN_UNCERTAINTY) {
+      return this.getUncertaintyBasedPair();
+    }
+
+    return bestPair;
+  }
+
+  /**
    * Sample game pairs efficiently.
    */
   private sampleGamePairs(sampleSize: number): GamePair[] {
@@ -311,6 +371,29 @@ export class PairService {
     const appId1 = pair.left.appId;
     const appId2 = pair.right.appId;
     return `${Math.min(appId1, appId2)}-${Math.max(appId1, appId2)}`;
+  }
+
+  /**
+   * Get high-preference games based on current preference model.
+   * Returns games the user is likely to prefer, sorted by score.
+   */
+  private getHighPreferenceGames(percentile: number): GameRecord[] {
+    if (this.games.length === 0 || percentile <= 0 || percentile > 1) {
+      return [];
+    }
+
+    // Calculate scores for all games
+    const gamesWithScores = this.games.map(game => ({
+      game,
+      score: this.preferenceService.calculateGameScore(game)
+    }));
+
+    // Sort by score descending (highest preference first)
+    gamesWithScores.sort((a, b) => b.score - a.score);
+
+    // Return top percentile of games
+    const topCount = Math.max(1, Math.ceil(this.games.length * percentile));
+    return gamesWithScores.slice(0, topCount).map(item => item.game);
   }
 
   /**

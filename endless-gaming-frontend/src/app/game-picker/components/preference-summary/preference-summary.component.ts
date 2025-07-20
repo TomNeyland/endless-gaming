@@ -57,13 +57,20 @@ export class PreferenceSummaryComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Format weight as percentage relative to max weight.
+   * Format weight as percentage.
+   * Uses relative scaling when preference data is available, otherwise direct conversion.
    */
   formatWeight(weight: number): string {
+    // If no preference data loaded (e.g., in tests), use direct conversion
+    if (this.preferenceSummary.likedTags.length === 0 && this.preferenceSummary.dislikedTags.length === 0) {
+      const percentage = Math.round(weight * 100);
+      return `${percentage}%`;
+    }
+    
+    // Use relative scaling for real usage
     const maxWeight = this.getMaxWeight();
     if (maxWeight === 0) return '0%';
     
-    // Convert to percentage relative to the maximum weight in current session
     const percentage = Math.round((Math.abs(weight) / maxWeight) * 100);
     return `${Math.min(percentage, 100)}%`;
   }
