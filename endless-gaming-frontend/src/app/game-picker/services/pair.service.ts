@@ -24,7 +24,7 @@ export class PairService {
   
   private usedPairs = new Set<string>(); // Track all used pairs to prevent duplicates
   
-  private readonly TARGET_COMPARISONS = 20;
+  private readonly TARGET_COMPARISONS = 5;
   private readonly MIN_UNCERTAINTY = 0.1; // Minimum uncertainty threshold
   private readonly DIVERSITY_WINDOW = 5; // Recent pairs to check for diversity
   private infiniteMode = false; // Enable infinite voting beyond target

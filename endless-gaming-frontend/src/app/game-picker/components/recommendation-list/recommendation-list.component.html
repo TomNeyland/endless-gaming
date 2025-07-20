@@ -1,13 +1,13 @@
 <div class="recommendation-list">
-  <!-- Loading State -->
-  @if (isRefreshing()) {
-    <div class="refreshing-overlay">
-      <mat-spinner diameter="32"></mat-spinner>
-      <p class="mat-body-2">Updating your recommendations...</p>
-    </div>
-  }
-  
-  @if (hasRecommendations()) {
+    <!-- Loading State -->
+    @if (isRefreshing()) {
+      <div class="refreshing-overlay">
+        <mat-spinner diameter="32"></mat-spinner>
+        <p class="mat-body-2">Updating your recommendations...</p>
+      </div>
+    }
+    
+    @if (hasRecommendations()) {
     <!-- Top 3 Premium Recommendations -->
     @if (getTopRecommendations().length > 0) {
       <div class="premium-section">
@@ -149,19 +149,19 @@
       </p>
     </div>
 
-    <!-- Voting FAB -->
-    <button 
-      mat-fab 
-      color="primary" 
-      class="voting-fab"
-      [disabled]="!canStartVoting()"
-      (click)="openVotingBottomSheet()"
-      matTooltip="Refine your preferences"
-      matTooltipPosition="above">
-      <mat-icon>tune</mat-icon>
-    </button>
+      <!-- Voting FAB -->
+      <button 
+        mat-fab 
+        color="primary" 
+        class="voting-fab"
+        [disabled]="!canStartVoting()"
+        (click)="openVotingDrawer()"
+        matTooltip="Refine your preferences"
+        matTooltipPosition="above">
+        <mat-icon>tune</mat-icon>
+      </button>
 
-  } @else {
+    } @else {
     <mat-card class="no-recommendations">
       <mat-card-content>
         <div class="no-recommendations-content">
@@ -171,5 +171,5 @@
         </div>
       </mat-card-content>
     </mat-card>
-  }
+    }
 </div>

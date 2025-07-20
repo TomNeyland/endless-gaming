@@ -10,10 +10,12 @@ import { GameDataService } from '../../services/game-data.service';
 import { VectorService } from '../../services/vector.service';
 import { PreferenceService } from '../../services/preference.service';
 import { PairService } from '../../services/pair.service';
+import { VotingDrawerService } from '../../services/voting-drawer.service';
 import { GameComparisonComponent } from '../game-comparison/game-comparison.component';
 import { ProgressBarComponent } from '../progress-bar/progress-bar.component';
 import { PreferenceSummaryComponent } from '../preference-summary/preference-summary.component';
 import { RecommendationListComponent } from '../recommendation-list/recommendation-list.component';
+import { VotingDrawerComponent } from '../voting-drawer/voting-drawer.component';
 
 /**
  * Main container component for the game picker feature.
@@ -34,7 +36,8 @@ import { RecommendationListComponent } from '../recommendation-list/recommendati
     GameComparisonComponent,
     ProgressBarComponent,
     PreferenceSummaryComponent,
-    RecommendationListComponent
+    RecommendationListComponent,
+    VotingDrawerComponent
   ],
   templateUrl: './game-picker-page.component.html',
   styleUrl: './game-picker-page.component.scss'
@@ -44,13 +47,25 @@ export class GamePickerPageComponent implements OnInit {
   private vectorService = inject(VectorService);
   private preferenceService = inject(PreferenceService);
   private pairService = inject(PairService);
+  private votingDrawerService = inject(VotingDrawerService);
   
   public readonly state = signal<GamePickerState>('loading');
+  public readonly isDrawerOpen = signal(false);
   private games: GameRecord[] = [];
   private errorMessage = '';
   
   ngOnInit(): void {
     this.startGamePicker();
+    
+    // Subscribe to drawer service
+    this.votingDrawerService.drawerOpen$.subscribe(isOpen => {
+      this.isDrawerOpen.set(isOpen);
+      if (isOpen) {
+        this.setupVotingSession();
+      } else {
+        this.teardownVotingSession();
+      }
+    });
   }
 
   /**
@@ -153,5 +168,47 @@ export class GamePickerPageComponent implements OnInit {
   onChoiceMade(event: any): void {
     // The PairService handles the choice internally
     // This is just for potential UI updates
+  }
+
+  /**
+   * Setup voting session when drawer opens.
+   */
+  private setupVotingSession(): void {
+    console.log('🗳️ Setting up voting session');
+    // Enable infinite mode for continuous voting
+    this.pairService.enableInfiniteMode();
+    
+    // Initialize the pair service with current games if needed
+    if (this.games.length > 0) {
+      this.pairService.initializeWithGames(this.games);
+    }
+  }
+
+  /**
+   * Teardown voting session when drawer closes.
+   */
+  private teardownVotingSession(): void {
+    console.log('🗳️ Tearing down voting session');
+    this.pairService.disableInfiniteMode();
+  }
+
+  /**
+   * Handle drawer close event.
+   */
+  onDrawerClosed(): void {
+    this.votingDrawerService.closeDrawer();
+  }
+
+  /**
+   * Handle vote cast events from the drawer.
+   */
+  onVoteCast(voteEvent: {
+    leftGame: GameRecord;
+    rightGame: GameRecord;
+    pick: 'left' | 'right' | 'skip';
+  }): void {
+    console.log('🗳️ Processing vote:', voteEvent.pick, 'between', voteEvent.leftGame.name, 'and', voteEvent.rightGame.name);
+    // The refreshRecommendations() will be called automatically via the subscription
+    // to preference summary changes in the RecommendationListComponent
   }
 }

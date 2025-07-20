@@ -8,12 +8,11 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatBottomSheetModule, MatBottomSheet } from '@angular/material/bottom-sheet';
 import { GameRecommendation, GameRecord } from '../../../types/game.types';
 import { PreferenceService } from '../../services/preference.service';
 import { PairService } from '../../services/pair.service';
 import { AnimationService } from '../../services/animation.service';
-import { VotingBottomSheetComponent } from '../voting-bottom-sheet/voting-bottom-sheet.component';
+import { VotingDrawerService } from '../../services/voting-drawer.service';
 import { Subscription } from 'rxjs';
 
 /**
@@ -34,8 +33,7 @@ import { Subscription } from 'rxjs';
     MatChipsModule,
     MatBadgeModule,
     MatTooltipModule,
-    MatProgressSpinnerModule,
-    MatBottomSheetModule
+    MatProgressSpinnerModule
   ],
   templateUrl: './recommendation-list.component.html',
   styleUrl: './recommendation-list.component.scss'
@@ -44,7 +42,7 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   private preferenceService = inject(PreferenceService);
   private pairService = inject(PairService);
   private animationService = inject(AnimationService);
-  private bottomSheet = inject(MatBottomSheet);
+  private votingDrawerService = inject(VotingDrawerService);
   private preferenceSummarySubscription?: Subscription;
   
   @Input() games: GameRecord[] = [];
@@ -387,57 +385,10 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Open the voting bottom sheet for continuous preference refinement.
+   * Open the voting drawer for continuous preference refinement.
    */
-  openVotingBottomSheet(): void {
-    // Enable infinite mode for continuous voting
-    this.pairService.enableInfiniteMode();
-    
-    // Initialize the pair service with current games if needed
-    if (this.games.length > 0) {
-      this.pairService.initializeWithGames(this.games);
-    }
-
-    const bottomSheetRef = this.bottomSheet.open(VotingBottomSheetComponent, {
-      data: { games: this.games },
-      disableClose: false,
-      hasBackdrop: true,
-      panelClass: 'voting-bottom-sheet-container'
-    });
-
-    // Listen to voting events
-    bottomSheetRef.instance.voteCast.subscribe((voteEvent) => {
-      console.log('🗳️ Vote cast:', voteEvent);
-      this.onVoteCast(voteEvent);
-    });
-
-    // Listen to completion events
-    bottomSheetRef.instance.votingComplete.subscribe(() => {
-      console.log('🗳️ Voting session complete');
-      bottomSheetRef.dismiss();
-    });
-
-    // Clean up when bottom sheet closes
-    bottomSheetRef.afterDismissed().subscribe(() => {
-      console.log('🗳️ Bottom sheet dismissed');
-      this.pairService.disableInfiniteMode();
-    });
-  }
-
-  /**
-   * Handle vote cast events from the bottom sheet.
-   */
-  private onVoteCast(voteEvent: {
-    leftGame: GameRecord;
-    rightGame: GameRecord;
-    pick: 'left' | 'right' | 'skip';
-  }): void {
-    // The voting has already been processed by PairService through the bottom sheet
-    // The PreferenceService has been updated and will trigger our subscription
-    console.log('🗳️ Processing vote:', voteEvent.pick, 'between', voteEvent.leftGame.name, 'and', voteEvent.rightGame.name);
-    
-    // The refreshRecommendations() will be called automatically via the subscription
-    // to preference summary changes, so we don't need to call it manually here
+  openVotingDrawer(): void {
+    this.votingDrawerService.openDrawer();
   }
 
   /**

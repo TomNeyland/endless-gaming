@@ -1,3 +1,8 @@
+<app-voting-drawer 
+  [isOpen]="isDrawerOpen()" 
+  (voteCast)="onVoteCast($event)"
+  (drawerClosed)="onDrawerClosed()">
+
 <div class="game-picker-page">
   <!-- Material Toolbar Header -->
   <mat-toolbar class="main-toolbar" color="primary">
@@ -98,3 +103,6 @@
       </mat-card-content>
     </mat-card>
   }
+</div>
+
+</app-voting-drawer>
