@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatIconModule } from '@angular/material/icon';
-import { MatExpansionModule } from '@angular/material/expansion';
 import { PreferenceSummary } from '../../../types/game.types';
 import { PreferenceService } from '../../services/preference.service';
 import { Subscription } from 'rxjs';
@@ -17,7 +16,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-preference-summary',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatProgressBarModule, MatIconModule, MatExpansionModule],
+  imports: [CommonModule, MatCardModule, MatProgressBarModule, MatIconModule],
   templateUrl: './preference-summary.component.html',
   styleUrl: './preference-summary.component.scss'
 })

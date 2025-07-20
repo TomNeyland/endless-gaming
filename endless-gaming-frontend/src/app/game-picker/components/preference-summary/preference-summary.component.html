@@ -11,23 +11,22 @@
     </mat-card-header>
 
     <mat-card-content>
-      <mat-accordion>
+      <!-- Side-by-side preference sections -->
+      <div class="preferences-grid">
         <!-- Liked Tags Section -->
-        <mat-expansion-panel class="liked-panel" [expanded]="true">
-          <mat-expansion-panel-header>
-            <mat-panel-title class="liked-title">
-              <mat-icon class="like-icon">thumb_up</mat-icon>
-              You Like
-              <span class="tag-count">({{ getLikedTags().length }})</span>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
+        <div class="preference-section liked-section">
+          <div class="section-header">
+            <mat-icon class="like-icon">thumb_up</mat-icon>
+            <h4 class="section-title mat-headline-6">You Like</h4>
+            <span class="tag-count mat-caption">({{ getLikedTags().length }})</span>
+          </div>
           
           @if (getLikedTags().length > 0) {
             <div class="tag-list">
               @for (tagData of getLikedTags(); track tagData.tag) {
                 <div class="tag-item liked-tag">
                   <div class="tag-header">
-                    <span class="tag-name mat-body-1">{{ tagData.tag }}</span>
+                    <span class="tag-name mat-body-2">{{ tagData.tag }}</span>
                     <span class="tag-weight mat-caption">{{ formatWeight(tagData.weight) }}</span>
                   </div>
                   <mat-progress-bar 
@@ -44,24 +43,22 @@
               <p>Make some choices to see what you like!</p>
             </div>
           }
-        </mat-expansion-panel>
+        </div>
 
         <!-- Disliked Tags Section -->
-        <mat-expansion-panel class="disliked-panel" [expanded]="true">
-          <mat-expansion-panel-header>
-            <mat-panel-title class="disliked-title">
-              <mat-icon class="dislike-icon">thumb_down</mat-icon>
-              You Dislike
-              <span class="tag-count">({{ getDislikedTags().length }})</span>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
+        <div class="preference-section disliked-section">
+          <div class="section-header">
+            <mat-icon class="dislike-icon">thumb_down</mat-icon>
+            <h4 class="section-title mat-headline-6">You Dislike</h4>
+            <span class="tag-count mat-caption">({{ getDislikedTags().length }})</span>
+          </div>
           
           @if (getDislikedTags().length > 0) {
             <div class="tag-list">
               @for (tagData of getDislikedTags(); track tagData.tag) {
                 <div class="tag-item disliked-tag">
                   <div class="tag-header">
-                    <span class="tag-name mat-body-1">{{ tagData.tag }}</span>
+                    <span class="tag-name mat-body-2">{{ tagData.tag }}</span>
                     <span class="tag-weight mat-caption">{{ formatWeight(getAbsWeight(tagData.weight)) }}</span>
                   </div>
                   <mat-progress-bar 
@@ -78,8 +75,8 @@
               <p>Make some choices to see what you dislike!</p>
             </div>
           }
-        </mat-expansion-panel>
-      </mat-accordion>
+        </div>
+      </div>
     </mat-card-content>
   } @else {
     <mat-card-content>
