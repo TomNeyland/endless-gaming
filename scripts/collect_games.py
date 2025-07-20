@@ -16,7 +16,7 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
 from rich.panel import Panel
 from rich.text import Text
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 # Add project root to path for imports
@@ -28,7 +28,6 @@ from models.game import Game
 from collectors.steam_collector import SteamGameListCollector
 from collectors.steamspy_collector import SteamSpyMetadataCollector
 from workers.parallel_fetcher import ParallelMetadataFetcher
-from utils.rate_limiter import SimpleRateLimiter
 
 app = typer.Typer(
     name="collect-games",
@@ -57,7 +56,7 @@ def validate_environment():
     try:
         engine = create_engine(settings.database_url)
         with engine.connect() as conn:
-            conn.execute("SELECT 1")
+            conn.execute(text("SELECT 1"))
     except Exception as e:
         errors.append(f"Database connection failed: {e}")
     
@@ -74,8 +73,7 @@ def validate_environment():
 
 async def collect_steam_games(session, progress_callback=None):
     """Collect Steam game list and save to database."""
-    rate_limiter = SimpleRateLimiter()
-    collector = SteamGameListCollector(rate_limiter=rate_limiter)
+    collector = SteamGameListCollector()
     
     console.print("🎮 Fetching Steam game list...")
     games_created, games_updated, games_deactivated = await collector.collect_and_save_games(session)
@@ -104,8 +102,7 @@ async def collect_metadata_parallel(session, batch_size: int, max_concurrent: in
     console.print(f"📦 Batch size: {batch_size}, Max concurrent: {max_concurrent}")
     
     # Set up collectors and parallel fetcher
-    rate_limiter = SimpleRateLimiter()
-    steamspy_collector = SteamSpyMetadataCollector(rate_limiter=rate_limiter)
+    steamspy_collector = SteamSpyMetadataCollector()
     parallel_fetcher = ParallelMetadataFetcher(
         steamspy_collector=steamspy_collector,
         batch_size=batch_size,

@@ -90,14 +90,15 @@ def test_database_connection():
         console.print("✅ Database connection successful")
         
         # Check if tables exist
-        with engine.connect() as conn:
-            inspector = engine.dialect.inspector(conn)
-            tables = inspector.get_table_names()
+        from sqlalchemy import inspect
+        inspector = inspect(engine)
+        tables = inspector.get_table_names()
+        
+        if "games" in tables and "game_metadata" in tables:
+            console.print("✅ Required tables found")
             
-            if "games" in tables and "game_metadata" in tables:
-                console.print("✅ Required tables found")
-                
-                # Get table counts
+            # Get table counts
+            with engine.connect() as conn:
                 result = conn.execute(text("SELECT COUNT(*) FROM games"))
                 game_count = result.fetchone()[0]
                 
@@ -105,8 +106,8 @@ def test_database_connection():
                 metadata_count = result.fetchone()[0]
                 
                 console.print(f"📊 Current data: {game_count} games, {metadata_count} metadata records")
-            else:
-                console.print("ℹ️  Tables not found (run migrations to create)")
+        else:
+            console.print("ℹ️  Tables not found (run migrations to create)")
         
         return True
         
