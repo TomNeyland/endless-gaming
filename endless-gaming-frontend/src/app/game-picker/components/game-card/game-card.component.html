@@ -7,11 +7,21 @@
   @if (hasValidGame()) {
     <!-- Cover Image Header -->
     <div class="card-image-container">
+      <!-- Loading spinner -->
+      @if (imageLoading) {
+        <div class="image-loading">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      }
+      
+      <!-- Game image -->
       <img 
         mat-card-image
         [src]="getCoverImage()" 
         [alt]="game!.name"
         (error)="onImageError($event)"
+        (load)="onImageLoad()"
+        [class.loaded]="!imageLoading"
         class="cover-image">
       
       <!-- Rank badge for recommendations -->

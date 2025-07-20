@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { GameRecord } from '../../../types/game.types';
 
 /**
@@ -14,7 +15,7 @@ import { GameRecord } from '../../../types/game.types';
 @Component({
   selector: 'app-game-card',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatChipsModule, MatIconModule],
+  imports: [CommonModule, MatCardModule, MatChipsModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './game-card.component.html',
   styleUrl: './game-card.component.scss'
 })
@@ -25,6 +26,9 @@ export class GameCardComponent {
   @Input() score?: number;
   @Input() rank?: number;
   @Input() highlightOnHover = false;
+  
+  imageLoading = true;
+  imageError = false;
 
   /**
    * Get formatted price display.
@@ -141,13 +145,101 @@ export class GameCardComponent {
    * Get cover image URL with fallback.
    */
   getCoverImage(): string {
-    return this.game?.coverUrl || '/assets/images/game-placeholder.png';
+    // If we have a valid coverUrl, use it
+    if (this.game?.coverUrl && this.game.coverUrl !== null) {
+      return this.game.coverUrl;
+    }
+    
+    // Otherwise, generate a Steam store image URL from appId
+    if (this.game?.appId) {
+      return `https://cdn.akamai.steamstatic.com/steam/apps/${this.game.appId}/header.jpg`;
+    }
+    
+    // Final fallback to a solid color placeholder
+    return this.generatePlaceholderImage();
+  }
+
+  /**
+   * Generate a placeholder image data URL.
+   */
+  private generatePlaceholderImage(): string {
+    // Create a canvas-based placeholder with the game name
+    const canvas = document.createElement('canvas');
+    canvas.width = 460;
+    canvas.height = 215;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      // Gradient background
+      const gradient = ctx.createLinearGradient(0, 0, 460, 215);
+      gradient.addColorStop(0, '#667eea');
+      gradient.addColorStop(1, '#764ba2');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 460, 215);
+      
+      // Game name text
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 20px "Roboto", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      const text = this.game?.name || 'Game';
+      const maxWidth = 420;
+      
+      // Simple text wrapping
+      const words = text.split(' ');
+      let line = '';
+      let lines = [];
+      
+      for (const word of words) {
+        const testLine = line + word + ' ';
+        const metrics = ctx.measureText(testLine);
+        
+        if (metrics.width > maxWidth && line !== '') {
+          lines.push(line.trim());
+          line = word + ' ';
+        } else {
+          line = testLine;
+        }
+      }
+      lines.push(line.trim());
+      
+      // Draw text lines
+      const lineHeight = 24;
+      const startY = 107.5 - ((lines.length - 1) * lineHeight) / 2;
+      
+      lines.forEach((line, index) => {
+        ctx.fillText(line, 230, startY + (index * lineHeight));
+      });
+    }
+    
+    return canvas.toDataURL('image/png');
   }
 
   /**
    * Handle image load errors.
    */
   onImageError(event: any): void {
-    event.target.src = '/assets/images/game-placeholder.png';
+    console.warn('Failed to load image for game:', this.game?.name);
+    this.imageError = true;
+    this.imageLoading = false;
+    
+    // Try Steam's alternative image URLs
+    if (this.game?.appId && !event.target.src.includes('library_600x900')) {
+      this.imageError = false;
+      event.target.src = `https://cdn.akamai.steamstatic.com/steam/apps/${this.game.appId}/library_600x900.jpg`;
+      return;
+    }
+    
+    // Final fallback to generated placeholder
+    event.target.src = this.generatePlaceholderImage();
+  }
+
+  /**
+   * Handle successful image load.
+   */
+  onImageLoad(): void {
+    this.imageLoading = false;
+    this.imageError = false;
   }
 }
