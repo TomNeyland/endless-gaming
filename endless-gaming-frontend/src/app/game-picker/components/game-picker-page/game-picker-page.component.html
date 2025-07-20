@@ -1,27 +1,47 @@
 <div class="game-picker-page">
+  <!-- Material Toolbar Header -->
+  <mat-toolbar class="main-toolbar" color="primary">
+    <mat-icon>videogame_asset</mat-icon>
+    <span class="toolbar-title">Endless Gaming</span>
+    <span class="spacer"></span>
+    @if (state() === 'comparing' || state() === 'recommendations') {
+      <button mat-icon-button (click)="resetGamePicker()" matTooltip="Start Over">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    }
+  </mat-toolbar>
+
   <!-- Loading State -->
   @if (state() === 'loading') {
-    <div class="loading-state">
-      <h1>Loading Games...</h1>
-      <div class="spinner"></div>
-      <p>Preparing your personalized game discovery experience...</p>
-    </div>
+    <mat-card class="state-card loading-state">
+      <mat-card-content>
+        <div class="loading-content">
+          <mat-spinner diameter="60" class="loading-spinner"></mat-spinner>
+          <h1 class="mat-headline-4">Loading Games...</h1>
+          <p class="mat-body-1">Preparing your personalized game discovery experience...</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
   }
 
   <!-- Comparison State -->
   @if (state() === 'comparing') {
     <div class="comparison-state">
-      <div class="header">
-        <h1>Find Your Perfect Games</h1>
-        <p>Choose the game you prefer or skip if neither appeals to you</p>
+      <!-- Header Section -->
+      <div class="header-section">
+        <h1 class="mat-headline-3">Find Your Perfect Games</h1>
+        <p class="mat-headline-6">Choose the game you prefer or skip if neither appeals to you</p>
       </div>
 
-      <div class="content">
+      <!-- Main Content Grid -->
+      <div class="content-grid">
+        <!-- Sidebar with Progress and Preferences -->
         <div class="sidebar">
           <app-progress-bar></app-progress-bar>
           <app-preference-summary></app-preference-summary>
         </div>
 
+        <!-- Main Game Comparison -->
         <div class="main-content">
           <app-game-comparison 
             (choiceMade)="onChoiceMade($event)"
@@ -35,15 +55,23 @@
   <!-- Recommendations State -->
   @if (state() === 'recommendations') {
     <div class="recommendations-state">
-      <div class="header">
-        <h1>Your Personalized Game Recommendations</h1>
-        <p>Based on your preferences, here are games you might love</p>
+      <!-- Header Section -->
+      <div class="header-section">
+        <h1 class="mat-headline-3">Your Personalized Game Recommendations</h1>
+        <p class="mat-headline-6">Based on your preferences, here are games you might love</p>
       </div>
 
+      <!-- Recommendations List -->
       <app-recommendation-list [games]="getGames()"></app-recommendation-list>
       
-      <div class="actions">
-        <button (click)="resetGamePicker()" class="restart-btn">
+      <!-- Action Buttons -->
+      <div class="actions-section">
+        <button 
+          mat-raised-button 
+          color="primary" 
+          (click)="resetGamePicker()"
+          class="restart-btn">
+          <mat-icon>refresh</mat-icon>
           Start Over
         </button>
       </div>
@@ -52,11 +80,21 @@
 
   <!-- Error State -->
   @if (state() === 'error') {
-    <div class="error-state">
-      <h1>Something went wrong</h1>
-      <p>{{ getErrorMessage() }}</p>
-      <button (click)="startGamePicker()" class="retry-btn">
-        Try Again
-      </button>
-    </div>
+    <mat-card class="state-card error-state">
+      <mat-card-content>
+        <div class="error-content">
+          <mat-icon class="error-icon">error_outline</mat-icon>
+          <h1 class="mat-headline-4">Something went wrong</h1>
+          <p class="mat-body-1">{{ getErrorMessage() }}</p>
+          <button 
+            mat-raised-button 
+            color="warn" 
+            (click)="startGamePicker()"
+            class="retry-btn">
+            <mat-icon>refresh</mat-icon>
+            Try Again
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
   }

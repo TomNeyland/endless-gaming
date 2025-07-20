@@ -1,5 +1,10 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
 import { GamePickerState, GameRecord } from '../../../types/game.types';
 import { GameDataService } from '../../services/game-data.service';
 import { VectorService } from '../../services/vector.service';
@@ -21,6 +26,11 @@ import { RecommendationListComponent } from '../recommendation-list/recommendati
   standalone: true,
   imports: [
     CommonModule,
+    MatToolbarModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatCardModule,
     GameComparisonComponent,
     ProgressBarComponent,
     PreferenceSummaryComponent,

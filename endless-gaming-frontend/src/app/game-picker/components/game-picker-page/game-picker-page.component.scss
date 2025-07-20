@@ -1,78 +1,253 @@
+// Material Design main page layout with gaming theme
 .game-picker-page {
   min-height: 100vh;
-  padding: 2rem;
+  background: var(--gaming-background);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
 
-  .loading-state,
-  .error-state {
-    text-align: center;
+  // Material Toolbar
+  .main-toolbar {
+    background: var(--gaming-primary) !important;
+    color: var(--gaming-text-primary) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
     
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #3498db;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 2rem auto;
+    .toolbar-title {
+      margin-left: 16px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    
+    .spacer {
+      flex: 1;
+    }
+    
+    mat-icon {
+      color: var(--gaming-text-primary) !important;
     }
   }
 
-  .comparison-state {
-    width: 100%;
-    max-width: 1200px;
+  // State Cards for Loading and Error
+  .state-card {
+    margin: 48px auto;
+    max-width: 500px;
+    background: var(--gaming-surface) !important;
     
-    h1 {
-      text-align: center;
-      margin-bottom: 2rem;
+    &.loading-state {
+      .loading-content {
+        text-align: center;
+        padding: 32px 16px;
+        
+        .loading-spinner {
+          margin-bottom: 24px;
+          --mdc-circular-progress-active-indicator-color: var(--gaming-accent);
+        }
+        
+        h1 {
+          color: var(--gaming-text-primary) !important;
+          margin-bottom: 16px;
+        }
+        
+        p {
+          color: var(--gaming-text-secondary) !important;
+        }
+      }
     }
-  }
-
-  .recommendations-state {
-    width: 100%;
-    max-width: 800px;
     
-    h1 {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    
-    .restart-btn {
-      display: block;
-      margin: 2rem auto;
-      padding: 1rem 2rem;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 1.1rem;
-      
-      &:hover {
-        background-color: #2980b9;
+    &.error-state {
+      .error-content {
+        text-align: center;
+        padding: 32px 16px;
+        
+        .error-icon {
+          font-size: 64px;
+          width: 64px;
+          height: 64px;
+          color: var(--gaming-warn);
+          margin-bottom: 16px;
+        }
+        
+        h1 {
+          color: var(--gaming-text-primary) !important;
+          margin-bottom: 16px;
+        }
+        
+        p {
+          color: var(--gaming-text-secondary) !important;
+          margin-bottom: 24px;
+        }
+        
+        .retry-btn {
+          mat-icon {
+            margin-right: 8px;
+          }
+        }
       }
     }
   }
 
-  .retry-btn {
-    padding: 1rem 2rem;
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1.1rem;
+  // Comparison State Layout
+  .comparison-state {
+    flex: 1;
+    padding: 24px;
     
-    &:hover {
-      background-color: #c0392b;
+    .header-section {
+      text-align: center;
+      margin-bottom: 32px;
+      
+      h1 {
+        color: var(--gaming-text-primary) !important;
+        margin-bottom: 8px;
+        background: linear-gradient(45deg, var(--gaming-primary), var(--gaming-accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      
+      p {
+        color: var(--gaming-text-secondary) !important;
+        margin: 0;
+      }
+    }
+    
+    .content-grid {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 32px;
+      max-width: 1400px;
+      margin: 0 auto;
+      align-items: start;
+      
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        position: sticky;
+        top: 88px; // Account for toolbar height
+      }
+      
+      .main-content {
+        min-height: 600px;
+      }
+    }
+  }
+
+  // Recommendations State Layout
+  .recommendations-state {
+    flex: 1;
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    
+    .header-section {
+      text-align: center;
+      margin-bottom: 32px;
+      
+      h1 {
+        color: var(--gaming-text-primary) !important;
+        margin-bottom: 8px;
+        background: linear-gradient(45deg, var(--gaming-primary), var(--gaming-accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      
+      p {
+        color: var(--gaming-text-secondary) !important;
+        margin: 0;
+      }
+    }
+    
+    .actions-section {
+      text-align: center;
+      margin-top: 48px;
+      
+      .restart-btn {
+        min-width: 200px;
+        height: 48px;
+        border-radius: 24px !important;
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        
+        mat-icon {
+          margin-right: 8px;
+        }
+      }
     }
   }
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+// Responsive Design
+@media (max-width: 1024px) {
+  .game-picker-page {
+    .comparison-state .content-grid {
+      grid-template-columns: 300px 1fr;
+      gap: 24px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .game-picker-page {
+    .main-toolbar {
+      .toolbar-title {
+        font-size: 1.1rem;
+        margin-left: 12px;
+      }
+    }
+    
+    .comparison-state {
+      padding: 16px;
+      
+      .content-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        
+        .sidebar {
+          position: static;
+          order: 2;
+        }
+        
+        .main-content {
+          order: 1;
+          min-height: auto;
+        }
+      }
+    }
+    
+    .recommendations-state {
+      padding: 16px;
+    }
+    
+    .state-card {
+      margin: 24px 16px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .game-picker-page {
+    .main-toolbar {
+      .toolbar-title {
+        font-size: 1rem;
+        margin-left: 8px;
+      }
+    }
+    
+    .comparison-state {
+      padding: 12px;
+      
+      .header-section {
+        margin-bottom: 24px;
+        
+        h1 {
+          font-size: 1.5rem !important;
+        }
+      }
+    }
+  }
 }
