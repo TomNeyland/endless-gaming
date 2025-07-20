@@ -1,0 +1,114 @@
+name: endless-gaming
+region: nyc1
+
+services:
+  - name: data-collector
+    source_dir: /
+    github:
+      repo: TomNeyland/endless-gaming
+      branch: master
+      deploy_on_push: true
+    
+    # Python environment configuration
+    environment_slug: python
+    
+    # Build configuration
+    build_command: |
+      pip install poetry
+      poetry config virtualenvs.create false
+      poetry install --only=main
+    
+    # Run configuration - data collection service
+    run_command: |
+      python scripts/collect_games.py collect --max-pages 10
+    
+    # Environment variables
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${endless-gaming-db.DATABASE_URL}
+      - key: PYTHONPATH
+        scope: RUN_AND_BUILD_TIME
+        value: /app
+      - key: POETRY_VENV_IN_PROJECT
+        scope: BUILD_TIME
+        value: "false"
+      - key: POETRY_CACHE_DIR
+        scope: BUILD_TIME
+        value: /tmp/poetry_cache
+      - key: MAX_WORKERS
+        scope: RUN_TIME
+        value: "3"
+    
+    # Resource allocation
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    
+    # Health check configuration
+    health_check:
+      initial_delay_seconds: 60
+      period_seconds: 30
+      timeout_seconds: 10
+      success_threshold: 1
+      failure_threshold: 3
+    
+    # No HTTP routes needed for CLI-based data collection
+    # This is a worker service, not a web service
+
+# Database configuration
+databases:
+  - engine: PG
+    name: endless-gaming-db
+    num_nodes: 1
+    size: db-s-dev-database
+    version: "15"
+
+# Jobs for scheduled or one-off tasks
+jobs:
+  - name: collect-initial-data
+    kind: PRE_DEPLOY
+    source_dir: /
+    environment_slug: python
+    
+    build_command: |
+      pip install poetry
+      poetry config virtualenvs.create false
+      poetry install --only=main
+    
+    run_command: |
+      python scripts/setup_db.py
+    
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${endless-gaming-db.DATABASE_URL}
+      - key: PYTHONPATH
+        scope: RUN_AND_BUILD_TIME
+        value: /app
+    
+    instance_count: 1
+    instance_size_slug: basic-xxs
+
+  - name: status-check
+    kind: POST_DEPLOY
+    source_dir: /
+    environment_slug: python
+    
+    build_command: |
+      pip install poetry
+      poetry config virtualenvs.create false
+      poetry install --only=main
+    
+    run_command: |
+      python scripts/collect_games.py status
+    
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${endless-gaming-db.DATABASE_URL}
+      - key: PYTHONPATH
+        scope: RUN_AND_BUILD_TIME
+        value: /app
+    
+    instance_count: 1
+    instance_size_slug: basic-xxs

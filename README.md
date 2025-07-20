@@ -168,6 +168,34 @@ STEAM_API_KEY=your_steam_api_key_here
 
 See [README.Docker.md](README.Docker.md) for complete deployment guide.
 
+### DigitalOcean App Platform
+
+Deploy to a fully managed platform with auto-scaling and managed PostgreSQL:
+
+```bash
+# Install doctl CLI
+brew install doctl  # macOS
+# or download from: https://github.com/digitalocean/doctl/releases
+
+# Authenticate (requires API token from DO control panel)
+doctl auth init --access-token YOUR_API_TOKEN
+
+# Deploy the application
+doctl apps create --spec .do/app.yaml
+
+# Monitor deployment
+doctl apps list
+doctl apps logs <APP_ID> --follow
+```
+
+**Features:**
+- **Managed PostgreSQL** - Automatic backups and scaling
+- **Auto-deployment** - Deploys automatically on GitHub push
+- **Serverless scaling** - Scales based on demand
+- **Zero infrastructure management** - Fully managed platform
+
+See [DO_SETUP.md](DO_SETUP.md) for complete setup guide including GitHub integration.
+
 ## Testing
 
 Comprehensive test suite with 89 tests covering all functionality:
