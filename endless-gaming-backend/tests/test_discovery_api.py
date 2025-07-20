@@ -21,13 +21,13 @@ class TestFlaskAppFactory:
 
     def test_create_app_returns_flask_instance(self):
         """Test that create_app returns a Flask application instance."""
-        app = create_app(TestingConfig)
+        app = create_app('testing')
         assert isinstance(app, Flask)
         assert app.config['TESTING'] is True
 
     def test_discovery_blueprint_registered(self):
         """Test that discovery blueprint is registered with the app."""
-        app = create_app(TestingConfig)
+        app = create_app('testing')
         
         # Check that the blueprint is registered
         blueprint_names = [bp.name for bp in app.blueprints.values()]
@@ -35,7 +35,7 @@ class TestFlaskAppFactory:
 
     def test_discovery_routes_accessible(self):
         """Test that discovery routes are accessible."""
-        app = create_app(TestingConfig)
+        app = create_app('testing')
         
         with app.test_client() as client:
             # This should return a response (even if it's an error)
@@ -50,7 +50,7 @@ class TestMasterJsonEndpoint:
     @pytest.fixture
     def client(self, db_engine):
         """Create test client with test database."""
-        app = create_app(TestingConfig)
+        app = create_app('testing')
         # Override the app's database engine with the test engine
         app.db_engine = db_engine
         from sqlalchemy.orm import sessionmaker
@@ -86,10 +86,19 @@ class TestMasterJsonEndpoint:
             fetch_status=FetchStatus.SUCCESS.value
         )
         
-        # Create active game without metadata
+        # Create active game with metadata (TF2)
         game3 = Game(app_id=440, name="Team Fortress 2", is_active=True)
+        metadata3 = GameMetadata(
+            app_id=440,
+            developer="Valve",
+            publisher="Valve",
+            price="Free",
+            positive_reviews=750000,
+            negative_reviews=75000,
+            fetch_status=FetchStatus.SUCCESS.value
+        )
         
-        db_session.add_all([game1, game2, game3, metadata1, metadata2])
+        db_session.add_all([game1, game2, game3, metadata1, metadata2, metadata3])
         db_session.commit()
         
         return [game1, game2, game3]
@@ -115,10 +124,10 @@ class TestMasterJsonEndpoint:
         response = client.get('/discovery/games/master.json')
         data = json.loads(response.data)
         
-        # Should only include active games (CS:GO and TF2, not Dota 2)
+        # Should only include active games with metadata (CS:GO and TF2, not Dota 2)
         app_ids = [game['appId'] for game in data]
-        assert 730 in app_ids  # CS:GO (active)
-        assert 440 in app_ids  # TF2 (active, no metadata)
+        assert 730 in app_ids  # CS:GO (active, has metadata)
+        assert 440 in app_ids  # TF2 (active, has metadata)
         assert 570 not in app_ids  # Dota 2 (inactive)
 
     def test_game_record_format_camel_case(self, client, sample_games_with_metadata):
