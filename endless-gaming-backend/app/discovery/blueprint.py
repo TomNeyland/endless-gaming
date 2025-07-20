@@ -11,6 +11,7 @@ from sqlalchemy.exc import DatabaseError
 from app.discovery import bp
 from app.discovery.utils import to_game_record
 from models.game import Game
+from models.game_metadata import GameMetadata
 from app import cache
 
 
@@ -31,7 +32,10 @@ def get_master_json():
             # Query all active games with their metadata
             games = (
                 session.query(Game)
+                .join(Game.game_metadata)
                 .filter(Game.is_active.is_(True))
+                .order_by(GameMetadata.score_rank)
+                .limit(1000)
                 .options(joinedload(Game.game_metadata))
                 .all()
             )
