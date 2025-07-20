@@ -22,6 +22,8 @@ export class PairService {
     timestamp: number;
   }> = [];
   
+  private usedPairs = new Set<string>(); // Track all used pairs to prevent duplicates
+  
   private readonly TARGET_COMPARISONS = 20;
   private readonly MIN_UNCERTAINTY = 0.1; // Minimum uncertainty threshold
   private readonly DIVERSITY_WINDOW = 5; // Recent pairs to check for diversity
@@ -32,16 +34,24 @@ export class PairService {
    * Returns null if no more pairs available or insufficient data.
    */
   getNextPair(): GamePair | null {
+    console.log('🎲 PairService: getNextPair called');
+    console.log('🎲 PairService: games.length =', this.games.length);
+    console.log('🎲 PairService: choiceHistory.length =', this.choiceHistory.length);
+    console.log('🎲 PairService: hasMorePairs() =', this.hasMorePairs());
+    
     if (!this.hasMorePairs() || this.games.length < 2) {
+      console.log('🎲 PairService: Returning null - no more pairs or insufficient games');
       return null;
     }
 
     // Bootstrap phase: use random pairs for first few comparisons
     if (this.choiceHistory.length < 3) {
+      console.log('🎲 PairService: Bootstrap phase - getting random pair');
       return this.getRandomPair();
     }
 
     // Uncertainty sampling phase
+    console.log('🎲 PairService: Uncertainty sampling phase');
     return this.getUncertaintyBasedPair();
   }
 
@@ -58,6 +68,10 @@ export class PairService {
     };
     
     this.choiceHistory.push(choice);
+    
+    // Track this pair as used to prevent duplicates
+    const pairKey = this.createPairKey({ left: leftGame, right: rightGame });
+    this.usedPairs.add(pairKey);
 
     // Update preferences if not skipped
     if (pick === 'left') {
@@ -72,7 +86,29 @@ export class PairService {
    * Based on target comparison count and algorithm state.
    */
   hasMorePairs(): boolean {
-    return this.choiceHistory.length < this.TARGET_COMPARISONS && this.games.length >= 2;
+    console.log('🎲 PairService: hasMorePairs check');
+    console.log('🎲 PairService: games.length =', this.games.length);
+    console.log('🎲 PairService: choiceHistory.length =', this.choiceHistory.length);
+    console.log('🎲 PairService: TARGET_COMPARISONS =', this.TARGET_COMPARISONS);
+    console.log('🎲 PairService: usedPairs.size =', this.usedPairs.size);
+    
+    if (this.games.length < 2) {
+      console.log('🎲 PairService: hasMorePairs = false (< 2 games)');
+      return false;
+    }
+    
+    // If we've reached the target number of comparisons, no more pairs
+    if (this.choiceHistory.length >= this.TARGET_COMPARISONS) {
+      console.log('🎲 PairService: hasMorePairs = false (reached target)');
+      return false;
+    }
+    
+    // Check if there are any unused pairs remaining
+    const totalPossiblePairs = (this.games.length * (this.games.length - 1)) / 2;
+    const hasMore = this.usedPairs.size < totalPossiblePairs;
+    console.log('🎲 PairService: totalPossiblePairs =', totalPossiblePairs);
+    console.log('🎲 PairService: hasMorePairs =', hasMore);
+    return hasMore;
   }
 
   /**
@@ -80,9 +116,17 @@ export class PairService {
    * Returns completion status for progress display.
    */
   getProgress(): ProgressInfo {
+    // Calculate maximum possible unique pairs
+    const maxPossiblePairs = this.games.length >= 2 
+      ? (this.games.length * (this.games.length - 1)) / 2 
+      : 0;
+    
+    // The total is the minimum of target comparisons and possible unique pairs
+    const total = Math.min(this.TARGET_COMPARISONS, maxPossiblePairs);
+    
     return {
       current: this.choiceHistory.length,
-      total: this.TARGET_COMPARISONS
+      total: total
     };
   }
 
@@ -91,8 +135,11 @@ export class PairService {
    * Sets up the candidate pool for uncertainty sampling.
    */
   initializeWithGames(games: GameRecord[]): void {
+    console.log('🎲 PairService: Initializing with', games.length, 'games');
     this.games = [...games];
     this.choiceHistory = [];
+    this.usedPairs.clear(); // Clear used pairs for fresh start
+    console.log('🎲 PairService: Initialization complete. Can create pairs:', this.games.length >= 2);
   }
 
   /**
@@ -101,6 +148,7 @@ export class PairService {
    */
   resetProgress(): void {
     this.choiceHistory = [];
+    this.usedPairs.clear(); // Clear used pairs to allow all pairs again
     this.preferenceService.resetPreferences();
   }
 
@@ -125,36 +173,27 @@ export class PairService {
       return null;
     }
 
-    // Avoid recent pairs for diversity
-    const recentPairs = this.getRecentPairs();
+    // Find all unused pairs
     const candidates: GamePair[] = [];
 
     for (let i = 0; i < this.games.length; i++) {
       for (let j = i + 1; j < this.games.length; j++) {
         const pair = { left: this.games[i], right: this.games[j] };
+        const pairKey = this.createPairKey(pair);
         
-        // Check if this pair was used recently
-        const isRecent = recentPairs.some(recent => 
-          this.isPairSame(pair, recent)
-        );
-        
-        if (!isRecent) {
+        // Check if this pair has never been used
+        if (!this.usedPairs.has(pairKey)) {
           candidates.push(pair);
         }
       }
     }
 
     if (candidates.length === 0) {
-      // If all pairs are recent, pick any random pair
-      const i = Math.floor(Math.random() * this.games.length);
-      let j = Math.floor(Math.random() * this.games.length);
-      while (j === i) {
-        j = Math.floor(Math.random() * this.games.length);
-      }
-      return { left: this.games[i], right: this.games[j] };
+      // No unused pairs available
+      return null;
     }
 
-    // Return random candidate
+    // Return random unused pair
     const randomIndex = Math.floor(Math.random() * candidates.length);
     return candidates[randomIndex];
   }
@@ -176,9 +215,9 @@ export class PairService {
     const candidates = this.sampleGamePairs(sampleSize);
 
     for (const pair of candidates) {
-      // Skip recent pairs for diversity
-      const isRecent = recentPairs.some(recent => this.isPairSame(pair, recent));
-      if (isRecent) {
+      // Skip already used pairs
+      const pairKey = this.createPairKey(pair);
+      if (this.usedPairs.has(pairKey)) {
         continue;
       }
 
@@ -263,6 +302,15 @@ export class PairService {
   private isPairSame(pair1: GamePair, pair2: GamePair): boolean {
     return (pair1.left.appId === pair2.left.appId && pair1.right.appId === pair2.right.appId) ||
            (pair1.left.appId === pair2.right.appId && pair1.right.appId === pair2.left.appId);
+  }
+
+  /**
+   * Create a unique key for a pair (order doesn't matter).
+   */
+  private createPairKey(pair: GamePair): string {
+    const appId1 = pair.left.appId;
+    const appId2 = pair.right.appId;
+    return `${Math.min(appId1, appId2)}-${Math.max(appId1, appId2)}`;
   }
 
   /**

@@ -89,12 +89,18 @@ export class GameDataService {
    * Returns cached data immediately if available, otherwise loads from API.
    */
   getGames(): Observable<GameRecord[]> {
+    console.log('📡 GameDataService: getGames called');
+    console.log('📡 GameDataService: isCacheValid() =', this.isCacheValid());
+    console.log('📡 GameDataService: allGamesCache.length =', this.allGamesCache.length);
+    
     // If we have cached data, return it immediately
     if (this.isCacheValid()) {
+      console.log('📡 GameDataService: Returning cached data:', this.getAllGames().length, 'games');
       return of(this.getAllGames());
     }
 
     // Otherwise, load from backend
+    console.log('📡 GameDataService: No valid cache, fetching from backend...');
     return this.fetchFromBackend();
   }
 
@@ -134,15 +140,20 @@ export class GameDataService {
    * Fetch games from backend API.
    */
   private fetchFromBackend(): Observable<GameRecord[]> {
+    console.log('📡 GameDataService: Fetching from', this.API_URL);
     return this.http.get<GameRecord[]>(this.API_URL).pipe(
       tap(data => {
+        console.log('📡 GameDataService: Received data from backend:', data.length, 'games');
+        if (data.length > 0) {
+          console.log('📡 GameDataService: First game:', data[0].name);
+        }
         this.cacheData(data).catch(error => 
           console.warn('Cache failed, but data loaded:', error)
         );
         this.populateInMemoryCache(data);
       }),
       catchError(error => {
-        console.error('Failed to fetch games from backend:', error);
+        console.error('📡 GameDataService: Failed to fetch games from backend:', error);
         return throwError(() => error);
       })
     );

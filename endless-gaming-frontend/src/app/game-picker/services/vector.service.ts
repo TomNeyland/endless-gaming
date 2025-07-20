@@ -47,11 +47,14 @@ export class VectorService {
   gameToSparseVector(game: GameRecord, tagDict: TagDictionary): SparseVector {
     const indexValuePairs: Array<[number, number]> = [];
     
-    // Convert game tags to sparse vector format
+    // Convert game tags to sparse vector format with normalization
     Object.entries(game.tags).forEach(([tag, votes]) => {
       const index = tagDict.tagToIndex[tag];
       if (index !== undefined && votes > 0) {
-        indexValuePairs.push([index, votes]);
+        // Normalize tag votes using log scaling to handle large vote counts
+        // This maps vote counts to a more reasonable 0-1 range
+        const normalizedVotes = Math.log(1 + votes) / Math.log(1 + 100000); // Assumes max ~100k votes
+        indexValuePairs.push([index, normalizedVotes]);
       }
     });
     
