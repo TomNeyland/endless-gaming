@@ -5,77 +5,65 @@
   .progress-section {
     .progress-text {
       text-align: center;
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: #333;
       margin-bottom: 1rem;
+      color: var(--gaming-text-primary);
     }
 
-    .progress-bar {
+    .progress-wrapper {
       display: flex;
       align-items: center;
       gap: 1rem;
       margin-bottom: 1rem;
 
-      .progress-track {
+      mat-progress-bar {
         flex: 1;
-        height: 12px;
-        background: #e9ecef;
-        border-radius: 6px;
+        height: 8px;
+        border-radius: 4px;
         overflow: hidden;
-        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-
-        .progress-fill {
-          height: 100%;
-          border-radius: 6px;
-          transition: width 0.4s ease, background-color 0.3s ease;
-          background: linear-gradient(90deg, #3498db, #2980b9);
-          position: relative;
-
-          // Animated shimmer effect for active progress
-          &::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(
-              90deg,
-              transparent,
-              rgba(255, 255, 255, 0.3),
-              transparent
-            );
-            animation: shimmer 2s infinite;
-          }
+        
+        &.progress-early {
+          --mdc-linear-progress-active-indicator-color: #e74c3c;
+        }
+        
+        &.progress-quarter {
+          --mdc-linear-progress-active-indicator-color: #f39c12;
+        }
+        
+        &.progress-half {
+          --mdc-linear-progress-active-indicator-color: #f1c40f;
+        }
+        
+        &.progress-near-complete {
+          --mdc-linear-progress-active-indicator-color: #27ae60;
+        }
+        
+        &.progress-complete {
+          --mdc-linear-progress-active-indicator-color: #2ecc71;
         }
       }
 
       .progress-percentage {
-        font-size: 0.9rem;
-        font-weight: bold;
-        color: #495057;
         min-width: 50px;
         text-align: right;
-        font-family: monospace;
+        font-family: 'Roboto Mono', monospace;
+        color: var(--gaming-text-secondary);
       }
     }
 
     .completion-message {
       text-align: center;
       padding: 1rem;
-      background: linear-gradient(135deg, #d4edda, #c3e6cb);
-      border: 1px solid #c3e6cb;
+      background: rgba(46, 204, 113, 0.1);
+      border: 1px solid rgba(46, 204, 113, 0.3);
       border-radius: 8px;
-      color: #155724;
-      font-weight: bold;
+      color: #2ecc71;
       animation: celebrate 0.6s ease;
 
       .checkmark {
         display: inline-block;
         margin-right: 0.5rem;
         font-size: 1.2rem;
-        color: #28a745;
+        color: #2ecc71;
         animation: bounce 0.6s ease;
       }
     }
@@ -84,7 +72,7 @@
   .no-progress {
     text-align: center;
     padding: 2rem;
-    color: #6c757d;
+    color: var(--gaming-text-secondary);
     font-style: italic;
 
     p {
@@ -93,35 +81,16 @@
   }
 }
 
-// Color variations for different progress states
-.progress-bar-container {
-  // Early progress (0-33%)
-  &.early-progress .progress-fill {
-    background: linear-gradient(90deg, #e74c3c, #c0392b);
-  }
+// Responsive design
+@media (max-width: 768px) {
+  .progress-bar-container .progress-section .progress-wrapper {
+    flex-direction: column;
+    gap: 0.5rem;
 
-  // Mid progress (34-66%)
-  &.mid-progress .progress-fill {
-    background: linear-gradient(90deg, #f39c12, #e67e22);
-  }
-
-  // Late progress (67-99%)
-  &.late-progress .progress-fill {
-    background: linear-gradient(90deg, #27ae60, #229954);
-  }
-
-  // Complete (100%)
-  &.complete-progress .progress-fill {
-    background: linear-gradient(90deg, #28a745, #20a745);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
+    .progress-percentage {
+      text-align: center;
+      min-width: auto;
+    }
   }
 }
 

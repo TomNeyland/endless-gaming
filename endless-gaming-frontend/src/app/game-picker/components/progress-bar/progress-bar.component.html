@@ -2,29 +2,27 @@
   @if (hasProgress()) {
     <div class="progress-section">
       @if (showCount) {
-        <div class="progress-text">
+        <div class="progress-text mat-headline-6">
           {{ getProgressText() }}
         </div>
       }
 
-      <div class="progress-bar">
-        <div class="progress-track">
-          <div 
-            class="progress-fill"
-            [style.width]="getProgressWidth()"
-            [style.background-color]="getProgressColor()">
-          </div>
-        </div>
+      <div class="progress-wrapper">
+        <mat-progress-bar 
+          mode="determinate" 
+          [value]="getProgressPercentage()"
+          [class]="getProgressClass()">
+        </mat-progress-bar>
         
         @if (showPercentage) {
-          <div class="progress-percentage">
+          <div class="progress-percentage mat-body-2">
             {{ getPercentageText() }}
           </div>
         }
       </div>
 
       @if (isComplete()) {
-        <div class="completion-message">
+        <div class="completion-message mat-headline-6">
           <span class="checkmark">✓</span>
           Comparisons Complete!
         </div>
@@ -32,7 +30,7 @@
     </div>
   } @else {
     <div class="no-progress">
-      <p>Progress not available</p>
+      <p class="mat-body-1">Progress not available</p>
     </div>
   }
 </div>

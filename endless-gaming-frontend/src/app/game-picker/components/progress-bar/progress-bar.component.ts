@@ -1,5 +1,6 @@
 import { Component, Input, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ProgressInfo } from '../../../types/game.types';
 import { PairService } from '../../services/pair.service';
 import { Subscription } from 'rxjs';
@@ -13,7 +14,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-progress-bar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatProgressBarModule],
   templateUrl: './progress-bar.component.html',
   styleUrl: './progress-bar.component.scss'
 })
@@ -102,21 +103,21 @@ export class ProgressBarComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get progress bar color based on completion.
+   * Get progress bar CSS class based on completion.
    */
-  getProgressColor(): string {
+  getProgressClass(): string {
     const percentage = this.getProgressPercentage();
     
     if (percentage < 25) {
-      return '#e74c3c'; // Red for early stage
+      return 'progress-early';
     } else if (percentage < 50) {
-      return '#f39c12'; // Orange for quarter way
+      return 'progress-quarter';
     } else if (percentage < 75) {
-      return '#f1c40f'; // Yellow for halfway
+      return 'progress-half';
     } else if (percentage < 100) {
-      return '#27ae60'; // Green for near completion
+      return 'progress-near-complete';
     } else {
-      return '#2ecc71'; // Bright green for complete
+      return 'progress-complete';
     }
   }
 
