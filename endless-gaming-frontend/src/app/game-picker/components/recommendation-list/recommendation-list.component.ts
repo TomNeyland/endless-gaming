@@ -9,7 +9,6 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatBottomSheetModule, MatBottomSheet } from '@angular/material/bottom-sheet';
-import { MatFabModule } from '@angular/material/fab';
 import { GameRecommendation, GameRecord } from '../../../types/game.types';
 import { PreferenceService } from '../../services/preference.service';
 import { PairService } from '../../services/pair.service';
@@ -36,8 +35,7 @@ import { Subscription } from 'rxjs';
     MatBadgeModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
-    MatBottomSheetModule,
-    MatFabModule
+    MatBottomSheetModule
   ],
   templateUrl: './recommendation-list.component.html',
   styleUrl: './recommendation-list.component.scss'

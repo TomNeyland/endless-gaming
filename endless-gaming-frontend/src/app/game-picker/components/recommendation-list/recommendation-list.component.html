@@ -144,20 +144,22 @@
       <p class="mat-body-2">
         Showing {{ recommendations.length }} personalized recommendations from {{ getTotalGamesCount() }} games
       </p>
+      <p class="mat-caption" style="margin-top: 8px; opacity: 0.7;">
+        Debug: canStartVoting={{ canStartVoting() }}, games.length={{ games.length }}, isRefreshing={{ isRefreshing() }}
+      </p>
     </div>
 
     <!-- Voting FAB -->
-    @if (canStartVoting()) {
-      <button 
-        mat-fab 
-        color="primary" 
-        class="voting-fab"
-        (click)="openVotingBottomSheet()"
-        matTooltip="Refine your preferences"
-        matTooltipPosition="above">
-        <mat-icon>tune</mat-icon>
-      </button>
-    }
+    <button 
+      mat-fab 
+      color="primary" 
+      class="voting-fab"
+      [disabled]="!canStartVoting()"
+      (click)="openVotingBottomSheet()"
+      matTooltip="Refine your preferences"
+      matTooltipPosition="above">
+      <mat-icon>tune</mat-icon>
+    </button>
 
   } @else {
     <mat-card class="no-recommendations">

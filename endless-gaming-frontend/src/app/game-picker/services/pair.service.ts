@@ -181,6 +181,13 @@ export class PairService {
   }
 
   /**
+   * Get the total number of comparisons made.
+   */
+  getComparisonCount(): number {
+    return this.choiceHistory.length;
+  }
+
+  /**
    * Get a random pair for bootstrap phase.
    */
   private getRandomPair(): GamePair | null {
