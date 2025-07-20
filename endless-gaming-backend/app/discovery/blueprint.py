@@ -15,25 +15,64 @@ from models.game_metadata import GameMetadata
 from app import cache
 
 
+def has_million_plus_owners(owners_estimate: str) -> bool:
+    """
+    Check if an owner estimate indicates 1M+ owners.
+    
+    Args:
+        owners_estimate: String like "1,000,000 .. 2,000,000"
+        
+    Returns:
+        True if the estimate indicates 1M+ owners
+    """
+    if not owners_estimate:
+        return False
+    
+    # Ranges that indicate 1M+ owners
+    million_plus_ranges = [
+        "1,000,000 .. 2,000,000",
+        "2,000,000 .. 5,000,000", 
+        "5,000,000 .. 10,000,000",
+        "10,000,000 .. 20,000,000",
+        "20,000,000 .. 50,000,000",
+        "50,000,000 .. 100,000,000",
+        "100,000,000 .. 200,000,000"
+    ]
+    
+    return owners_estimate in million_plus_ranges
+
+
 @bp.route('/games/master.json')
-@cache.cached(timeout=86400, key_prefix="master_json_v1")
+@cache.cached(timeout=86400, key_prefix="master_json_1m_owners_v1")
 def get_master_json():
     """
-    Get all active games with their metadata in JSON format.
+    Get all active games with 1M+ owners and their metadata in JSON format.
     
     Returns:
-        JSON response containing array of game records
+        JSON response containing array of game records for games with 1M+ estimated owners
     """
     try:
         # Use the app's database session factory
         session = current_app.db_session_factory()
         
         try:
-            # Query all active games with their metadata
+            # Define owner ranges that indicate 1M+ owners
+            million_plus_ranges = [
+                "1,000,000 .. 2,000,000",
+                "2,000,000 .. 5,000,000", 
+                "5,000,000 .. 10,000,000",
+                "10,000,000 .. 20,000,000",
+                "20,000,000 .. 50,000,000",
+                "50,000,000 .. 100,000,000",
+                "100,000,000 .. 200,000,000"
+            ]
+            
+            # Query all active games with their metadata, filtered for 1M+ owners
             games = (
                 session.query(Game)
                 .join(Game.game_metadata)
                 .filter(Game.is_active.is_(True))
+                .filter(GameMetadata.owners_estimate.in_(million_plus_ranges))
                 .order_by(GameMetadata.score_rank)
                 .limit(1000)
                 .options(joinedload(Game.game_metadata))

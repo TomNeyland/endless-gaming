@@ -1,5 +1,11 @@
 import { Component, Input, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatBadgeModule } from '@angular/material/badge';
 import { GameRecommendation, GameRecord } from '../../../types/game.types';
 import { PreferenceService } from '../../services/preference.service';
 import { GameCardComponent } from '../game-card/game-card.component';
@@ -13,7 +19,16 @@ import { GameCardComponent } from '../game-card/game-card.component';
 @Component({
   selector: 'app-recommendation-list',
   standalone: true,
-  imports: [CommonModule, GameCardComponent],
+  imports: [
+    CommonModule, 
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatListModule,
+    MatChipsModule,
+    MatBadgeModule,
+    GameCardComponent
+  ],
   templateUrl: './recommendation-list.component.html',
   styleUrl: './recommendation-list.component.scss'
 })
@@ -57,6 +72,20 @@ export class RecommendationListComponent implements OnInit {
   }
 
   /**
+   * Get top 3 premium recommendations for featured display.
+   */
+  getTopRecommendations(): GameRecommendation[] {
+    return this.recommendations.slice(0, 3);
+  }
+
+  /**
+   * Get remaining recommendations for compact list display.
+   */
+  getCompactRecommendations(): GameRecommendation[] {
+    return this.recommendations.slice(3);
+  }
+
+  /**
    * Format score for display.
    */
   formatScore(score: number): string {
@@ -89,6 +118,44 @@ export class RecommendationListComponent implements OnInit {
    */
   getRankText(rank: number): string {
     return `#${rank}`;
+  }
+
+  /**
+   * Get rank icon for top 3 positions.
+   */
+  getRankIcon(rank: number): string {
+    switch (rank) {
+      case 1: return 'military_tech'; // Gold medal
+      case 2: return 'military_tech'; // Silver medal  
+      case 3: return 'military_tech'; // Bronze medal
+      default: return 'star';
+    }
+  }
+
+  /**
+   * Get rank icon color for top 3 positions.
+   */
+  getRankIconColor(rank: number): string {
+    switch (rank) {
+      case 1: return '#FFD700'; // Gold
+      case 2: return '#C0C0C0'; // Silver
+      case 3: return '#CD7F32'; // Bronze
+      default: return 'var(--gaming-accent)';
+    }
+  }
+
+  /**
+   * Get top tags for display in compact view.
+   */
+  getTopTags(game: GameRecord, maxTags: number = 3): Array<{tag: string, votes: number}> {
+    if (!game?.tags) {
+      return [];
+    }
+
+    return Object.entries(game.tags)
+      .map(([tag, votes]) => ({ tag, votes }))
+      .sort((a, b) => b.votes - a.votes)
+      .slice(0, maxTags);
   }
 
   /**

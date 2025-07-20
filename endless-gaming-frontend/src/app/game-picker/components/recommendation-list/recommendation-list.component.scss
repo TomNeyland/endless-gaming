@@ -1,218 +1,417 @@
+// Material Design recommendations with tiered layout and gaming theme
 .recommendation-list {
-  .list-header {
-    text-align: center;
-    margin-bottom: 2rem;
+  padding: 0 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  // Section titles
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    color: var(--gaming-text-primary) !important;
     
-    h2 {
-      margin: 0 0 0.5rem 0;
-      color: #333;
-      font-size: 2rem;
-    }
-    
-    .subtitle {
-      margin: 0;
-      color: #666;
-      font-size: 1.1rem;
+    mat-icon {
+      color: var(--gaming-accent);
     }
   }
 
-  .recommendations-container {
-    max-height: 70vh;
-    overflow-y: auto;
-    padding-right: 0.5rem;
-
-    .recommendation-item {
+  // Premium Section - Top 3 Recommendations
+  .premium-section {
+    margin-bottom: 48px;
+    
+    .premium-grid {
       display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 1.5rem;
-      align-items: center;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-      }
-
-      // Special styling for top recommendations
-      &[data-rank="1"] {
-        border: 2px solid #f1c40f;
-        background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
-      }
-
-      &[data-rank="2"], &[data-rank="3"] {
-        border: 1px solid #e9ecef;
-        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      }
-
-      .rank-section {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-        min-width: 80px;
-
-        .rank-number {
-          font-size: 1.5rem;
-          font-weight: bold;
-          color: #333;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      
+      .premium-card {
+        background: var(--gaming-surface) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        
+        &:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        // Special styling for rank 1
+        &.rank-1 {
+          border: 2px solid #FFD700 !important;
+          box-shadow: 0 0 20px rgba(255, 215, 0, 0.3) !important;
           
-          // Special styling for top 3
-          &:has([data-rank="1"]) {
-            color: #f1c40f;
+          .rank-badge {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
           }
         }
-
-        .score-badge {
-          padding: 0.25rem 0.75rem;
+        
+        // Special styling for rank 2  
+        &.rank-2 {
+          border: 2px solid #C0C0C0 !important;
+          
+          .rank-badge {
+            background: linear-gradient(45deg, #C0C0C0, #A0A0A0);
+          }
+        }
+        
+        // Special styling for rank 3
+        &.rank-3 {
+          border: 2px solid #CD7F32 !important;
+          
+          .rank-badge {
+            background: linear-gradient(45deg, #CD7F32, #B8860B);
+          }
+        }
+        
+        .rank-badge {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          background: var(--gaming-accent);
+          color: var(--gaming-background);
+          padding: 8px 12px;
           border-radius: 20px;
-          font-size: 0.8rem;
-          font-weight: bold;
-          color: white;
-          font-family: monospace;
-          min-width: 60px;
-          text-align: center;
-        }
-      }
-
-      .game-section {
-        flex: 1;
-
-        .placeholder-game-info {
-          .game-name {
-            margin: 0 0 0.5rem 0;
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #333;
-            line-height: 1.3;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-weight: 600;
+          z-index: 2;
+          
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
           }
-
+          
+          .rank-number {
+            font-size: 14px;
+          }
+        }
+        
+        .game-image-container {
+          position: relative;
+          width: 100%;
+          padding-top: 46.7%; // 460x215 aspect ratio
+          overflow: hidden;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          
+          .game-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+          }
+          
+          &:hover .game-image {
+            transform: scale(1.05);
+          }
+        }
+        
+        mat-card-content {
+          padding: 20px !important;
+          
+          .game-title {
+            color: var(--gaming-text-primary) !important;
+            margin-bottom: 16px !important;
+            font-size: 1.25rem !important;
+            line-height: 1.3 !important;
+          }
+          
           .game-meta {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 0.75rem;
-
-            .game-price {
-              font-weight: bold;
-              color: #27ae60;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            
+            .price {
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              color: var(--gaming-accent) !important;
+              font-weight: 600;
+              
+              mat-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+              }
             }
-
-            .game-developer {
-              color: #666;
-              font-size: 0.9rem;
-            }
-          }
-
-          .game-tags-preview {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-
-            .tag-preview {
-              background: #e9ecef;
-              color: #495057;
-              padding: 0.25rem 0.5rem;
-              border-radius: 12px;
-              font-size: 0.8rem;
-
-              &:first-child {
-                background: #3498db;
-                color: white;
+            
+            .score {
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              color: var(--gaming-text-secondary) !important;
+              font-family: 'Roboto Mono', monospace;
+              
+              mat-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
               }
             }
           }
-        }
-      }
-
-      .action-section {
-        .view-details-btn {
-          padding: 0.75rem 1.5rem;
-          background: #3498db;
-          color: white;
-          border: none;
-          border-radius: 6px;
-          font-size: 0.9rem;
-          cursor: pointer;
-          transition: background-color 0.2s ease;
-
-          &:hover {
-            background: #2980b9;
+          
+          .game-tags {
+            margin-bottom: 20px;
+            
+            mat-chip-set {
+              mat-chip {
+                background-color: rgba(25, 118, 210, 0.2) !important;
+                color: var(--gaming-primary) !important;
+                font-size: 0.75rem !important;
+                height: 24px !important;
+              }
+            }
+          }
+          
+          .view-game-btn {
+            width: 100%;
+            height: 40px;
+            border-radius: 20px !important;
+            font-weight: 600 !important;
+            
+            mat-icon {
+              margin-right: 8px;
+              font-size: 18px;
+              width: 18px;
+              height: 18px;
+            }
           }
         }
       }
     }
   }
 
-  .list-footer {
-    text-align: center;
-    margin-top: 2rem;
-    padding: 1rem;
-    background: #f8f9fa;
-    border-radius: 8px;
-
-    p {
-      margin: 0;
-      color: #666;
-      font-style: italic;
+  // Compact Section - Remaining Recommendations
+  .compact-section {
+    margin-bottom: 32px;
+    
+    .compact-list {
+      background: var(--gaming-surface);
+      border-radius: 12px;
+      padding: 0 !important;
+      
+      .compact-item {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        
+        &:hover {
+          background: rgba(255, 255, 255, 0.05) !important;
+        }
+        
+        &:last-child {
+          border-bottom: none;
+        }
+        
+        .compact-content {
+          display: grid;
+          grid-template-columns: 60px 80px 1fr auto;
+          gap: 16px;
+          align-items: center;
+          width: 100%;
+          padding: 12px 16px;
+          
+          .compact-rank {
+            text-align: center;
+            
+            .rank-number {
+              font-size: 1.25rem;
+              font-weight: 600;
+              color: var(--gaming-accent);
+            }
+          }
+          
+          .compact-thumbnail {
+            .thumbnail-image {
+              width: 80px;
+              height: 45px;
+              object-fit: cover;
+              border-radius: 6px;
+              border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+          }
+          
+          .compact-info {
+            min-width: 0; // Allow text to shrink
+            
+            .compact-title {
+              margin: 0 0 4px 0;
+              font-size: 1rem;
+              font-weight: 500;
+              color: var(--gaming-text-primary);
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            
+            .compact-meta {
+              display: flex;
+              gap: 16px;
+              margin-bottom: 6px;
+              
+              .compact-price {
+                color: var(--gaming-accent);
+                font-weight: 600;
+                font-size: 0.875rem;
+              }
+              
+              .compact-score {
+                color: var(--gaming-text-secondary);
+                font-size: 0.875rem;
+                font-family: 'Roboto Mono', monospace;
+              }
+            }
+            
+            .compact-tags {
+              display: flex;
+              gap: 8px;
+              
+              .compact-tag {
+                background: rgba(25, 118, 210, 0.2);
+                color: var(--gaming-primary);
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 0.75rem;
+                white-space: nowrap;
+              }
+            }
+          }
+          
+          .compact-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+        }
+      }
     }
   }
 
+  // Stats Footer
+  .stats-footer {
+    text-align: center;
+    padding: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    
+    p {
+      margin: 0;
+      color: var(--gaming-text-secondary) !important;
+    }
+  }
+
+  // No Recommendations State
   .no-recommendations {
-    text-align: center;
-    padding: 4rem 2rem;
-    color: #666;
-
-    h2 {
-      margin: 0 0 1rem 0;
-      color: #333;
+    margin: 48px auto;
+    max-width: 500px;
+    background: var(--gaming-surface) !important;
+    
+    .no-recommendations-content {
+      text-align: center;
+      padding: 48px 32px;
+      
+      .large-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        color: var(--gaming-text-secondary);
+        margin-bottom: 24px;
+        opacity: 0.7;
+      }
+      
+      h2 {
+        color: var(--gaming-text-primary) !important;
+        margin-bottom: 16px;
+      }
+      
+      p {
+        color: var(--gaming-text-secondary) !important;
+        margin: 0;
+      }
     }
-
-    p {
-      margin: 0;
-      font-size: 1.1rem;
-    }
   }
+}
 
-  // Custom scrollbar for recommendations container
-  .recommendations-container::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  .recommendations-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-  }
-
-  .recommendations-container::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 4px;
-
-    &:hover {
-      background: #a8a8a8;
+// Responsive Design
+@media (max-width: 1024px) {
+  .recommendation-list {
+    .premium-section .premium-grid {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
     }
   }
 }
 
 @media (max-width: 768px) {
   .recommendation-list {
-    .recommendations-container .recommendation-item {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto auto auto;
-      text-align: center;
-      gap: 1rem;
-
-      .rank-section {
-        flex-direction: row;
-        justify-content: center;
+    padding: 0 8px;
+    
+    .premium-section {
+      margin-bottom: 32px;
+      
+      .premium-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
       }
+    }
+    
+    .compact-section .compact-list .compact-item .compact-content {
+      grid-template-columns: 50px 60px 1fr auto;
+      gap: 12px;
+      padding: 12px;
+      
+      .compact-thumbnail .thumbnail-image {
+        width: 60px;
+        height: 34px;
+      }
+      
+      .compact-info {
+        .compact-title {
+          font-size: 0.9rem;
+        }
+        
+        .compact-meta {
+          flex-direction: column;
+          gap: 2px;
+          
+          .compact-price,
+          .compact-score {
+            font-size: 0.8rem;
+          }
+        }
+        
+        .compact-tags {
+          gap: 4px;
+          
+          .compact-tag {
+            font-size: 0.7rem;
+            padding: 1px 6px;
+          }
+        }
+      }
+    }
+  }
+}
 
-      .action-section {
+@media (max-width: 480px) {
+  .recommendation-list {
+    .compact-section .compact-list .compact-item .compact-content {
+      grid-template-columns: 40px 50px 1fr;
+      grid-template-rows: auto auto;
+      gap: 8px;
+      
+      .compact-action {
+        grid-column: 1 / -1;
         justify-self: center;
+        margin-top: 8px;
       }
     }
   }

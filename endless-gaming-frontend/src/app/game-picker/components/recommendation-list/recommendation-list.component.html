@@ -1,53 +1,150 @@
 <div class="recommendation-list">
   @if (hasRecommendations()) {
-    <div class="list-header">
-      <h2>Your Top {{ maxRecommendations }} Game Recommendations</h2>
-      <p class="subtitle">Based on your preferences, here are games you might love!</p>
-    </div>
+    <!-- Top 3 Premium Recommendations -->
+    @if (getTopRecommendations().length > 0) {
+      <div class="premium-section">
+        <h3 class="section-title mat-headline-5">
+          <mat-icon>emoji_events</mat-icon>
+          Top Recommendations
+        </h3>
+        
+        <div class="premium-grid">
+          @for (recommendation of getTopRecommendations(); track trackByAppId($index, recommendation)) {
+            <mat-card 
+              class="premium-card"
+              [class]="'rank-' + recommendation.rank"
+              (click)="onRecommendationClick(recommendation)"
+              appearance="outlined">
+              
+              <!-- Rank Badge -->
+              <div class="rank-badge">
+                <mat-icon [style.color]="getRankIconColor(recommendation.rank)">
+                  {{ getRankIcon(recommendation.rank) }}
+                </mat-icon>
+                <span class="rank-number">{{ recommendation.rank }}</span>
+              </div>
 
-    <div class="recommendations-container">
-      @for (recommendation of getDisplayRecommendations(); track trackByAppId($index, recommendation)) {
-        <div 
-          class="recommendation-item"
-          (click)="onRecommendationClick(recommendation)"
-          [attr.data-rank]="recommendation.rank">
-          
-          <div class="rank-section">
-            <div class="rank-number">{{ getRankText(recommendation.rank) }}</div>
-            <div 
-              class="score-badge"
-              [style.background-color]="getScoreColor(recommendation.score)">
-              {{ formatScore(recommendation.score) }}
-            </div>
-          </div>
+              <!-- Game Image -->
+              <div class="game-image-container">
+                <img 
+                  [src]="recommendation.game.coverUrl || 'https://cdn.akamai.steamstatic.com/steam/apps/' + recommendation.game.appId + '/header.jpg'"
+                  [alt]="recommendation.game.name"
+                  class="game-image"
+                  (error)="$event.target.src='https://via.placeholder.com/460x215/667eea/ffffff?text=' + encodeURIComponent(recommendation.game.name)">
+              </div>
 
-          <div class="game-section">
-            <app-game-card 
-              [game]="recommendation.game"
-              [showScore]="true"
-              [score]="recommendation.score"
-              [rank]="recommendation.rank">
-            </app-game-card>
-          </div>
+              <mat-card-content>
+                <mat-card-title class="game-title">{{ recommendation.game.name }}</mat-card-title>
+                
+                <div class="game-meta">
+                  <span class="price">
+                    <mat-icon>attach_money</mat-icon>
+                    {{ recommendation.game.price || 'Free' }}
+                  </span>
+                  <span class="score">
+                    <mat-icon>analytics</mat-icon>
+                    {{ formatScore(recommendation.score) }}
+                  </span>
+                </div>
 
-          <div class="action-section">
-            <button class="view-details-btn" type="button">
-              View Details
-            </button>
-          </div>
+                <div class="game-tags">
+                  <mat-chip-set>
+                    @for (tagData of getTopTags(recommendation.game, 3); track tagData.tag) {
+                      <mat-chip>{{ tagData.tag }}</mat-chip>
+                    }
+                  </mat-chip-set>
+                </div>
+
+                <button 
+                  mat-raised-button 
+                  color="primary"
+                  class="view-game-btn"
+                  (click)="onRecommendationClick(recommendation); $event.stopPropagation()">
+                  <mat-icon>open_in_new</mat-icon>
+                  View Game
+                </button>
+              </mat-card-content>
+            </mat-card>
+          }
         </div>
-      }
-    </div>
-
-    @if (recommendations.length > maxRecommendations) {
-      <div class="list-footer">
-        <p>Showing top {{ maxRecommendations }} of {{ recommendations.length }} recommendations</p>
       </div>
     }
-  } @else {
-    <div class="no-recommendations">
-      <h2>No Recommendations Available</h2>
-      <p>Complete some game comparisons to get personalized recommendations!</p>
+
+    <!-- Compact List for Remaining Recommendations -->
+    @if (getCompactRecommendations().length > 0) {
+      <div class="compact-section">
+        <h3 class="section-title mat-headline-6">
+          <mat-icon>list</mat-icon>
+          More Recommendations
+        </h3>
+
+        <mat-list class="compact-list">
+          @for (recommendation of getCompactRecommendations(); track trackByAppId($index + 3, recommendation)) {
+            <mat-list-item 
+              class="compact-item"
+              (click)="onRecommendationClick(recommendation)">
+              
+              <div class="compact-content">
+                <!-- Rank and Thumbnail -->
+                <div class="compact-rank">
+                  <span class="rank-number">{{ recommendation.rank }}</span>
+                </div>
+
+                <div class="compact-thumbnail">
+                  <img 
+                    [src]="recommendation.game.coverUrl || 'https://cdn.akamai.steamstatic.com/steam/apps/' + recommendation.game.appId + '/header.jpg'"
+                    [alt]="recommendation.game.name"
+                    class="thumbnail-image"
+                    (error)="$event.target.src='https://via.placeholder.com/120x67/667eea/ffffff?text=' + encodeURIComponent(recommendation.game.name.substring(0, 8))">
+                </div>
+
+                <!-- Game Info -->
+                <div class="compact-info">
+                  <h4 class="compact-title">{{ recommendation.game.name }}</h4>
+                  <div class="compact-meta">
+                    <span class="compact-price">{{ recommendation.game.price || 'Free' }}</span>
+                    <span class="compact-score">Score: {{ formatScore(recommendation.score) }}</span>
+                  </div>
+                  <div class="compact-tags">
+                    @for (tagData of getTopTags(recommendation.game, 2); track tagData.tag) {
+                      <span class="compact-tag">{{ tagData.tag }}</span>
+                    }
+                  </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="compact-action">
+                  <button 
+                    mat-icon-button 
+                    color="primary"
+                    (click)="onRecommendationClick(recommendation); $event.stopPropagation()"
+                    matTooltip="View Game">
+                    <mat-icon>open_in_new</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </mat-list-item>
+          }
+        </mat-list>
+      </div>
+    }
+
+    <!-- Stats Footer -->
+    <div class="stats-footer">
+      <p class="mat-body-2">
+        Showing {{ recommendations.length }} personalized recommendations from {{ getTotalGamesCount() }} games
+      </p>
     </div>
+
+  } @else {
+    <mat-card class="no-recommendations">
+      <mat-card-content>
+        <div class="no-recommendations-content">
+          <mat-icon class="large-icon">sentiment_very_dissatisfied</mat-icon>
+          <h2 class="mat-headline-5">No Recommendations Available</h2>
+          <p class="mat-body-1">Complete some game comparisons to get personalized recommendations!</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
   }
 </div>
