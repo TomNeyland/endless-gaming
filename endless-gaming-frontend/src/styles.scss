@@ -1,1 +1,81 @@
-/* You can add global styles to this file, and also import other style files */
+// Global styles for Endless Gaming
+
+// Import Angular Material themes
+@use '@angular/material' as mat;
+
+// Define custom color palettes for gaming theme
+$gaming-primary: mat.m2-define-palette(mat.$m2-blue-palette, 700, 500, 900);
+$gaming-accent: mat.m2-define-palette(mat.$m2-orange-palette, A200, A100, A400);
+$gaming-warn: mat.m2-define-palette(mat.$m2-red-palette);
+
+// Create dark theme
+$gaming-dark-theme: mat.m2-define-dark-theme((
+  color: (
+    primary: $gaming-primary,
+    accent: $gaming-accent,
+    warn: $gaming-warn,
+  ),
+  typography: mat.m2-define-typography-config(),
+  density: 0,
+));
+
+// Include the common styles for Angular Material
+@include mat.core();
+
+// Include Material Design theme styles
+@include mat.all-component-themes($gaming-dark-theme);
+
+// Custom gaming-specific styles
+:root {
+  --gaming-primary: #1976d2;
+  --gaming-accent: #ff9800;
+  --gaming-warn: #f44336;
+  --gaming-background: #121212;
+  --gaming-surface: #1e1e1e;
+  --gaming-text-primary: #ffffff;
+  --gaming-text-secondary: rgba(255, 255, 255, 0.7);
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  background-color: var(--gaming-background);
+  color: var(--gaming-text-primary);
+}
+
+// Global Material Design overrides for gaming aesthetic
+.mat-mdc-card {
+  background-color: var(--gaming-surface) !important;
+  color: var(--gaming-text-primary) !important;
+}
+
+.mat-mdc-progress-bar {
+  --mdc-linear-progress-track-color: rgba(255, 255, 255, 0.1);
+}
+
+// Utility classes
+.mat-elevation-z4 {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+.gaming-card {
+  background: var(--gaming-surface);
+  border-radius: 8px;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  }
+}
+
+// Preference colors for like/dislike indicators
+.preference-like {
+  --mdc-linear-progress-active-indicator-color: #4caf50;
+}
+
+.preference-dislike {
+  --mdc-linear-progress-active-indicator-color: #f44336;
+}
