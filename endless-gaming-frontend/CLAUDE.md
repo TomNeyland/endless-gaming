@@ -213,3 +213,49 @@ beforeEach(() => {
 - Mock external dependencies (HTTP, IndexedDB) consistently
 - Focus on testing user-facing behavior over implementation details
 - Validate ML algorithms with known input/output pairs
+
+## CI/CD Pipeline
+
+### GitHub Actions Workflows
+
+The frontend includes comprehensive CI/CD pipelines with multiple workflows:
+
+**Test Pipeline** (`.github/workflows/test.yml`):
+- Matrix testing across Node.js versions (18.x, 20.x)
+- Unit tests with Karma/Jasmine using ChromeHeadlessNoSandbox
+- Automatic dependency caching for faster builds
+- Test result artifacts uploaded for debugging
+
+**CI/CD Pipeline** (`.github/workflows/ci.yml`):
+- **Quality Checks**: Linting, TypeScript compilation, security audits
+- **Build Verification**: Production bundle building with size analysis
+- **Testing**: Unit tests with coverage reporting
+- **Security**: npm audit for vulnerability scanning
+- **Dependency Analysis**: Package analysis and outdated dependency detection
+- **Deployment Ready**: Status checks for production readiness
+
+### Workflow Triggers
+- **Push**: Triggers on main/master/develop branches
+- **Pull Request**: Runs on PRs to main/master
+- **Path Filtering**: Only runs when frontend files change
+- **Manual**: Can be triggered manually for testing
+
+### Key Features
+- **Node.js 20.x** as primary version with 18.x compatibility testing
+- **Chrome Headless** for reliable CI testing
+- **Bundle Analysis** with size reporting and optimization checks
+- **Artifact Storage** for test results, coverage, and build outputs
+- **Security Scanning** with npm audit integration
+- **Parallel Jobs** for faster pipeline execution
+
+### Local Development vs CI
+- **Local**: Use `npm test` for watch mode development
+- **CI**: Uses `npm test -- --code-coverage --browsers=ChromeHeadlessNoSandbox`
+- **Build**: Both use `npm run build` for production bundles
+- **Dependencies**: CI uses `npm ci` for deterministic installs
+
+### Deployment Integration
+- Pipelines include deployment-ready checks for main/master branches
+- Ready for integration with Netlify, Vercel, AWS S3, or similar platforms
+- Environment-specific configuration support planned
+- Production API endpoint configuration included
