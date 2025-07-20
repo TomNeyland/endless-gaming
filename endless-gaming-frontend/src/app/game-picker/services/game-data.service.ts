@@ -85,6 +85,20 @@ export class GameDataService {
   }
 
   /**
+   * Get games as Observable, loading from backend if needed.
+   * Returns cached data immediately if available, otherwise loads from API.
+   */
+  getGames(): Observable<GameRecord[]> {
+    // If we have cached data, return it immediately
+    if (this.isCacheValid()) {
+      return of(this.getAllGames());
+    }
+
+    // Otherwise, load from backend
+    return this.fetchFromBackend();
+  }
+
+  /**
    * Check if master data is currently cached.
    */
   isCacheValid(): boolean {
@@ -116,6 +130,24 @@ export class GameDataService {
     }
   }
 
+  /**
+   * Fetch games from backend API.
+   */
+  private fetchFromBackend(): Observable<GameRecord[]> {
+    return this.http.get<GameRecord[]>(this.API_URL).pipe(
+      tap(data => {
+        this.cacheData(data).catch(error => 
+          console.warn('Cache failed, but data loaded:', error)
+        );
+        this.populateInMemoryCache(data);
+      }),
+      catchError(error => {
+        console.error('Failed to fetch games from backend:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
   private async getCachedData(): Promise<GameRecord[] | null> {
     try {
       // In test environment, IndexedDB might not work properly, so fall back gracefully
@@ -138,21 +170,6 @@ export class GameDataService {
     }
   }
 
-  private fetchFromBackend(): Observable<GameRecord[]> {
-    return this.http.get<GameRecord[]>(this.API_URL).pipe(
-      tap(data => {
-        // Cache data asynchronously without blocking the response
-        this.cacheData(data).catch(error => 
-          console.warn('Cache failed, but data loaded:', error)
-        );
-        this.populateInMemoryCache(data);
-      }),
-      catchError(error => {
-        console.error('Backend fetch failed:', error);
-        return throwError(() => error);
-      })
-    );
-  }
 
   private async cacheData(games: GameRecord[]): Promise<void> {
     try {

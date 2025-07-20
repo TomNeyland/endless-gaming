@@ -48,12 +48,12 @@
                 <div class="tag-item disliked-tag">
                   <div class="tag-info">
                     <span class="tag-name">{{ tagData.tag }}</span>
-                    <span class="tag-weight">{{ formatWeight(Math.abs(tagData.weight)) }}</span>
+                    <span class="tag-weight">{{ formatWeight(getAbsWeight(tagData.weight)) }}</span>
                   </div>
                   <div class="weight-bar">
                     <div 
                       class="weight-fill disliked-fill" 
-                      [style.width]="getBarWidth(Math.abs(tagData.weight), getMaxWeight())">
+                      [style.width]="getBarWidth(getAbsWeight(tagData.weight), getMaxWeight())">
                     </div>
                   </div>
                 </div>

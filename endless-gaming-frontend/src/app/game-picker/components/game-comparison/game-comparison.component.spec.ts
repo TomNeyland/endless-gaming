@@ -2,10 +2,14 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { GameComparisonComponent } from './game-comparison.component';
 import { GameRecord, GamePair } from '../../../types/game.types';
+import { PairService } from '../../services/pair.service';
+import { ChoiceApiService } from '../../services/choice-api.service';
 
 describe('GameComparisonComponent', () => {
   let component: GameComparisonComponent;
   let fixture: ComponentFixture<GameComparisonComponent>;
+  let mockPairService: jasmine.SpyObj<PairService>;
+  let mockChoiceApiService: jasmine.SpyObj<ChoiceApiService>;
 
   const mockGamePair: GamePair = {
     left: {
@@ -35,43 +39,59 @@ describe('GameComparisonComponent', () => {
   };
 
   beforeEach(async () => {
+    const pairServiceSpy = jasmine.createSpyObj('PairService', ['getNextPair', 'recordChoice']);
+    const choiceApiServiceSpy = jasmine.createSpyObj('ChoiceApiService', ['queueChoice', 'stopAutoFlush']);
+    
     await TestBed.configureTestingModule({
-      imports: [GameComparisonComponent]
+      imports: [GameComparisonComponent],
+      providers: [
+        { provide: PairService, useValue: pairServiceSpy },
+        { provide: ChoiceApiService, useValue: choiceApiServiceSpy }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(GameComparisonComponent);
     component = fixture.componentInstance;
+    mockPairService = TestBed.inject(PairService) as jasmine.SpyObj<PairService>;
+    mockChoiceApiService = TestBed.inject(ChoiceApiService) as jasmine.SpyObj<ChoiceApiService>;
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('input handling', () => {
-    it('should accept null game pair initially', () => {
-      expect(component.gamePair).toBeNull();
+  describe('pair loading', () => {
+    it('should load pair from PairService on init', () => {
+      mockPairService.getNextPair.and.returnValue(mockGamePair);
+      
+      component.ngOnInit();
+      
+      expect(mockPairService.getNextPair).toHaveBeenCalled();
+      expect(component.currentPair).toBe(mockGamePair);
     });
 
-    it('should accept valid game pair', () => {
-      component.gamePair = mockGamePair;
-      expect(component.gamePair).toBe(mockGamePair);
+    it('should handle no pairs available', () => {
+      mockPairService.getNextPair.and.returnValue(null);
+      
+      component.ngOnInit();
+      
+      expect(component.currentPair).toBeNull();
+      expect(component.hasValidPair()).toBe(false);
     });
 
-    it('should handle game pair changes', () => {
-      component.gamePair = mockGamePair;
-      fixture.detectChanges();
-
-      const leftGame = fixture.debugElement.query(By.css('.left-choice h3'));
-      const rightGame = fixture.debugElement.query(By.css('.right-choice h3'));
-
-      expect(leftGame.nativeElement.textContent).toBe(mockGamePair.left.name);
-      expect(rightGame.nativeElement.textContent).toBe(mockGamePair.right.name);
+    it('should emit comparisonsComplete when no pair available', () => {
+      spyOn(component.comparisonsComplete, 'emit');
+      mockPairService.getNextPair.and.returnValue(null);
+      
+      component.ngOnInit();
+      
+      expect(component.comparisonsComplete.emit).toHaveBeenCalled();
     });
   });
 
   describe('template rendering', () => {
     it('should display comparison container when valid pair provided', () => {
-      component.gamePair = mockGamePair;
+      component.currentPair = mockGamePair;
       fixture.detectChanges();
 
       const comparisonContainer = fixture.debugElement.query(By.css('.comparison-container'));
@@ -82,7 +102,7 @@ describe('GameComparisonComponent', () => {
     });
 
     it('should display no pair message when no pair provided', () => {
-      component.gamePair = null;
+      component.currentPair = null;
       fixture.detectChanges();
 
       const comparisonContainer = fixture.debugElement.query(By.css('.comparison-container'));
@@ -94,7 +114,7 @@ describe('GameComparisonComponent', () => {
     });
 
     it('should render game names correctly', () => {
-      component.gamePair = mockGamePair;
+      component.currentPair = mockGamePair;
       fixture.detectChanges();
 
       const leftGameName = fixture.debugElement.query(By.css('.left-choice h3'));
@@ -105,7 +125,7 @@ describe('GameComparisonComponent', () => {
     });
 
     it('should render all choice buttons', () => {
-      component.gamePair = mockGamePair;
+      component.currentPair = mockGamePair;
       fixture.detectChanges();
 
       const leftButton = fixture.debugElement.query(By.css('.left-btn'));
@@ -122,7 +142,7 @@ describe('GameComparisonComponent', () => {
     });
 
     it('should render VS section', () => {
-      component.gamePair = mockGamePair;
+      component.currentPair = mockGamePair;
       fixture.detectChanges();
 
       const vsSection = fixture.debugElement.query(By.css('.vs-section'));
@@ -136,18 +156,54 @@ describe('GameComparisonComponent', () => {
 
   describe('user interactions', () => {
     beforeEach(() => {
-      component.gamePair = mockGamePair;
+      component.currentPair = mockGamePair;
       fixture.detectChanges();
     });
 
-    it('should emit choice when left button clicked', () => {
+    it('should record choice and emit event when left button clicked', () => {
       spyOn(component.choiceMade, 'emit');
-      spyOn(component, 'selectLeft').and.callThrough();
+      mockPairService.getNextPair.and.returnValue(null); // No next pair
+      
+      component.selectLeft();
+      
+      expect(mockPairService.recordChoice).toHaveBeenCalledWith(
+        mockGamePair.left, 
+        mockGamePair.right, 
+        'left'
+      );
+      expect(mockChoiceApiService.queueChoice).toHaveBeenCalled();
+      expect(component.choiceMade.emit).toHaveBeenCalledWith({
+        leftGame: mockGamePair.left,
+        rightGame: mockGamePair.right,
+        pick: 'left'
+      });
+    });
 
-      const leftButton = fixture.debugElement.query(By.css('.left-btn'));
-      leftButton.nativeElement.click();
+    it('should record choice when right button clicked', () => {
+      spyOn(component.choiceMade, 'emit');
+      mockPairService.getNextPair.and.returnValue(null);
+      
+      component.selectRight();
+      
+      expect(mockPairService.recordChoice).toHaveBeenCalledWith(
+        mockGamePair.left, 
+        mockGamePair.right, 
+        'right'
+      );
+    });
 
-      expect(component.selectLeft).toHaveBeenCalled();
+    it('should record choice when skip button clicked', () => {
+      spyOn(component.choiceMade, 'emit');
+      mockPairService.getNextPair.and.returnValue(null);
+      
+      component.skip();
+      
+      expect(mockPairService.recordChoice).toHaveBeenCalledWith(
+        mockGamePair.left, 
+        mockGamePair.right, 
+        'skip'
+      );
+
     });
 
     it('should emit choice when right button clicked', () => {
@@ -171,7 +227,7 @@ describe('GameComparisonComponent', () => {
     });
 
     it('should handle button clicks when no pair available', () => {
-      component.gamePair = null;
+      component.currentPair = null;
       fixture.detectChanges();
 
       const buttons = fixture.debugElement.queryAll(By.css('button'));
@@ -205,7 +261,7 @@ describe('GameComparisonComponent', () => {
 
     it('should emit with correct event structure', () => {
       spyOn(component.choiceMade, 'emit');
-      component.gamePair = mockGamePair;
+      component.currentPair = mockGamePair;
 
       // Simulate method implementation for testing
       component.selectLeft = jasmine.createSpy().and.callFake(() => {
@@ -228,7 +284,7 @@ describe('GameComparisonComponent', () => {
 
   describe('responsive layout', () => {
     beforeEach(() => {
-      component.gamePair = mockGamePair;
+      component.currentPair = mockGamePair;
       fixture.detectChanges();
     });
 
@@ -262,7 +318,7 @@ describe('GameComparisonComponent', () => {
 
   describe('accessibility', () => {
     beforeEach(() => {
-      component.gamePair = mockGamePair;
+      component.currentPair = mockGamePair;
       fixture.detectChanges();
     });
 
@@ -297,7 +353,7 @@ describe('GameComparisonComponent', () => {
 
   describe('edge cases', () => {
     it('should handle undefined game pair', () => {
-      component.gamePair = undefined as any;
+      component.currentPair = null;
       fixture.detectChanges();
 
       const noPairMessage = fixture.debugElement.query(By.css('.no-pair-message'));
@@ -332,7 +388,7 @@ describe('GameComparisonComponent', () => {
         }
       };
 
-      component.gamePair = incompleteGamePair;
+      component.currentPair = incompleteGamePair;
       fixture.detectChanges();
 
       const leftGameName = fixture.debugElement.query(By.css('.left-choice h3'));
@@ -354,7 +410,7 @@ describe('GameComparisonComponent', () => {
         }
       };
 
-      component.gamePair = longNameGamePair;
+      component.currentPair = longNameGamePair;
       fixture.detectChanges();
 
       const leftGameName = fixture.debugElement.query(By.css('.left-choice h3'));

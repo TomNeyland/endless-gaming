@@ -18,7 +18,7 @@ export class ChoiceApiService {
   
   private readonly QUEUE_STORAGE_KEY = 'choice_queue';
   private readonly USER_ID_STORAGE_KEY = 'user_id';
-  private readonly API_URL = '/api/discovery/choices';
+  private readonly API_URL = '/discovery/choices';
   private readonly FLUSH_INTERVAL = 30000; // 30 seconds
   
   private choiceQueue: ChoiceEvent[] = [];
@@ -35,11 +35,10 @@ export class ChoiceApiService {
    * Stores in local queue for offline support.
    */
   queueChoice(choice: ChoiceEvent): void {
-    // Add user ID and ensure timestamp
+    // Ensure timestamp is set per backend contract
     const enrichedChoice: ChoiceEvent = {
       ...choice,
-      userId: this.getUserId(),
-      timestamp: choice.timestamp || Date.now()
+      ts: choice.ts || Date.now()
     };
     
     this.choiceQueue.push(enrichedChoice);

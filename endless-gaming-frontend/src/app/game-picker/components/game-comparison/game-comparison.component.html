@@ -1,38 +1,45 @@
 <div class="game-comparison">
   @if (hasValidPair()) {
     <div class="comparison-container">
-      <div class="game-choice left-choice">
-        <!-- Game card component will go here -->
-        <div class="placeholder-card">
-          <h3>{{ gamePair?.left.name }}</h3>
-          <p>Left Game Placeholder</p>
-        </div>
-        <button (click)="selectLeft()" class="choice-btn left-btn">
-          Choose This Game
+      <div class="game-section left-game">
+        <app-game-card 
+          [game]="getLeftGame()!" 
+          [highlightOnHover]="true">
+        </app-game-card>
+        <button 
+          class="choice-btn prefer-btn" 
+          (click)="selectLeft()"
+          [disabled]="isLoading">
+          I Prefer This Game
         </button>
       </div>
 
       <div class="vs-section">
         <div class="vs-text">VS</div>
-        <button (click)="skip()" class="skip-btn">
+        <button 
+          class="choice-btn skip-btn" 
+          (click)="skip()"
+          [disabled]="isLoading">
           Skip Both
         </button>
       </div>
 
-      <div class="game-choice right-choice">
-        <!-- Game card component will go here -->
-        <div class="placeholder-card">
-          <h3>{{ gamePair?.right.name }}</h3>
-          <p>Right Game Placeholder</p>
-        </div>
-        <button (click)="selectRight()" class="choice-btn right-btn">
-          Choose This Game
+      <div class="game-section right-game">
+        <app-game-card 
+          [game]="getRightGame()!" 
+          [highlightOnHover]="true">
+        </app-game-card>
+        <button 
+          class="choice-btn prefer-btn" 
+          (click)="selectRight()"
+          [disabled]="isLoading">
+          I Prefer This Game
         </button>
       </div>
     </div>
   } @else {
-    <div class="no-pair-message">
-      <p>No game pair available for comparison.</p>
+    <div class="no-pairs">
+      <h3>No more game pairs available</h3>
+      <p>Generating your recommendations...</p>
     </div>
   }
-</div>

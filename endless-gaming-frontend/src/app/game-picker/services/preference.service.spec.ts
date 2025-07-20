@@ -6,20 +6,14 @@ describe('PreferenceService', () => {
   let service: PreferenceService;
 
   const mockTagDict: TagDictionary = {
-    tagToIndex: new Map([
-      ['FPS', 0],
-      ['Shooter', 1],
-      ['Multiplayer', 2],
-      ['MOBA', 3],
-      ['Strategy', 4]
-    ]),
-    indexToTag: new Map([
-      [0, 'FPS'],
-      [1, 'Shooter'],
-      [2, 'Multiplayer'],
-      [3, 'MOBA'],
-      [4, 'Strategy']
-    ]),
+    tagToIndex: {
+      'FPS': 0,
+      'Shooter': 1,
+      'Multiplayer': 2,
+      'MOBA': 3,
+      'Strategy': 4
+    },
+    indexToTag: ['FPS', 'Shooter', 'Multiplayer', 'MOBA', 'Strategy'],
     size: 5
   };
 
@@ -126,14 +120,15 @@ describe('PreferenceService', () => {
       expect(service.getComparisonCount()).toBe(5);
     });
 
-    it('should update lastUpdated timestamp', () => {
-      const beforeTime = Date.now();
+    it('should track comparison count', () => {
+      service.initializeModel(mockTagDict);
+      expect(service.getComparisonCount()).toBe(0);
+      
       service.updatePreferences(mockGames[0], mockGames[1]);
-      const afterTime = Date.now();
+      expect(service.getComparisonCount()).toBe(1);
       
       const state = service.getPreferenceState();
-      expect(state.lastUpdated).toBeGreaterThanOrEqual(beforeTime);
-      expect(state.lastUpdated).toBeLessThanOrEqual(afterTime);
+      expect(state.comparisonCount).toBe(1);
     });
   });
 
@@ -338,9 +333,9 @@ describe('PreferenceService', () => {
 
     it('should handle invalid state gracefully', () => {
       const invalidState: UserPreferenceState = {
-        weightVector: new Float32Array([1, 2]), // Wrong size
+        weightVector: [1, 2], // Wrong size
         comparisonCount: -1, // Invalid count
-        lastUpdated: 0
+        tagDict: null
       };
       
       expect(() => service.loadPreferenceState(invalidState)).not.toThrow();

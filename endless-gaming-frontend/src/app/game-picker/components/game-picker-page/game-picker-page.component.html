@@ -4,25 +4,49 @@
     <div class="loading-state">
       <h1>Loading Games...</h1>
       <div class="spinner"></div>
+      <p>Preparing your personalized game discovery experience...</p>
     </div>
   }
 
   <!-- Comparison State -->
   @if (state() === 'comparing') {
     <div class="comparison-state">
-      <h1>Find Your Perfect Games</h1>
-      <!-- Progress component will go here -->
-      <!-- Preference summary will go here -->
-      <!-- Game comparison will go here -->
+      <div class="header">
+        <h1>Find Your Perfect Games</h1>
+        <p>Choose the game you prefer or skip if neither appeals to you</p>
+      </div>
+
+      <div class="content">
+        <div class="sidebar">
+          <app-progress-bar></app-progress-bar>
+          <app-preference-summary></app-preference-summary>
+        </div>
+
+        <div class="main-content">
+          <app-game-comparison 
+            (choiceMade)="onChoiceMade($event)"
+            (comparisonsComplete)="onComparisonsComplete()">
+          </app-game-comparison>
+        </div>
+      </div>
     </div>
   }
 
   <!-- Recommendations State -->
   @if (state() === 'recommendations') {
     <div class="recommendations-state">
-      <h1>Your Personalized Game Recommendations</h1>
-      <!-- Recommendation list will go here -->
-      <button (click)="resetGamePicker()" class="restart-btn">Start Over</button>
+      <div class="header">
+        <h1>Your Personalized Game Recommendations</h1>
+        <p>Based on your preferences, here are games you might love</p>
+      </div>
+
+      <app-recommendation-list [games]="getGames()"></app-recommendation-list>
+      
+      <div class="actions">
+        <button (click)="resetGamePicker()" class="restart-btn">
+          Start Over
+        </button>
+      </div>
     </div>
   }
 
@@ -30,8 +54,9 @@
   @if (state() === 'error') {
     <div class="error-state">
       <h1>Something went wrong</h1>
-      <p>Unable to load game data. Please try again.</p>
-      <button (click)="startGamePicker()" class="retry-btn">Retry</button>
+      <p>{{ getErrorMessage() }}</p>
+      <button (click)="startGamePicker()" class="retry-btn">
+        Try Again
+      </button>
     </div>
   }
-</div>

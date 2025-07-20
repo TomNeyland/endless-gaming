@@ -1,6 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PreferenceSummary } from '../../../types/game.types';
+import { PreferenceService } from '../../services/preference.service';
+import { Subscription } from 'rxjs';
 
 /**
  * Component for displaying real-time user preference summary.
@@ -15,54 +17,82 @@ import { PreferenceSummary } from '../../../types/game.types';
   templateUrl: './preference-summary.component.html',
   styleUrl: './preference-summary.component.scss'
 })
-export class PreferenceSummaryComponent {
+export class PreferenceSummaryComponent implements OnInit, OnDestroy {
+  private preferenceService = inject(PreferenceService);
+  private subscription?: Subscription;
   
-  @Input() preferenceSummary: PreferenceSummary | null = null;
-  @Input() maxTags: number = 5;
+  preferenceSummary: PreferenceSummary = { likedTags: [], dislikedTags: [] };
+  maxTags: number = 5;
 
-  constructor() {
-    throw new Error('Not implemented');
+  ngOnInit(): void {
+    this.subscription = this.preferenceService.getPreferenceSummary().subscribe(
+      summary => this.preferenceSummary = summary
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
   }
 
   /**
    * Check if preference data is available.
    */
   hasPreferences(): boolean {
-    throw new Error('Not implemented');
+    return this.preferenceSummary.likedTags.length > 0 || 
+           this.preferenceSummary.dislikedTags.length > 0;
   }
 
   /**
    * Get liked tags for display.
    */
   getLikedTags(): Array<{tag: string, weight: number}> {
-    throw new Error('Not implemented');
+    return this.preferenceSummary.likedTags.slice(0, this.maxTags);
   }
 
   /**
    * Get disliked tags for display.
    */
   getDislikedTags(): Array<{tag: string, weight: number}> {
-    throw new Error('Not implemented');
+    return this.preferenceSummary.dislikedTags.slice(0, this.maxTags);
   }
 
   /**
    * Format weight as percentage.
    */
   formatWeight(weight: number): string {
-    throw new Error('Not implemented');
+    return `${Math.round(weight * 100)}%`;
   }
 
   /**
    * Get visual bar width for weight.
    */
   getBarWidth(weight: number, maxWeight: number): string {
-    throw new Error('Not implemented');
+    if (maxWeight === 0) return '0%';
+    const percentage = Math.min(100, (weight / maxWeight) * 100);
+    return `${percentage}%`;
   }
 
   /**
    * Get maximum weight for scaling.
    */
   getMaxWeight(): number {
-    throw new Error('Not implemented');
+    const likedWeights = this.preferenceSummary.likedTags.map(t => t.weight);
+    const dislikedWeights = this.preferenceSummary.dislikedTags.map(t => t.weight);
+    const allWeights = [...likedWeights, ...dislikedWeights];
+    return Math.max(...allWeights, 1); // Minimum 1 to avoid division by zero
+  }
+
+  /**
+   * Get number of comparisons made.
+   */
+  getComparisonCount(): number {
+    return this.preferenceService.getComparisonCount();
+  }
+
+  /**
+   * Get absolute value of weight for display.
+   */
+  getAbsWeight(weight: number): number {
+    return Math.abs(weight);
   }
 }

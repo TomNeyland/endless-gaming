@@ -140,7 +140,7 @@ describe('PreferenceSummaryComponent', () => {
 
   describe('template rendering without preferences', () => {
     beforeEach(() => {
-      component.preferenceSummary = null;
+      component.preferenceSummary = { likedTags: [], dislikedTags: [] };
       fixture.detectChanges();
     });
 

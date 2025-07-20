@@ -58,13 +58,13 @@ describe('VectorService', () => {
       const tagDict = service.buildTagDictionary(mockGames);
       
       expect(tagDict.size).toBe(6); // FPS, Shooter, Multiplayer, MOBA, Strategy, Team-based
-      expect(tagDict.tagToIndex.has('FPS')).toBe(true);
-      expect(tagDict.tagToIndex.has('MOBA')).toBe(true);
-      expect(tagDict.tagToIndex.has('Shooter')).toBe(true);
+      expect(tagDict.tagToIndex['FPS']).toBeDefined();
+      expect(tagDict.tagToIndex['MOBA']).toBeDefined();
+      expect(tagDict.tagToIndex['Shooter']).toBeDefined();
       
       // Check bidirectional mapping
-      const fpsIndex = tagDict.tagToIndex.get('FPS')!;
-      expect(tagDict.indexToTag.get(fpsIndex)).toBe('FPS');
+      const fpsIndex = tagDict.tagToIndex['FPS'];
+      expect(tagDict.indexToTag[fpsIndex]).toBe('FPS');
     });
 
     it('should handle games with no tags', () => {
@@ -81,7 +81,7 @@ describe('VectorService', () => {
 
     it('should create sequential indices', () => {
       const tagDict = service.buildTagDictionary(mockGames);
-      const indices = Array.from(tagDict.tagToIndex.values()).sort();
+      const indices = Object.values(tagDict.tagToIndex).sort();
       
       // Should be sequential starting from 0
       for (let i = 0; i < indices.length; i++) {
@@ -92,8 +92,8 @@ describe('VectorService', () => {
     it('should handle empty game list', () => {
       const tagDict = service.buildTagDictionary([]);
       expect(tagDict.size).toBe(0);
-      expect(tagDict.tagToIndex.size).toBe(0);
-      expect(tagDict.indexToTag.size).toBe(0);
+      expect(Object.keys(tagDict.tagToIndex).length).toBe(0);
+      expect(tagDict.indexToTag.length).toBe(0);
     });
   });
 
@@ -191,7 +191,8 @@ describe('VectorService', () => {
     it('should calculate dot product correctly', () => {
       const sparseVec: SparseVector = {
         indices: new Uint16Array([0, 2, 4]),
-        values: new Float32Array([0.5, 0.8, 0.3])
+        values: new Float32Array([0.5, 0.8, 0.3]),
+        size: 5
       };
       const denseVec = new Float32Array([1.0, 0.0, 2.0, 0.0, 4.0]);
       
@@ -203,7 +204,8 @@ describe('VectorService', () => {
     it('should handle empty sparse vector', () => {
       const sparseVec: SparseVector = {
         indices: new Uint16Array([]),
-        values: new Float32Array([])
+        values: new Float32Array([]),
+        size: 3
       };
       const denseVec = new Float32Array([1.0, 2.0, 3.0]);
       
@@ -214,7 +216,8 @@ describe('VectorService', () => {
     it('should handle single element vectors', () => {
       const sparseVec: SparseVector = {
         indices: new Uint16Array([1]),
-        values: new Float32Array([0.7])
+        values: new Float32Array([0.7]),
+        size: 3
       };
       const denseVec = new Float32Array([0.0, 3.0, 0.0]);
       

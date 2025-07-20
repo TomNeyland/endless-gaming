@@ -1,65 +1,57 @@
-<div class="game-card" *ngIf="hasValidGame()">
-  <div class="card-header">
-    @if (showScore && rank) {
-      <div class="rank-badge">#{{ rank }}</div>
-    }
-    <div class="game-cover">
-      @if (game?.coverUrl) {
-        <img [src]="game.coverUrl" [alt]="game.name" class="cover-image" />
-      } @else {
-        <div class="cover-placeholder">
-          <span>{{ game?.name?.charAt(0) || '?' }}</span>
-        </div>
-      }
-    </div>
-  </div>
-
-  <div class="card-content">
-    <h3 class="game-title">{{ game?.name }}</h3>
-    
-    <div class="game-price">
-      {{ getFormattedPrice() }}
-    </div>
-
-    <div class="game-developer">
-      {{ getDeveloperText() }}
-    </div>
-
-    @if (showScore && score !== undefined) {
-      <div class="preference-score">
-        Score: {{ score | number:'1.2-2' }}
-      </div>
-    }
-
-    <div class="game-tags">
-      @for (tag of getTopTags(); track tag.tag) {
-        <span class="tag-chip">{{ tag.tag }}</span>
-      }
-    </div>
-
-    <div class="game-reviews">
-      <div class="review-summary">
-        {{ getReviewText() }}
-      </div>
-      @if (getReviewPercentage() !== null) {
-        <div class="review-percentage">
-          {{ getReviewPercentage() }}% positive
-        </div>
-      }
-    </div>
-
-    @if (game?.genres && game.genres.length > 0) {
-      <div class="game-genres">
-        @for (genre of game.genres; track genre) {
-          <span class="genre-badge">{{ genre }}</span>
+<div class="game-card" 
+     [class.highlight-hover]="highlightOnHover"
+     [class.has-score]="showScore">
+  
+  @if (hasValidGame()) {
+    <div class="card-content">
+      <!-- Cover Image -->
+      <div class="cover-section">
+        <img 
+          [src]="getCoverImage()" 
+          [alt]="game!.name"
+          (error)="onImageError($event)"
+          class="cover-image">
+        
+        <!-- Rank badge for recommendations -->
+        @if (showScore && rank) {
+          <div class="rank-badge">
+            #{{ rank }}
+          </div>
         }
       </div>
-    }
-  </div>
-</div>
 
-<div class="game-card-placeholder" *ngIf="!hasValidGame()">
-  <div class="placeholder-content">
-    <p>No game data available</p>
-  </div>
+      <!-- Game Info -->
+      <div class="info-section">
+        <h3 class="game-title">{{ game!.name }}</h3>
+        
+        <div class="metadata">
+          <div class="price">{{ getFormattedPrice() }}</div>
+          <div class="genre">{{ getPrimaryGenre() }}</div>
+        </div>
+
+        <div class="developer">{{ getDeveloperText() }}</div>
+
+        <!-- Tags -->
+        <div class="tags">
+          @for (tagData of getTopTags(3); track tagData.tag) {
+            <span class="tag">{{ tagData.tag }}</span>
+          }
+        </div>
+
+        <!-- Reviews -->
+        <div class="reviews">{{ getReviewText() }}</div>
+
+        <!-- Score for recommendations -->
+        @if (showScore && score !== undefined) {
+          <div class="score">
+            Score: {{ getFormattedScore() }}
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="empty-card">
+      <p>No game data available</p>
+    </div>
+  }
 </div>

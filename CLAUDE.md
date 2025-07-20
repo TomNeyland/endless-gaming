@@ -452,3 +452,12 @@ master.json (≈500KB) → IndexedDB → Sparse Vectors → Preference Model →
 - **Dexie.js** - IndexedDB wrapper for offline data storage
 - **fastpriorityqueue** - Efficient top-K game ranking
 - **vectorious** - Typed-array vector operations for ML
+```
+
+## Testing and Test Updates
+
+- Updating tests is acceptable if the updates still reflect testing the core implementation
+- Tests should evolve with the implementation to maintain meaningful test coverage
+- Focus on avoiding trivial tests that only serve to pass but do not provide substantive validation
+- When updating tests, ensure they continue to verify critical functionality and edge cases
+- Prioritize tests that validate the actual behavior and requirements of the component or feature

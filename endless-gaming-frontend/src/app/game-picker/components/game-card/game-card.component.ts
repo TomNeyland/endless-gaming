@@ -21,50 +21,126 @@ export class GameCardComponent {
   @Input() showScore = false;
   @Input() score?: number;
   @Input() rank?: number;
-
-  constructor() {
-    throw new Error('Not implemented');
-  }
+  @Input() highlightOnHover = false;
 
   /**
    * Get formatted price display.
    */
   getFormattedPrice(): string {
-    throw new Error('Not implemented');
+    if (!this.game?.price) {
+      return 'Price unavailable';
+    }
+    
+    if (this.game.price === 'Free') {
+      return 'Free';
+    }
+    
+    // Price should already be formatted from backend (e.g., "19.99")
+    return `$${this.game.price}`;
   }
 
   /**
    * Get top tags for display.
    */
   getTopTags(maxTags: number = 5): Array<{tag: string, votes: number}> {
-    throw new Error('Not implemented');
+    if (!this.game?.tags) {
+      return [];
+    }
+
+    return Object.entries(this.game.tags)
+      .map(([tag, votes]) => ({ tag, votes }))
+      .sort((a, b) => b.votes - a.votes)
+      .slice(0, maxTags);
   }
 
   /**
    * Calculate review percentage.
    */
   getReviewPercentage(): number | null {
-    throw new Error('Not implemented');
+    if (!this.game?.reviewPos || !this.game?.reviewNeg) {
+      return null;
+    }
+
+    const total = this.game.reviewPos + this.game.reviewNeg;
+    if (total === 0) {
+      return null;
+    }
+
+    return Math.round((this.game.reviewPos / total) * 100);
   }
 
   /**
    * Get review display text.
    */
   getReviewText(): string {
-    throw new Error('Not implemented');
+    const percentage = this.getReviewPercentage();
+    
+    if (percentage === null) {
+      return 'No reviews';
+    }
+
+    const total = (this.game?.reviewPos || 0) + (this.game?.reviewNeg || 0);
+    return `${percentage}% positive (${total.toLocaleString()} reviews)`;
   }
 
   /**
    * Check if game data is valid.
    */
   hasValidGame(): boolean {
-    throw new Error('Not implemented');
+    return this.game !== null && !!this.game.name;
   }
 
   /**
    * Get developer/publisher display text.
    */
   getDeveloperText(): string {
-    throw new Error('Not implemented');
+    if (!this.game) {
+      return 'Unknown';
+    }
+
+    const dev = this.game.developer;
+    const pub = this.game.publisher;
+
+    if (dev && pub && dev !== pub) {
+      return `${dev} / ${pub}`;
+    }
+    
+    return dev || pub || 'Unknown';
+  }
+
+  /**
+   * Get formatted score for display.
+   */
+  getFormattedScore(): string {
+    if (this.score === undefined) {
+      return '';
+    }
+    
+    return this.score.toFixed(2);
+  }
+
+  /**
+   * Get the primary genre.
+   */
+  getPrimaryGenre(): string {
+    if (!this.game?.genres || this.game.genres.length === 0) {
+      return 'Unclassified';
+    }
+    
+    return this.game.genres[0];
+  }
+
+  /**
+   * Get cover image URL with fallback.
+   */
+  getCoverImage(): string {
+    return this.game?.coverUrl || '/assets/images/game-placeholder.png';
+  }
+
+  /**
+   * Handle image load errors.
+   */
+  onImageError(event: any): void {
+    event.target.src = '/assets/images/game-placeholder.png';
   }
 }

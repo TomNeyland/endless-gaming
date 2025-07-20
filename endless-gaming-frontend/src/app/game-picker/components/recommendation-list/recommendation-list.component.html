@@ -22,23 +22,12 @@
           </div>
 
           <div class="game-section">
-            <!-- Game card component will go here -->
-            <div class="placeholder-game-info">
-              <h3 class="game-name">{{ recommendation.game.name }}</h3>
-              <div class="game-meta">
-                <span class="game-price">{{ recommendation.game.price || 'Price not available' }}</span>
-                @if (recommendation.game.developer) {
-                  <span class="game-developer">by {{ recommendation.game.developer }}</span>
-                }
-              </div>
-              <div class="game-tags-preview">
-                @if (recommendation.game.tags && Object.keys(recommendation.game.tags).length > 0) {
-                  @for (tag of Object.keys(recommendation.game.tags).slice(0, 3); track tag) {
-                    <span class="tag-preview">{{ tag }}</span>
-                  }
-                }
-              </div>
-            </div>
+            <app-game-card 
+              [game]="recommendation.game"
+              [showScore]="true"
+              [score]="recommendation.score"
+              [rank]="recommendation.rank">
+            </app-game-card>
           </div>
 
           <div class="action-section">
