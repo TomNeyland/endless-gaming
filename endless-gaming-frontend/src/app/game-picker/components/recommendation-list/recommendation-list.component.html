@@ -30,7 +30,7 @@
                   [src]="recommendation.game.coverUrl || 'https://cdn.akamai.steamstatic.com/steam/apps/' + recommendation.game.appId + '/header.jpg'"
                   [alt]="recommendation.game.name"
                   class="game-image"
-                  (error)="$event.target.src='https://via.placeholder.com/460x215/667eea/ffffff?text=' + encodeURIComponent(recommendation.game.name)">
+                  (error)="$event.target.src='https://via.placeholder.com/460x215/667eea/ffffff?text=Game'">
               </div>
 
               <mat-card-content>
@@ -95,7 +95,7 @@
                     [src]="recommendation.game.coverUrl || 'https://cdn.akamai.steamstatic.com/steam/apps/' + recommendation.game.appId + '/header.jpg'"
                     [alt]="recommendation.game.name"
                     class="thumbnail-image"
-                    (error)="$event.target.src='https://via.placeholder.com/120x67/667eea/ffffff?text=' + encodeURIComponent(recommendation.game.name.substring(0, 8))">
+                    (error)="$event.target.src='https://via.placeholder.com/120x67/667eea/ffffff?text=Game'">
                 </div>
 
                 <!-- Game Info -->

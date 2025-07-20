@@ -6,9 +6,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { GameRecommendation, GameRecord } from '../../../types/game.types';
 import { PreferenceService } from '../../services/preference.service';
-import { GameCardComponent } from '../game-card/game-card.component';
 
 /**
  * Component for displaying the final ranked list of game recommendations.
@@ -27,7 +27,7 @@ import { GameCardComponent } from '../game-card/game-card.component';
     MatListModule,
     MatChipsModule,
     MatBadgeModule,
-    GameCardComponent
+    MatTooltipModule
   ],
   templateUrl: './recommendation-list.component.html',
   styleUrl: './recommendation-list.component.scss'
@@ -189,6 +189,13 @@ export class RecommendationListComponent implements OnInit {
   getRecommendationPercentage(): number {
     if (this.games.length === 0) return 0;
     return Math.round((this.recommendations.length / this.games.length) * 100);
+  }
+
+  /**
+   * Encode URI component for safe URL usage in templates.
+   */
+  encodeURIComponent(str: string): string {
+    return encodeURIComponent(str);
   }
 
   /**
