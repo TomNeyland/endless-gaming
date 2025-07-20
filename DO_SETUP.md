@@ -7,9 +7,20 @@ This guide covers deploying the endless-gaming data collection system to Digital
 DigitalOcean App Platform provides a serverless platform-as-a-service that can automatically scale your application and manage databases. This setup will deploy the Steam game data collection system with:
 
 - **Automated PostgreSQL database** - Managed database with backups
-- **Serverless Python application** - Auto-scaling data collection service
+- **Scheduled data collection** - Daily cron jobs for automated data updates
 - **Git-based deployments** - Auto-deploy from GitHub on push
 - **Environment management** - Separate staging/production environments
+
+## Build Process
+
+DigitalOcean App Platform builds your application using **Cloud Native Buildpacks**, not your local Dockerfile. The build process:
+
+1. **Detects Python** from `pyproject.toml` and `poetry.lock`
+2. **Installs Poetry** via the build command in app spec
+3. **Installs dependencies** using `poetry install --only=main`
+4. **Creates optimized image** for production deployment
+
+This means your `Dockerfile` is ignored - the platform handles containerization automatically.
 
 ## Prerequisites
 
@@ -83,11 +94,26 @@ Once connected, DigitalOcean can access your GitHub repositories.
 
 The `.do/app.yaml` file defines your entire application infrastructure. Here's what it configures:
 
-- **Python service** running the data collection CLI
+- **Scheduled cron jobs** for automated data collection
 - **PostgreSQL database** for storing game data
 - **Environment variables** for configuration
 - **Auto-deployment** from GitHub
-- **Health checks** and scaling rules
+- **Pre-deploy database setup** jobs
+
+### Scheduled Data Collection
+
+The app uses **cron jobs** instead of long-running services:
+
+**Development (app.yaml):**
+- `daily-data-collection`: Runs at 6 AM UTC daily, collects 15 pages (~15,000 games)
+- `database-setup`: Runs before each deployment to ensure DB is ready
+
+**Production (app-production.yaml):**
+- `daily-full-collection`: Runs at 2 AM UTC daily, collects 30 pages (~30,000 games)
+- `weekly-maintenance`: Runs weekly to check database status
+- `database-setup`: Pre-deploy database initialization
+
+This approach is more cost-effective than running 24/7 services.
 
 ### Environment Variables
 
@@ -187,28 +213,48 @@ Update environment variables without redeployment:
 doctl apps update <APP_ID> --spec .do/app.yaml
 ```
 
-## Running Data Collection
+## Managing Scheduled Jobs
 
-### Manual Collection
-
-Once deployed, trigger data collection:
+### Monitor Cron Jobs
 
 ```bash
-# Check app status
-doctl apps get <APP_ID>
+# List all jobs for your app
+doctl apps list-deployments <APP_ID>
 
-# View recent logs
-doctl apps logs <APP_ID> --type run
+# View cron job logs
+doctl apps logs <APP_ID> --type job
 
-# The app runs automatically based on the configuration
+# Check specific job logs
+doctl apps logs <APP_ID> --type job --deployment <DEPLOYMENT_ID>
 ```
 
-### Scheduled Collection
+### Manual Data Collection
 
-The app can be configured to run data collection on a schedule by:
-1. Using DigitalOcean Functions for cron-like scheduling
-2. Implementing internal scheduling in the Python application
-3. Using GitHub Actions to trigger deployments
+Trigger one-off data collection manually:
+
+```bash
+# Create a manual job (requires app spec modification)
+doctl apps update <APP_ID> --spec .do/app.yaml
+
+# Monitor the job execution
+doctl apps logs <APP_ID> --type job --follow
+```
+
+### Cron Schedule Examples
+
+```bash
+# Every day at 6 AM UTC
+schedule: "0 6 * * *"
+
+# Every 12 hours
+schedule: "0 */12 * * *"
+
+# Every Sunday at 1 AM UTC
+schedule: "0 1 * * 0"
+
+# Every hour (not recommended for rate-limited APIs)
+schedule: "0 * * * *"
+```
 
 ## Cost Optimization
 
