@@ -27,6 +27,7 @@ export class PairService {
   private readonly TARGET_COMPARISONS = 20;
   private readonly MIN_UNCERTAINTY = 0.1; // Minimum uncertainty threshold
   private readonly DIVERSITY_WINDOW = 5; // Recent pairs to check for diversity
+  private infiniteMode = false; // Enable infinite voting beyond target
 
   /**
    * Get the next pair of games for comparison.
@@ -52,6 +53,13 @@ export class PairService {
 
     // Preference-guided sampling phase (comparisons 4+)
     console.log('🎲 PairService: Preference-guided sampling phase');
+    
+    // In infinite mode with many comparisons, focus on top games
+    if (this.infiniteMode && this.choiceHistory.length >= this.TARGET_COMPARISONS) {
+      console.log('🎲 PairService: Infinite mode - focusing on top games');
+      return this.getTopGamesPair();
+    }
+    
     return this.getPreferenceGuidedPair();
   }
 
@@ -90,6 +98,7 @@ export class PairService {
     console.log('🎲 PairService: games.length =', this.games.length);
     console.log('🎲 PairService: choiceHistory.length =', this.choiceHistory.length);
     console.log('🎲 PairService: TARGET_COMPARISONS =', this.TARGET_COMPARISONS);
+    console.log('🎲 PairService: infiniteMode =', this.infiniteMode);
     console.log('🎲 PairService: usedPairs.size =', this.usedPairs.size);
     
     if (this.games.length < 2) {
@@ -97,7 +106,13 @@ export class PairService {
       return false;
     }
     
-    // If we've reached the target number of comparisons, no more pairs
+    // In infinite mode, always allow more comparisons (for continuous voting)
+    if (this.infiniteMode) {
+      console.log('🎲 PairService: hasMorePairs = true (infinite mode)');
+      return true;
+    }
+    
+    // Normal mode: check target comparisons
     if (this.choiceHistory.length >= this.TARGET_COMPARISONS) {
       console.log('🎲 PairService: hasMorePairs = false (reached target)');
       return false;
@@ -404,5 +419,88 @@ export class PairService {
     return candidates.filter(candidate => 
       !recentPairs.some(recent => this.isPairSame(candidate, recent))
     );
+  }
+
+  /**
+   * Enable infinite voting mode for continuous preference refinement.
+   * Used by voting bottom sheet component.
+   */
+  enableInfiniteMode(): void {
+    console.log('🎲 PairService: Enabling infinite mode');
+    this.infiniteMode = true;
+  }
+
+  /**
+   * Disable infinite voting mode and return to normal target-based mode.
+   */
+  disableInfiniteMode(): void {
+    console.log('🎲 PairService: Disabling infinite mode');
+    this.infiniteMode = false;
+  }
+
+  /**
+   * Check if infinite mode is currently enabled.
+   */
+  isInfiniteMode(): boolean {
+    return this.infiniteMode;
+  }
+
+  /**
+   * Get pairs focused on top-ranked games for refinement.
+   * Used in infinite mode to prioritize uncertain pairs among high-scoring games.
+   */
+  getTopGamesPair(topPercentile: number = 0.3): GamePair | null {
+    if (this.games.length < 2) {
+      return null;
+    }
+
+    // Get top games by current preference score
+    const topGames = this.getHighPreferenceGames(topPercentile);
+    if (topGames.length < 2) {
+      // Not enough top games, fall back to regular pairing
+      return this.getPreferenceGuidedPair();
+    }
+
+    let bestPair: GamePair | null = null;
+    let maxUncertainty = -1;
+
+    // Find the most uncertain pair among top games
+    for (let i = 0; i < topGames.length; i++) {
+      for (let j = i + 1; j < topGames.length; j++) {
+        const pair = { left: topGames[i], right: topGames[j] };
+        const pairKey = this.createPairKey(pair);
+
+        // In infinite mode, allow reusing pairs after some time
+        const shouldSkipPair = this.shouldSkipPairInInfiniteMode(pairKey);
+        if (shouldSkipPair) {
+          continue;
+        }
+
+        const uncertainty = this.calculateUncertainty(topGames[i], topGames[j]);
+        if (uncertainty > maxUncertainty) {
+          maxUncertainty = uncertainty;
+          bestPair = pair;
+        }
+      }
+    }
+
+    return bestPair || this.getPreferenceGuidedPair();
+  }
+
+  /**
+   * In infinite mode, decide if a pair should be skipped.
+   * Allows reusing pairs after they haven't been seen for a while.
+   */
+  private shouldSkipPairInInfiniteMode(pairKey: string): boolean {
+    if (!this.infiniteMode) {
+      return this.usedPairs.has(pairKey);
+    }
+
+    // In infinite mode, allow reusing pairs if we haven't seen them recently
+    const recentPairKeys = this.choiceHistory
+      .slice(-this.DIVERSITY_WINDOW * 2) // Larger window for infinite mode
+      .map(choice => this.createPairKey({ left: choice.leftGame, right: choice.rightGame }));
+
+    return recentPairKeys.includes(pairKey);
   }
 }

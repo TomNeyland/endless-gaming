@@ -1,4 +1,4 @@
-import { Component, Input, inject, OnInit } from '@angular/core';
+import { Component, Input, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,8 +7,15 @@ import { MatListModule } from '@angular/material/list';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatBottomSheetModule, MatBottomSheet } from '@angular/material/bottom-sheet';
+import { MatFabModule } from '@angular/material/fab';
 import { GameRecommendation, GameRecord } from '../../../types/game.types';
 import { PreferenceService } from '../../services/preference.service';
+import { PairService } from '../../services/pair.service';
+import { AnimationService } from '../../services/animation.service';
+import { VotingBottomSheetComponent } from '../voting-bottom-sheet/voting-bottom-sheet.component';
+import { Subscription } from 'rxjs';
 
 /**
  * Component for displaying the final ranked list of game recommendations.
@@ -27,21 +34,50 @@ import { PreferenceService } from '../../services/preference.service';
     MatListModule,
     MatChipsModule,
     MatBadgeModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatProgressSpinnerModule,
+    MatBottomSheetModule,
+    MatFabModule
   ],
   templateUrl: './recommendation-list.component.html',
   styleUrl: './recommendation-list.component.scss'
 })
-export class RecommendationListComponent implements OnInit {
+export class RecommendationListComponent implements OnInit, OnDestroy {
   private preferenceService = inject(PreferenceService);
+  private pairService = inject(PairService);
+  private animationService = inject(AnimationService);
+  private bottomSheet = inject(MatBottomSheet);
+  private preferenceSummarySubscription?: Subscription;
   
   @Input() games: GameRecord[] = [];
   @Input() maxRecommendations: number = 100;
   
   recommendations: GameRecommendation[] = [];
+  
+  // Reactive state for live updates
+  public readonly isRefreshing = signal(false);
+  public readonly lastUpdateTime = signal<Date | null>(null);
 
   ngOnInit(): void {
     this.generateRecommendations();
+    this.subscribeToPreferenceUpdates();
+  }
+
+  ngOnDestroy(): void {
+    this.preferenceSummarySubscription?.unsubscribe();
+  }
+
+  /**
+   * Subscribe to preference changes to trigger automatic recommendation updates.
+   */
+  private subscribeToPreferenceUpdates(): void {
+    // Subscribe to preference summary changes as a proxy for preference updates
+    this.preferenceSummarySubscription = this.preferenceService.getPreferenceSummary().subscribe(() => {
+      // Debounce updates to avoid excessive recalculation
+      if (!this.isRefreshing()) {
+        this.refreshRecommendations();
+      }
+    });
   }
 
   /**
@@ -55,6 +91,132 @@ export class RecommendationListComponent implements OnInit {
 
     this.recommendations = this.preferenceService.rankGames(this.games)
       .slice(0, this.maxRecommendations);
+  }
+
+  /**
+   * Refresh recommendations with loading state and animation support.
+   * Called when preferences are updated from voting.
+   */
+  public async refreshRecommendations(): Promise<void> {
+    if (this.games.length === 0 || this.isRefreshing()) {
+      return;
+    }
+
+    this.isRefreshing.set(true);
+    
+    // Capture current state for animations
+    const previousRecommendations = [...this.recommendations];
+    const containerElement = document.querySelector('.recommendation-list') as HTMLElement;
+    
+    // Brief delay to show loading state
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Generate new recommendations
+    this.recommendations = this.preferenceService.rankGames(this.games)
+      .slice(0, this.maxRecommendations);
+    
+    // Update timestamps
+    this.lastUpdateTime.set(new Date());
+    
+    // Calculate changes for animation feedback
+    const changes = this.calculateRankingChanges(previousRecommendations, this.recommendations);
+    
+    // Perform FLIP animations if there are changes
+    if (changes.length > 0 && containerElement) {
+      try {
+        // Wait for DOM update
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
+        // Animate reordering
+        await this.animationService.animateReorder(containerElement);
+        
+        // Highlight changed cards
+        await this.highlightChangedCards(changes);
+        
+      } catch (error) {
+        console.warn('Animation failed:', error);
+      }
+    }
+    
+    this.isRefreshing.set(false);
+    
+    // Emit change event for potential parent components
+    this.onRecommendationsUpdated(previousRecommendations, this.recommendations);
+  }
+
+  /**
+   * Highlight cards that changed position.
+   */
+  private async highlightChangedCards(changes: Array<{appId: number, oldRank: number, newRank: number}>): Promise<void> {
+    if (changes.length === 0) return;
+    
+    try {
+      const changedElements: HTMLElement[] = [];
+      
+      changes.forEach(change => {
+        // Find elements with data attributes or by content
+        const cardSelectors = [
+          `[data-app-id="${change.appId}"]`,
+          `.premium-card:nth-child(${change.newRank})`,
+          `.compact-item:nth-child(${change.newRank - 3})` // Offset for premium cards
+        ];
+        
+        for (const selector of cardSelectors) {
+          const element = document.querySelector(selector) as HTMLElement;
+          if (element) {
+            changedElements.push(element);
+            break;
+          }
+        }
+      });
+      
+      if (changedElements.length > 0) {
+        await this.animationService.animateHighlight(changedElements);
+      }
+    } catch (error) {
+      console.warn('Highlight animation failed:', error);
+    }
+  }
+
+  /**
+   * Handle recommendation updates for potential animation coordination.
+   */
+  private onRecommendationsUpdated(
+    previous: GameRecommendation[], 
+    current: GameRecommendation[]
+  ): void {
+    // This method can be extended to coordinate animations
+    // or notify parent components of ranking changes
+    console.log('🎯 Recommendations updated:', {
+      previousCount: previous.length,
+      currentCount: current.length,
+      changedRankings: this.calculateRankingChanges(previous, current)
+    });
+  }
+
+  /**
+   * Calculate which games changed positions for animation purposes.
+   */
+  private calculateRankingChanges(
+    previous: GameRecommendation[], 
+    current: GameRecommendation[]
+  ): Array<{appId: number, oldRank: number, newRank: number}> {
+    const changes: Array<{appId: number, oldRank: number, newRank: number}> = [];
+    
+    const previousMap = new Map(previous.map(r => [r.game.appId, r.rank]));
+    
+    current.forEach(currentRec => {
+      const previousRank = previousMap.get(currentRec.game.appId);
+      if (previousRank && previousRank !== currentRec.rank) {
+        changes.push({
+          appId: currentRec.game.appId,
+          oldRank: previousRank,
+          newRank: currentRec.rank
+        });
+      }
+    });
+    
+    return changes;
   }
 
   /**
@@ -224,5 +386,76 @@ export class RecommendationListComponent implements OnInit {
     
     const percentage = Math.min(100, (Math.abs(score) / maxAbsScore) * 100);
     return `${percentage}%`;
+  }
+
+  /**
+   * Open the voting bottom sheet for continuous preference refinement.
+   */
+  openVotingBottomSheet(): void {
+    // Enable infinite mode for continuous voting
+    this.pairService.enableInfiniteMode();
+    
+    // Initialize the pair service with current games if needed
+    if (this.games.length > 0) {
+      this.pairService.initializeWithGames(this.games);
+    }
+
+    const bottomSheetRef = this.bottomSheet.open(VotingBottomSheetComponent, {
+      data: { games: this.games },
+      disableClose: false,
+      hasBackdrop: true,
+      panelClass: 'voting-bottom-sheet-container'
+    });
+
+    // Listen to voting events
+    bottomSheetRef.instance.voteCast.subscribe((voteEvent) => {
+      console.log('🗳️ Vote cast:', voteEvent);
+      this.onVoteCast(voteEvent);
+    });
+
+    // Listen to completion events
+    bottomSheetRef.instance.votingComplete.subscribe(() => {
+      console.log('🗳️ Voting session complete');
+      bottomSheetRef.dismiss();
+    });
+
+    // Clean up when bottom sheet closes
+    bottomSheetRef.afterDismissed().subscribe(() => {
+      console.log('🗳️ Bottom sheet dismissed');
+      this.pairService.disableInfiniteMode();
+    });
+  }
+
+  /**
+   * Handle vote cast events from the bottom sheet.
+   */
+  private onVoteCast(voteEvent: {
+    leftGame: GameRecord;
+    rightGame: GameRecord;
+    pick: 'left' | 'right' | 'skip';
+  }): void {
+    // The voting has already been processed by PairService through the bottom sheet
+    // The PreferenceService has been updated and will trigger our subscription
+    console.log('🗳️ Processing vote:', voteEvent.pick, 'between', voteEvent.leftGame.name, 'and', voteEvent.rightGame.name);
+    
+    // The refreshRecommendations() will be called automatically via the subscription
+    // to preference summary changes, so we don't need to call it manually here
+  }
+
+  /**
+   * Check if voting is available (enough games for meaningful pairs).
+   */
+  canStartVoting(): boolean {
+    return this.games.length >= 2 && !this.isRefreshing();
+  }
+
+  /**
+   * Get voting session statistics.
+   */
+  getVotingStats(): { totalComparisons: number, canContinue: boolean } {
+    return {
+      totalComparisons: this.pairService.getComparisonCount(),
+      canContinue: this.canStartVoting()
+    };
   }
 }

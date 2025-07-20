@@ -1,4 +1,12 @@
 <div class="recommendation-list">
+  <!-- Loading State -->
+  @if (isRefreshing()) {
+    <div class="refreshing-overlay">
+      <mat-spinner diameter="32"></mat-spinner>
+      <p class="mat-body-2">Updating your recommendations...</p>
+    </div>
+  }
+  
   @if (hasRecommendations()) {
     <!-- Top 3 Premium Recommendations -->
     @if (getTopRecommendations().length > 0) {
@@ -13,6 +21,7 @@
             <mat-card 
               class="premium-card"
               [class]="'rank-' + recommendation.rank"
+              [attr.data-app-id]="recommendation.game.appId"
               (click)="onRecommendationClick(recommendation)"
               appearance="outlined">
               
@@ -82,6 +91,7 @@
           @for (recommendation of getCompactRecommendations(); track trackByAppId($index + 3, recommendation)) {
             <mat-list-item 
               class="compact-item"
+              [attr.data-app-id]="recommendation.game.appId"
               (click)="onRecommendationClick(recommendation)">
               
               <div class="compact-content">
@@ -135,6 +145,19 @@
         Showing {{ recommendations.length }} personalized recommendations from {{ getTotalGamesCount() }} games
       </p>
     </div>
+
+    <!-- Voting FAB -->
+    @if (canStartVoting()) {
+      <button 
+        mat-fab 
+        color="primary" 
+        class="voting-fab"
+        (click)="openVotingBottomSheet()"
+        matTooltip="Refine your preferences"
+        matTooltipPosition="above">
+        <mat-icon>tune</mat-icon>
+      </button>
+    }
 
   } @else {
     <mat-card class="no-recommendations">

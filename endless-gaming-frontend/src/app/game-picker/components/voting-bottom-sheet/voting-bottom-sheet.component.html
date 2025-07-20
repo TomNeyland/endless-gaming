@@ -1,0 +1,125 @@
+<div class="voting-bottom-sheet">
+  @if (hasValidPair()) {
+    <!-- Header -->
+    <div class="sheet-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h3 class="mat-headline-6">Refine Your Preferences</h3>
+          <p class="mat-body-2">{{ getVotingProgress() }}</p>
+        </div>
+        <mat-icon class="refine-icon">tune</mat-icon>
+      </div>
+    </div>
+
+    <!-- Game Comparison -->
+    <div class="comparison-container">
+      <!-- Left Game -->
+      <div class="game-option" [class.disabled]="isVoting()">
+        <mat-card class="game-card" appearance="outlined">
+          <div class="game-image-container">
+            <img 
+              [src]="getGameThumbnail(getLeftGame()!)"
+              [alt]="getLeftGame()!.name"
+              class="game-thumbnail"
+              (error)="$event.target.src='https://via.placeholder.com/200x112/667eea/ffffff?text=Game'">
+          </div>
+          
+          <mat-card-content>
+            <h4 class="game-title">{{ getLeftGame()!.name }}</h4>
+            <div class="game-meta">
+              <span class="price">{{ getGamePrice(getLeftGame()!) }}</span>
+            </div>
+            <div class="game-tags">
+              @for (tag of getGameTags(getLeftGame()!); track tag) {
+                <span class="tag-chip">{{ tag }}</span>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+        
+        <button 
+          mat-raised-button 
+          color="primary"
+          class="vote-button left-vote"
+          [disabled]="isVoting()"
+          (click)="voteLeft()">
+          <mat-icon>thumb_up</mat-icon>
+          I Prefer This
+        </button>
+      </div>
+
+      <!-- VS Divider -->
+      <div class="vs-divider">
+        <div class="vs-circle">
+          <span class="vs-text">VS</span>
+        </div>
+      </div>
+
+      <!-- Right Game -->
+      <div class="game-option" [class.disabled]="isVoting()">
+        <mat-card class="game-card" appearance="outlined">
+          <div class="game-image-container">
+            <img 
+              [src]="getGameThumbnail(getRightGame()!)"
+              [alt]="getRightGame()!.name"
+              class="game-thumbnail"
+              (error)="$event.target.src='https://via.placeholder.com/200x112/667eea/ffffff?text=Game'">
+          </div>
+          
+          <mat-card-content>
+            <h4 class="game-title">{{ getRightGame()!.name }}</h4>
+            <div class="game-meta">
+              <span class="price">{{ getGamePrice(getRightGame()!) }}</span>
+            </div>
+            <div class="game-tags">
+              @for (tag of getGameTags(getRightGame()!); track tag) {
+                <span class="tag-chip">{{ tag }}</span>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+        
+        <button 
+          mat-raised-button 
+          color="primary"
+          class="vote-button right-vote"
+          [disabled]="isVoting()"
+          (click)="voteRight()">
+          <mat-icon>thumb_up</mat-icon>
+          I Prefer This
+        </button>
+      </div>
+    </div>
+
+    <!-- Skip Action -->
+    <div class="skip-section">
+      <button 
+        mat-button 
+        class="skip-button"
+        [disabled]="isVoting()"
+        (click)="skip()">
+        <mat-icon>skip_next</mat-icon>
+        Skip This Comparison
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    @if (isVoting()) {
+      <div class="voting-overlay">
+        <div class="loading-content">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p class="mat-body-2">Processing your preference...</p>
+        </div>
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      </div>
+    }
+
+  } @else {
+    <!-- No More Pairs State -->
+    <div class="no-pairs-state">
+      <mat-icon class="large-icon">check_circle</mat-icon>
+      <h3 class="mat-headline-6">Great job!</h3>
+      <p class="mat-body-1">You've helped improve your recommendations</p>
+    </div>
+  }
+</div>
