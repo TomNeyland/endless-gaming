@@ -115,13 +115,10 @@
           </button>
         </div>
 
-        <!-- Loading State -->
+        <!-- Subtle Loading State -->
         @if (isVoting()) {
-          <div class="voting-overlay">
-            <div class="loading-content">
-              <mat-spinner diameter="32"></mat-spinner>
-              <p class="mat-body-2">Processing your choice...</p>
-            </div>
+          <div class="subtle-loading">
+            <mat-spinner diameter="20" strokeWidth="3"></mat-spinner>
           </div>
         }
 

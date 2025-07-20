@@ -126,11 +126,11 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
     // Update stats
     this.updateVotingStats();
 
-    // Brief pause to show feedback, then load next pair
+    // Brief pause for button animation, then load next pair
     setTimeout(() => {
       this.loadNextPair();
       this.isVoting.set(false);
-    }, 400);
+    }, 200);
   }
 
   /**

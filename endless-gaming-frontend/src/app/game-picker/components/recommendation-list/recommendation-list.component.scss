@@ -5,30 +5,26 @@
   margin: 0 auto;
   position: relative;
 
-  // Loading overlay for live updates
-  .refreshing-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+  // Subtle refresh indicator
+  .subtle-refresh-indicator {
+    position: fixed;
+    top: 80px;
+    right: 24px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    backdrop-filter: blur(4px);
-    border-radius: 12px;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--gaming-text-primary);
+    padding: 8px 16px;
+    border-radius: 20px;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    font-size: 0.875rem;
+    font-weight: 500;
     
     mat-spinner {
-      margin-bottom: 16px;
-    }
-    
-    p {
-      color: var(--gaming-text-primary) !important;
-      margin: 0;
-      text-align: center;
+      --mat-progress-spinner-color: var(--gaming-accent);
     }
   }
 

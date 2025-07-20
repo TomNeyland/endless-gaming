@@ -235,36 +235,20 @@
         }
       }
       
-      // Loading overlay
-      .voting-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.8);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 100;
-        backdrop-filter: blur(2px);
+      // Subtle loading indicator
+      .subtle-loading {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 50;
+        padding: 8px;
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 50%;
+        backdrop-filter: blur(4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         
-        .loading-content {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 16px;
-          
-          mat-spinner {
-            --mat-progress-spinner-color: var(--gaming-accent);
-          }
-          
-          p {
-            color: var(--gaming-text-primary);
-            margin: 0;
-            text-align: center;
-            font-weight: 500;
-          }
+        mat-spinner {
+          --mat-progress-spinner-color: var(--gaming-accent);
         }
       }
       

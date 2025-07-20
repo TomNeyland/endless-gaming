@@ -1,9 +1,9 @@
 <div class="recommendation-list">
-    <!-- Loading State -->
+    <!-- Subtle Loading Indicator -->
     @if (isRefreshing()) {
-      <div class="refreshing-overlay">
-        <mat-spinner diameter="32"></mat-spinner>
-        <p class="mat-body-2">Updating your recommendations...</p>
+      <div class="subtle-refresh-indicator">
+        <mat-spinner diameter="16" strokeWidth="2"></mat-spinner>
+        <span>Updating...</span>
       </div>
     }
     
