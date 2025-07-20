@@ -1,26 +1,93 @@
-# DigitalOcean App Platform Deployment Guide
+# DigitalOcean App Platform Full-Stack Deployment Guide
 
-This guide covers deploying the endless-gaming data collection system to DigitalOcean App Platform using `doctl` and app specifications.
+This guide covers deploying the complete endless-gaming application (frontend + backend + data collection) to DigitalOcean App Platform using `doctl` and app specifications.
 
 ## Overview
 
-DigitalOcean App Platform provides a serverless platform-as-a-service that can automatically scale your application and manage databases. This setup will deploy the Steam game data collection system with:
+DigitalOcean App Platform provides a serverless platform-as-a-service that automatically scales your application and manages databases. This setup deploys the complete gaming platform with:
 
+- **Angular Frontend** - Static site with SPA routing
+- **Flask API Backend** - Web service for game data API
 - **Automated PostgreSQL database** - Managed database with backups
 - **Scheduled data collection** - Daily cron jobs for automated data updates
 - **Git-based deployments** - Auto-deploy from GitHub on push
 - **Environment management** - Separate staging/production environments
+- **Integrated routing** - `/api/*` routes to backend, `/*` routes to frontend
+
+## Application Architecture
+
+The deployment consists of multiple services working together:
+
+### Frontend (Angular Static Site)
+- **Technology**: Angular 20.1.0 with standalone components
+- **Deployment**: Static site service with SPA routing
+- **Build Process**: Node.js with custom build script
+- **Routes**: Serves all routes except `/api/*`
+- **Features**: Client-side routing, IndexedDB caching, ML algorithms
+
+### Backend (Flask Web Service)
+- **Technology**: Flask 3.1.1 with application factory pattern
+- **Deployment**: Web service with health checks
+- **Routes**: Serves `/api/discovery/*` endpoints (mapped from `/discovery/*`)
+- **Features**: Game data API, database connectivity, CORS configuration
+
+### Database & Jobs
+- **Database**: Managed PostgreSQL with automated backups
+- **Data Collection**: Scheduled CRON jobs for Steam/SteamSpy data
+- **Frequency**: Daily collection (15-30k games depending on environment)
 
 ## Build Process
 
-DigitalOcean App Platform builds your application using **Cloud Native Buildpacks**, not your local Dockerfile. The build process:
+DigitalOcean App Platform builds your application using **Cloud Native Buildpacks**:
 
+### Backend Build (Python)
 1. **Detects Python** from `pyproject.toml` and `poetry.lock`
 2. **Installs Poetry** via the build command in app spec
 3. **Installs dependencies** using `poetry install --only=main`
-4. **Creates optimized image** for production deployment
+4. **Installs Gunicorn** for production WSGI server
+5. **Creates optimized image** for production deployment
+
+### Frontend Build (Node.js)
+1. **Detects Node.js** from `package.json` and `package-lock.json`
+2. **Runs custom build script** with error checking and validation
+3. **Installs dependencies** using `npm ci`
+4. **Builds Angular app** with production configuration
+5. **Generates static assets** in `/dist` directory
 
 This means your `Dockerfile` is ignored - the platform handles containerization automatically.
+
+## Routing & API Integration
+
+The deployment uses DigitalOcean App Platform's built-in routing to handle frontend/backend integration:
+
+### Request Routing
+```
+User Request Flow:
+├── Frontend Routes (/*) → Angular Static Site
+│   ├── /game-picker → Angular SPA
+│   ├── /recommendations → Angular SPA  
+│   └── /* → Angular SPA (client-side routing)
+│
+└── API Routes (/api/*) → Flask Backend Service
+    ├── /api/discovery/games/master.json → Flask /discovery/games/master.json
+    └── /api/health → Flask /health
+```
+
+### Path Rewriting
+- **Frontend**: Calls `/api/discovery/games/master.json`
+- **DO Platform**: Routes `/api/*` to Flask service
+- **Path Rewriting**: `/api/discovery/*` → Flask `/discovery/*`
+- **Backend**: Handles `/discovery/games/master.json`
+
+### CORS Configuration
+- **Development**: `CORS_ORIGINS="*"` (accepts all origins)
+- **Production**: `CORS_ORIGINS="https://YOUR_DOMAIN.com"` (specific domain)
+- **Headers**: Automatic handling of preflight requests
+
+### Health Checks
+- **Endpoint**: `/health` on Flask backend service
+- **Monitoring**: Database connectivity + application status
+- **Frequency**: Every 10 seconds with failure thresholds
 
 ## Prerequisites
 

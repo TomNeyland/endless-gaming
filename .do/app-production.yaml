@@ -1,7 +1,80 @@
 name: endless-gaming-production
 region: nyc1
 
-# No long-running services needed - using scheduled cron jobs for data collection
+# Full-stack production deployment with Flask API and Angular frontend
+
+# Production services configuration
+services:
+  # Flask API backend (production)
+  - name: backend-api
+    source_dir: /endless-gaming-backend
+    github:
+      repo: YOUR_GITHUB_USERNAME/endless-gaming
+      branch: main
+    environment_slug: python
+    
+    build_command: |
+      pip install poetry
+      poetry config virtualenvs.create false
+      poetry install --only=main
+      pip install gunicorn
+    
+    run_command: |
+      gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 'app:create_app()'
+    
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${endless-gaming-production-db.DATABASE_URL}
+      - key: PYTHONPATH
+        scope: RUN_AND_BUILD_TIME
+        value: /app
+      - key: FLASK_ENV
+        scope: RUN_TIME
+        value: production
+      - key: CORS_ORIGINS
+        scope: RUN_TIME
+        value: "https://YOUR_PRODUCTION_DOMAIN.com"
+      - key: SECRET_KEY
+        scope: RUN_TIME
+        value: ${SECRET_KEY}
+    
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 60
+      period_seconds: 10
+      timeout_seconds: 10
+      failure_threshold: 3
+      success_threshold: 1
+      
+    http_port: 80
+    instance_count: 1
+    instance_size_slug: basic-s
+    
+    routes:
+      - path: /api
+        preserve_path_prefix: false
+
+# Static site configuration for Angular frontend (production)
+static_sites:
+  - name: frontend-app
+    source_dir: /endless-gaming-frontend
+    github:
+      repo: YOUR_GITHUB_USERNAME/endless-gaming
+      branch: main
+    environment_slug: node-js
+    
+    build_command: |
+      chmod +x /app/endless-gaming-frontend/.do/build.sh
+      /app/endless-gaming-frontend/.do/build.sh
+    
+    output_dir: /dist
+    index_document: index.html
+    error_document: index.html
+    catchall_document: index.html
+    
+    routes:
+      - path: /
 
 # Production database configuration
 databases:
