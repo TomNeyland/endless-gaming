@@ -191,7 +191,7 @@ class TestSteamGameListCollector:
         result = await collector.save_games_to_database(games, db_session)
         
         assert result['new_games'] == 0
-        assert result['updated_games'] == 2  # Names refreshed
+        assert result['updated_games'] == 0  # No actual updates (names are identical)
         assert result['deactivated_games'] == 1  # Game 30 deactivated
         
         # Verify game 30 was deactivated
