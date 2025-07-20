@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { RecommendationListComponent } from './recommendation-list.component';
 import { GameRecommendation } from '../../../types/game.types';
+import { PreferenceService } from '../../services/preference.service';
 
 describe('RecommendationListComponent', () => {
   let component: RecommendationListComponent;
@@ -93,12 +94,9 @@ describe('RecommendationListComponent', () => {
 
   describe('template rendering with recommendations', () => {
     beforeEach(() => {
-      // Override ngOnInit to prevent automatic generation
-      component.ngOnInit = () => {};
-      
-      // Set games and manually set recommendations
-      component.games = mockRecommendations.map(r => r.game);
+      // Set recommendations before any lifecycle hooks run
       component.recommendations = mockRecommendations;
+      component.games = mockRecommendations.map(r => r.game);
       fixture.detectChanges();
     });
 
@@ -205,12 +203,9 @@ describe('RecommendationListComponent', () => {
 
   describe('user interactions', () => {
     beforeEach(() => {
-      // Override ngOnInit to prevent automatic generation
-      component.ngOnInit = () => {};
-      
-      // Set games and manually set recommendations
-      component.games = mockRecommendations.map(r => r.game);
+      // Set recommendations before any lifecycle hooks run
       component.recommendations = mockRecommendations;
+      component.games = mockRecommendations.map(r => r.game);
       fixture.detectChanges();
     });
 
