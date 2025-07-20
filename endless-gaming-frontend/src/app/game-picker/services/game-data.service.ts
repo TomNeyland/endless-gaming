@@ -38,7 +38,7 @@ export class GameDataService {
   private db = new GameDatabase();
   private readonly CACHE_KEY = 'master_data';
   private readonly CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
-  private readonly API_URL = '/discovery/games/master.json';
+  private readonly API_URL = '/api/discovery/games/master.json';
   private gameCache = new Map<number, GameRecord>();
   private allGamesCache: GameRecord[] = [];
 

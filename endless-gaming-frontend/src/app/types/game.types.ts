@@ -22,16 +22,6 @@ export interface GameRecord {
   reviewNeg: number | null;  // Negative review count
 }
 
-/**
- * User choice event for analytics tracking.
- * Represents a single pairwise comparison decision.
- */
-export interface ChoiceEvent {
-  leftId: number;   // App ID of left game
-  rightId: number;  // App ID of right game
-  pick: 'left' | 'right' | 'skip';  // User's choice
-  ts: number;       // Timestamp in epoch milliseconds (backend contract)
-}
 
 /**
  * Sparse vector representation for efficient ML operations.

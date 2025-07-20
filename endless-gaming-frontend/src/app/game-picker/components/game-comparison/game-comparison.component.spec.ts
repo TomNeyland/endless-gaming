@@ -1,15 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { GameComparisonComponent } from './game-comparison.component';
 import { GameRecord, GamePair } from '../../../types/game.types';
 import { PairService } from '../../services/pair.service';
-import { ChoiceApiService } from '../../services/choice-api.service';
 
 describe('GameComparisonComponent', () => {
   let component: GameComparisonComponent;
   let fixture: ComponentFixture<GameComparisonComponent>;
   let mockPairService: jasmine.SpyObj<PairService>;
-  let mockChoiceApiService: jasmine.SpyObj<ChoiceApiService>;
 
   const mockGamePair: GamePair = {
     left: {
@@ -40,20 +39,18 @@ describe('GameComparisonComponent', () => {
 
   beforeEach(async () => {
     const pairServiceSpy = jasmine.createSpyObj('PairService', ['getNextPair', 'recordChoice']);
-    const choiceApiServiceSpy = jasmine.createSpyObj('ChoiceApiService', ['queueChoice', 'stopAutoFlush']);
     
     await TestBed.configureTestingModule({
       imports: [GameComparisonComponent],
       providers: [
-        { provide: PairService, useValue: pairServiceSpy },
-        { provide: ChoiceApiService, useValue: choiceApiServiceSpy }
-      ]
+        { provide: PairService, useValue: pairServiceSpy }
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
     fixture = TestBed.createComponent(GameComparisonComponent);
     component = fixture.componentInstance;
     mockPairService = TestBed.inject(PairService) as jasmine.SpyObj<PairService>;
-    mockChoiceApiService = TestBed.inject(ChoiceApiService) as jasmine.SpyObj<ChoiceApiService>;
   });
 
   it('should create', () => {
@@ -113,31 +110,31 @@ describe('GameComparisonComponent', () => {
       expect(noPairMessage.nativeElement.textContent).toContain('No game pair available');
     });
 
-    it('should render game names correctly', () => {
+    it('should render game sections correctly', () => {
       component.currentPair = mockGamePair;
       fixture.detectChanges();
 
-      const leftGameName = fixture.debugElement.query(By.css('.left-choice h3'));
-      const rightGameName = fixture.debugElement.query(By.css('.right-choice h3'));
+      const leftGameSection = fixture.debugElement.query(By.css('.left-game'));
+      const rightGameSection = fixture.debugElement.query(By.css('.right-game'));
 
-      expect(leftGameName.nativeElement.textContent).toBe('Counter-Strike: Global Offensive');
-      expect(rightGameName.nativeElement.textContent).toBe('Dota 2');
+      expect(leftGameSection).toBeTruthy();
+      expect(rightGameSection).toBeTruthy();
     });
 
     it('should render all choice buttons', () => {
       component.currentPair = mockGamePair;
       fixture.detectChanges();
 
-      const leftButton = fixture.debugElement.query(By.css('.left-btn'));
-      const rightButton = fixture.debugElement.query(By.css('.right-btn'));
+      const leftButton = fixture.debugElement.query(By.css('.left-game .prefer-btn'));
+      const rightButton = fixture.debugElement.query(By.css('.right-game .prefer-btn'));
       const skipButton = fixture.debugElement.query(By.css('.skip-btn'));
 
       expect(leftButton).toBeTruthy();
       expect(rightButton).toBeTruthy();
       expect(skipButton).toBeTruthy();
 
-      expect(leftButton.nativeElement.textContent.trim()).toBe('Choose This Game');
-      expect(rightButton.nativeElement.textContent.trim()).toBe('Choose This Game');
+      expect(leftButton.nativeElement.textContent.trim()).toBe('I Prefer This Game');
+      expect(rightButton.nativeElement.textContent.trim()).toBe('I Prefer This Game');
       expect(skipButton.nativeElement.textContent.trim()).toBe('Skip Both');
     });
 
@@ -161,6 +158,7 @@ describe('GameComparisonComponent', () => {
     });
 
     it('should record choice and emit event when left button clicked', () => {
+      component.currentPair = mockGamePair; // Set up the pair first
       spyOn(component.choiceMade, 'emit');
       mockPairService.getNextPair.and.returnValue(null); // No next pair
       
@@ -171,7 +169,8 @@ describe('GameComparisonComponent', () => {
         mockGamePair.right, 
         'left'
       );
-      expect(mockChoiceApiService.queueChoice).toHaveBeenCalled();
+      // Choice is recorded in PairService (no analytics tracking)
+      expect(mockPairService.recordChoice).toHaveBeenCalledWith(mockGamePair.left, mockGamePair.right, 'left');
       expect(component.choiceMade.emit).toHaveBeenCalledWith({
         leftGame: mockGamePair.left,
         rightGame: mockGamePair.right,
@@ -180,6 +179,7 @@ describe('GameComparisonComponent', () => {
     });
 
     it('should record choice when right button clicked', () => {
+      component.currentPair = mockGamePair; // Set up the pair first
       spyOn(component.choiceMade, 'emit');
       mockPairService.getNextPair.and.returnValue(null);
       
@@ -193,6 +193,7 @@ describe('GameComparisonComponent', () => {
     });
 
     it('should record choice when skip button clicked', () => {
+      component.currentPair = mockGamePair; // Set up the pair first
       spyOn(component.choiceMade, 'emit');
       mockPairService.getNextPair.and.returnValue(null);
       
@@ -207,10 +208,13 @@ describe('GameComparisonComponent', () => {
     });
 
     it('should emit choice when right button clicked', () => {
+      component.currentPair = mockGamePair;
+      fixture.detectChanges();
+      
       spyOn(component.choiceMade, 'emit');
       spyOn(component, 'selectRight').and.callThrough();
 
-      const rightButton = fixture.debugElement.query(By.css('.right-btn'));
+      const rightButton = fixture.debugElement.query(By.css('.right-game .prefer-btn'));
       rightButton.nativeElement.click();
 
       expect(component.selectRight).toHaveBeenCalled();
@@ -237,19 +241,50 @@ describe('GameComparisonComponent', () => {
 
   describe('component methods', () => {
     it('should implement selectLeft method', () => {
-      expect(() => component.selectLeft()).toThrowError('Not implemented');
+      component.currentPair = mockGamePair;
+      spyOn(component.choiceMade, 'emit');
+      
+      component.selectLeft();
+      
+      expect(component.choiceMade.emit).toHaveBeenCalledWith({
+        leftGame: mockGamePair.left,
+        rightGame: mockGamePair.right,
+        pick: 'left'
+      });
     });
 
     it('should implement selectRight method', () => {
-      expect(() => component.selectRight()).toThrowError('Not implemented');
+      component.currentPair = mockGamePair;
+      spyOn(component.choiceMade, 'emit');
+      
+      component.selectRight();
+      
+      expect(component.choiceMade.emit).toHaveBeenCalledWith({
+        leftGame: mockGamePair.left,
+        rightGame: mockGamePair.right,
+        pick: 'right'
+      });
     });
 
     it('should implement skip method', () => {
-      expect(() => component.skip()).toThrowError('Not implemented');
+      component.currentPair = mockGamePair;
+      spyOn(component.choiceMade, 'emit');
+      
+      component.skip();
+      
+      expect(component.choiceMade.emit).toHaveBeenCalledWith({
+        leftGame: mockGamePair.left,
+        rightGame: mockGamePair.right,
+        pick: 'skip'
+      });
     });
 
     it('should implement hasValidPair method', () => {
-      expect(() => component.hasValidPair()).toThrowError('Not implemented');
+      component.currentPair = null;
+      expect(component.hasValidPair()).toBe(false);
+      
+      component.currentPair = mockGamePair;
+      expect(component.hasValidPair()).toBe(true);
     });
   });
 

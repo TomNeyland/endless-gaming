@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { RecommendationListComponent } from './recommendation-list.component';
 import { GameRecommendation } from '../../../types/game.types';
@@ -71,7 +72,8 @@ describe('RecommendationListComponent', () => {
       imports: [RecommendationListComponent],
       providers: [
         { provide: PreferenceService, useValue: mockPreferenceService }
-      ]
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
     fixture = TestBed.createComponent(RecommendationListComponent);

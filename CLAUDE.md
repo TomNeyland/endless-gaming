@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Endless Gaming is a comprehensive Steam gaming platform with a production-ready data collection engine as its foundation. The current implementation focuses on collecting and processing game data from Steam and SteamSpy APIs, with future plans for game recommendation and discovery features. Built with Poetry for dependency management and designed for large-scale data collection (30k+ games) with proper rate limiting, error handling, and multiple deployment options.
+Endless Gaming is a comprehensive Steam gaming platform with a production-ready data collection engine and Flask API backend. The current implementation includes robust data collection from Steam and SteamSpy APIs, plus a discovery API that serves game data to frontend applications. Built with Poetry for dependency management and designed for large-scale data collection (30k+ games) with proper rate limiting, error handling, caching, and multiple deployment options.
 
 ## Project Structure
 
@@ -12,7 +12,11 @@ The project is organized with a clean separation between backend and frontend:
 
 ```
 endless-gaming/
-├── endless-gaming-backend/     # Python backend (current implementation)
+├── endless-gaming-backend/     # Python backend with Flask API
+│   ├── app/                    # Flask application factory
+│   │   ├── __init__.py         # App factory with cache/CORS setup
+│   │   ├── config.py           # Flask configuration classes
+│   │   └── discovery/          # Discovery API blueprint
 │   ├── models/                 # SQLAlchemy database models
 │   ├── collectors/             # Data collection components
 │   ├── utils/                  # Shared utilities (rate limiter, HTTP client)
@@ -22,7 +26,8 @@ endless-gaming/
 │   ├── alembic/                # Database migrations
 │   ├── config.py               # Application configuration
 │   ├── pyproject.toml          # Poetry dependency management
-│   └── alembic.ini             # Alembic migration configuration
+│   ├── alembic.ini             # Alembic migration configuration
+│   └── DISCOVERY_API_SPEC.md   # Flask API specification
 └── endless-gaming-frontend/    # Angular frontend (in development)
     ├── src/app/                # Angular application components
     ├── public/                 # Static assets
@@ -35,7 +40,11 @@ endless-gaming/
 
 ## Technology Stack
 
+### Backend Stack
 - **Python 3.12+** with Poetry for dependency management
+- **Flask** with application factory pattern for API endpoints
+- **Flask-Caching** for server-side caching with 24-hour TTL
+- **Flask-CORS** for cross-origin resource sharing
 - **SQLAlchemy 2.0** with proper relationships and migrations
 - **HTTPX + aiolimiter** for async HTTP requests with rate limiting
 - **Pydantic Settings** for configuration management
@@ -75,8 +84,19 @@ poetry run pytest tests/test_steam_collector.py  # Steam collector tests (16 tes
 poetry run pytest tests/test_steamspy_collector.py # SteamSpy collector tests (18 tests)
 poetry run pytest tests/test_steamspy_all_collector.py # SteamSpy /all collector tests (16 tests)
 poetry run pytest tests/test_parallel_fetcher.py # Parallel processing tests (11 tests)
+poetry run pytest tests/test_discovery_api.py # Discovery API tests (0 tests - needs implementation)
 poetry run pytest -v                       # Verbose output
 poetry run pytest -k "test_name"          # Run specific test
+```
+
+### Flask API Development
+```bash
+cd endless-gaming-backend              # All backend commands from this directory
+export FLASK_APP=app:create_app         # Set Flask app factory
+export FLASK_ENV=development            # Enable debug mode
+poetry run flask run                     # Start development server (http://localhost:5000)
+poetry run flask run --host=0.0.0.0     # Allow external connections
+poetry run flask shell                   # Interactive shell with app context
 ```
 
 ### Frontend Development & Testing
@@ -121,6 +141,15 @@ poetry run python -c "from models import Base; from sqlalchemy import create_eng
 
 ### Core Components (All Implemented)
 ```
+app/                 # Flask application (production-ready)
+├── __init__.py      # Application factory with Flask-Caching/CORS setup
+├── config.py        # Configuration classes (dev/test/prod)
+└── discovery/       # Discovery API blueprint
+    ├── __init__.py  # Blueprint registration
+    ├── blueprint.py # API routes (/games/master.json)
+    ├── schemas.py   # Pydantic/marshmallow schemas
+    └── utils.py     # Game record conversion utilities
+
 models/               # SQLAlchemy models with full relationships
 ├── game.py          # Game model (app_id, name, timestamps, active status)
 └── game_metadata.py # GameMetadata model (SteamSpy data, fetch status)
@@ -142,6 +171,7 @@ utils/               # Core utilities (robust implementations)
 └── http_client.py   # HTTPClient with tenacity retry logic
 
 tests/               # Comprehensive test suite (89 tests total)
+├── test_discovery_api.py          # Discovery API tests (0 tests - needs implementation)
 ├── test_models.py                 # Database model tests (14 tests)
 ├── test_rate_limiter.py           # Rate limiting tests (14 tests) 
 ├── test_steam_collector.py        # Steam API tests (16 tests)
@@ -171,6 +201,14 @@ tests/               # Comprehensive test suite (89 tests total)
 - Each game saved to database immediately after metadata fetch (not batched)
 - Rate limiter automatically throttles requests across all concurrent workers
 - Real-time progress display with game names and top 3 tags
+
+**Flask API Architecture**: Application factory pattern with blueprint organization:
+- `create_app()` factory function for testability and configuration flexibility
+- Flask-Caching with 24-hour TTL for `/games/master.json` endpoint
+- Flask-CORS for cross-origin requests from Angular frontend
+- Discovery blueprint at `/discovery` prefix for game data endpoints
+- Database session management via app context and request teardown
+- Environment-specific configurations (development/testing/production)
 
 ### Database Models (SQLAlchemy 2.0)
 
@@ -246,6 +284,29 @@ def progress_callback(current, total, game_name, top_tags, status):
 await collector.collect_metadata_for_games(games, session, progress_callback=progress_callback)
 ```
 
+### Discovery API (Flask Backend)
+The Discovery API provides cached game data endpoints for frontend applications:
+
+```python
+from app import create_app
+
+app = create_app()
+# GET /discovery/games/master.json - returns all active games with metadata
+# Cached for 24 hours, includes tags, reviews, pricing, etc.
+```
+
+**Key Features**:
+- **Caching**: 24-hour server-side cache via Flask-Caching
+- **CORS**: Configured for cross-origin requests from Angular frontend  
+- **Error Handling**: Graceful database error handling with 503 responses
+- **Session Management**: Proper SQLAlchemy session lifecycle management
+- **Game Records**: Converts database models to camelCase JSON for frontend consumption
+
+**API Endpoints**:
+- `GET /discovery/games/master.json` - All active games with full metadata
+- Cache headers: `Cache-Control: public, max-age=86400` 
+- Response format: Array of game records with `appId`, `name`, `tags`, `price`, etc.
+
 ## Testing Philosophy
 
 **TDD Approach**: All components built test-first focusing on happy path and critical failures
@@ -296,13 +357,23 @@ This codebase was built using strict Test-Driven Development. When adding new fe
 
 ## Configuration Requirements
 
-Set environment variables for production:
+### Environment Variables for Production:
 - `STEAM_API_KEY`: Optional, only needed for legacy Steam Web API access
 - `DATABASE_URL`: SQLAlchemy connection string (defaults to SQLite)
+- `SECRET_KEY`: Flask secret key for sessions (defaults to dev key)
+- `FLASK_ENV`: Set to `production` for production deployment
+- `CORS_ORIGINS`: Comma-separated list of allowed origins (defaults to `*`)
+- `CACHE_TYPE`: Cache backend type (`SimpleCache`, `RedisCache`, etc.)
+- `REDIS_URL`: Redis connection string when using RedisCache
+
+### Flask Configuration Classes:
+- **DevelopmentConfig**: Debug enabled, SimpleCache, SQLite database
+- **TestingConfig**: In-memory SQLite, NullCache, CSRF disabled
+- **ProductionConfig**: Debug disabled, configurable cache backends
 
 **Note**: The primary collection method now uses SteamSpy's `/all` endpoint, so `STEAM_API_KEY` is no longer required for standard operations.
 
-All other settings have sensible defaults via `config.py` with pydantic-settings.
+All other settings have sensible defaults via `app/config.py` classes.
 
 ## Deployment Patterns
 

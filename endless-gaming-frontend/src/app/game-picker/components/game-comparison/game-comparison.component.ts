@@ -1,8 +1,7 @@
-import { Component, EventEmitter, Output, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, Output, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { GameRecord, GamePair, ChoiceEvent } from '../../../types/game.types';
+import { GameRecord, GamePair } from '../../../types/game.types';
 import { PairService } from '../../services/pair.service';
-import { ChoiceApiService } from '../../services/choice-api.service';
 import { GameCardComponent } from '../game-card/game-card.component';
 
 /**
@@ -18,9 +17,8 @@ import { GameCardComponent } from '../game-card/game-card.component';
   templateUrl: './game-comparison.component.html',
   styleUrl: './game-comparison.component.scss'
 })
-export class GameComparisonComponent implements OnInit, OnDestroy {
+export class GameComparisonComponent implements OnInit {
   private pairService = inject(PairService);
-  private choiceApiService = inject(ChoiceApiService);
   
   @Output() choiceMade = new EventEmitter<{
     leftGame: GameRecord;
@@ -37,10 +35,6 @@ export class GameComparisonComponent implements OnInit, OnDestroy {
     this.loadNextPair();
   }
 
-  ngOnDestroy(): void {
-    // Stop analytics auto-flush when component is destroyed
-    this.choiceApiService.stopAutoFlush();
-  }
 
   /**
    * Load the next pair of games for comparison.
@@ -92,15 +86,6 @@ export class GameComparisonComponent implements OnInit, OnDestroy {
 
     // Record choice in pair service
     this.pairService.recordChoice(leftGame, rightGame, pick);
-
-    // Queue choice for analytics
-    const choiceEvent: ChoiceEvent = {
-      leftId: leftGame.appId,
-      rightId: rightGame.appId,
-      pick,
-      ts: Date.now()
-    };
-    this.choiceApiService.queueChoice(choiceEvent);
 
     // Emit choice event for parent component
     this.choiceMade.emit({

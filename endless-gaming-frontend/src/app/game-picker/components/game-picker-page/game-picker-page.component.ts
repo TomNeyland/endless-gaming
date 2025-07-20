@@ -5,7 +5,6 @@ import { GameDataService } from '../../services/game-data.service';
 import { VectorService } from '../../services/vector.service';
 import { PreferenceService } from '../../services/preference.service';
 import { PairService } from '../../services/pair.service';
-import { ChoiceApiService } from '../../services/choice-api.service';
 import { GameComparisonComponent } from '../game-comparison/game-comparison.component';
 import { ProgressBarComponent } from '../progress-bar/progress-bar.component';
 import { PreferenceSummaryComponent } from '../preference-summary/preference-summary.component';
@@ -35,7 +34,6 @@ export class GamePickerPageComponent implements OnInit {
   private vectorService = inject(VectorService);
   private preferenceService = inject(PreferenceService);
   private pairService = inject(PairService);
-  private choiceApiService = inject(ChoiceApiService);
   
   public readonly state = signal<GamePickerState>('loading');
   private games: GameRecord[] = [];
@@ -75,9 +73,6 @@ export class GamePickerPageComponent implements OnInit {
     
     // Initialize pair service with games
     this.pairService.initializeWithGames(games);
-    
-    // Start analytics auto-flush
-    this.choiceApiService.startAutoFlush();
   }
 
   /**
@@ -129,7 +124,7 @@ export class GamePickerPageComponent implements OnInit {
    * Handle choice made event from game comparison component.
    */
   onChoiceMade(event: any): void {
-    // The PairService and ChoiceApiService handle the choice internally
-    // This is just for potential UI updates or analytics
+    // The PairService handles the choice internally
+    // This is just for potential UI updates
   }
 }

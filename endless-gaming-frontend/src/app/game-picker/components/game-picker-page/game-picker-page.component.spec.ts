@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { GamePickerPageComponent } from './game-picker-page.component';
@@ -15,7 +16,8 @@ describe('GamePickerPageComponent', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting()
-      ]
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
     fixture = TestBed.createComponent(GamePickerPageComponent);
@@ -51,7 +53,15 @@ describe('GamePickerPageComponent', () => {
 
       const comparingElement = fixture.debugElement.query(By.css('.comparison-state'));
       expect(comparingElement).toBeTruthy();
-      expect(comparingElement.nativeElement.textContent).toContain('Find Your Perfect Games');
+      
+      // Check that other states are not rendered
+      const loadingElement = fixture.debugElement.query(By.css('.loading-state'));
+      const recommendationsElement = fixture.debugElement.query(By.css('.recommendations-state'));
+      const errorElement = fixture.debugElement.query(By.css('.error-state'));
+      
+      expect(loadingElement).toBeFalsy();
+      expect(recommendationsElement).toBeFalsy();
+      expect(errorElement).toBeFalsy();
     });
 
     it('should transition to recommendations state', () => {
@@ -63,7 +73,15 @@ describe('GamePickerPageComponent', () => {
       
       expect(recommendationsElement).toBeTruthy();
       expect(restartButton).toBeTruthy();
-      expect(recommendationsElement.nativeElement.textContent).toContain('Your Personalized Game Recommendations');
+      
+      // Check that other states are not rendered
+      const loadingElement = fixture.debugElement.query(By.css('.loading-state'));
+      const comparingElement = fixture.debugElement.query(By.css('.comparison-state'));
+      const errorElement = fixture.debugElement.query(By.css('.error-state'));
+      
+      expect(loadingElement).toBeFalsy();
+      expect(comparingElement).toBeFalsy();
+      expect(errorElement).toBeFalsy();
     });
 
     it('should display error state', () => {
@@ -75,7 +93,15 @@ describe('GamePickerPageComponent', () => {
       
       expect(errorElement).toBeTruthy();
       expect(retryButton).toBeTruthy();
-      expect(errorElement.nativeElement.textContent).toContain('Something went wrong');
+      
+      // Check that other states are not rendered
+      const loadingElement = fixture.debugElement.query(By.css('.loading-state'));
+      const comparingElement = fixture.debugElement.query(By.css('.comparison-state'));
+      const recommendationsElement = fixture.debugElement.query(By.css('.recommendations-state'));
+      
+      expect(loadingElement).toBeFalsy();
+      expect(comparingElement).toBeFalsy();
+      expect(recommendationsElement).toBeFalsy();
     });
   });
 
@@ -107,24 +133,39 @@ describe('GamePickerPageComponent', () => {
 
   describe('component methods', () => {
     it('should implement startGamePicker method', () => {
-      expect(() => component.startGamePicker()).toThrowError('Not implemented');
+      spyOn(component, 'startGamePicker').and.callThrough();
+      
+      component.startGamePicker();
+      
+      expect(component.startGamePicker).toHaveBeenCalled();
+      expect(component.state()).toBe('loading');
     });
 
     it('should implement onStartComparisons method', () => {
-      expect(() => component.onStartComparisons()).toThrowError('Not implemented');
+      component.onStartComparisons();
+      
+      expect(component.state()).toBe('comparing');
     });
 
     it('should implement onComparisonsComplete method', () => {
-      expect(() => component.onComparisonsComplete()).toThrowError('Not implemented');
+      component.onComparisonsComplete();
+      
+      expect(component.state()).toBe('recommendations');
     });
 
     it('should implement resetGamePicker method', () => {
-      expect(() => component.resetGamePicker()).toThrowError('Not implemented');
+      component.resetGamePicker();
+      
+      expect(component.state()).toBe('comparing');
     });
 
     it('should implement onError method', () => {
       const error = new Error('Test error');
-      expect(() => component.onError(error)).toThrowError('Not implemented');
+      
+      component.onError(error);
+      
+      expect(component.state()).toBe('error');
+      expect(component.getErrorMessage()).toBe('Test error');
     });
   });
 

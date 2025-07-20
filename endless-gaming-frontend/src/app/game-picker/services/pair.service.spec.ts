@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { PairService } from './pair.service';
+import { PreferenceService } from './preference.service';
 import { GameRecord, GamePair, ProgressInfo } from '../../types/game.types';
 
 describe('PairService', () => {
@@ -57,7 +58,20 @@ describe('PairService', () => {
   ];
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    const mockPreferenceService = jasmine.createSpyObj('PreferenceService', [
+      'updatePreferences',
+      'calculateGameScore',
+      'resetPreferences'
+    ]);
+    
+    // Set default return values for calculateGameScore
+    mockPreferenceService.calculateGameScore.and.returnValue(0.5);
+    
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: PreferenceService, useValue: mockPreferenceService }
+      ]
+    });
     service = TestBed.inject(PairService);
     service.initializeWithGames(mockGames);
   });

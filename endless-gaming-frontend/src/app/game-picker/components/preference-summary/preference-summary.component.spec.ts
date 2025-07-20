@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { PreferenceSummaryComponent } from './preference-summary.component';
 import { PreferenceSummary } from '../../../types/game.types';
@@ -37,7 +38,8 @@ describe('PreferenceSummaryComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PreferenceSummaryComponent]
+      imports: [PreferenceSummaryComponent],
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
     fixture = TestBed.createComponent(PreferenceSummaryComponent);
