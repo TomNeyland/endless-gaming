@@ -48,16 +48,19 @@ export class GamePickerPageComponent implements OnInit {
    * Loads data and initializes services.
    */
   startGamePicker(): void {
+    console.log('🎮 GamePickerPage: Starting game picker...');
     this.state.set('loading');
     
     this.gameDataService.getGames().subscribe({
       next: (games) => {
+        console.log('🎮 GamePickerPage: Received games from service:', games.length, 'games');
         this.games = games;
         this.initializeServices(games);
+        console.log('🎮 GamePickerPage: Services initialized, transitioning to comparing state');
         this.state.set('comparing');
       },
       error: (error) => {
-        console.error('Failed to load games:', error);
+        console.error('🎮 GamePickerPage: Failed to load games:', error);
         this.onError(error);
       }
     });
@@ -67,12 +70,25 @@ export class GamePickerPageComponent implements OnInit {
    * Initialize all services with game data.
    */
   private initializeServices(games: GameRecord[]): void {
+    console.log('🎮 GamePickerPage: Initializing services with', games.length, 'games');
+    
     // Build tag dictionary and initialize preference model
+    console.log('🎮 GamePickerPage: Building tag dictionary...');
     const tagDict = this.vectorService.buildTagDictionary(games);
+    console.log('🎮 GamePickerPage: Tag dictionary built:', tagDict.size, 'unique tags');
+    
+    console.log('🎮 GamePickerPage: Initializing preference model...');
     this.preferenceService.initializeModel(tagDict);
     
     // Initialize pair service with games
+    console.log('🎮 GamePickerPage: Initializing pair service...');
     this.pairService.initializeWithGames(games);
+    
+    // Check if pair service has pairs available
+    const firstPair = this.pairService.getNextPair();
+    console.log('🎮 GamePickerPage: First pair from PairService:', firstPair ? `${firstPair.left.name} vs ${firstPair.right.name}` : 'null');
+    
+    console.log('🎮 GamePickerPage: Service initialization complete');
   }
 
   /**
@@ -86,6 +102,7 @@ export class GamePickerPageComponent implements OnInit {
    * Handle completion of comparison phase.
    */
   onComparisonsComplete(): void {
+    console.log('🎮 GamePickerPage: Comparisons completed - transitioning to recommendations');
     this.state.set('recommendations');
   }
 

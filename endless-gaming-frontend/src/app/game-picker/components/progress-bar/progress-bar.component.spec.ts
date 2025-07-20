@@ -3,10 +3,12 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { ProgressBarComponent } from './progress-bar.component';
 import { ProgressInfo } from '../../../types/game.types';
+import { PairService } from '../../services/pair.service';
 
 describe('ProgressBarComponent', () => {
   let component: ProgressBarComponent;
   let fixture: ComponentFixture<ProgressBarComponent>;
+  let mockPairService: jasmine.SpyObj<PairService>;
 
   const mockProgressStart: ProgressInfo = {
     current: 0,
@@ -29,8 +31,15 @@ describe('ProgressBarComponent', () => {
   };
 
   beforeEach(async () => {
+    // Create mock PairService
+    mockPairService = jasmine.createSpyObj('PairService', ['getProgress']);
+    mockPairService.getProgress.and.returnValue(mockProgressMidway);
+
     await TestBed.configureTestingModule({
       imports: [ProgressBarComponent],
+      providers: [
+        { provide: PairService, useValue: mockPairService }
+      ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 

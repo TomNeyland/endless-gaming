@@ -57,10 +57,15 @@ export class PreferenceSummaryComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Format weight as percentage.
+   * Format weight as percentage relative to max weight.
    */
   formatWeight(weight: number): string {
-    return `${Math.round(weight * 100)}%`;
+    const maxWeight = this.getMaxWeight();
+    if (maxWeight === 0) return '0%';
+    
+    // Convert to percentage relative to the maximum weight in current session
+    const percentage = Math.round((Math.abs(weight) / maxWeight) * 100);
+    return `${Math.min(percentage, 100)}%`;
   }
 
   /**
@@ -73,13 +78,13 @@ export class PreferenceSummaryComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get maximum weight for scaling.
+   * Get maximum absolute weight for scaling.
    */
   getMaxWeight(): number {
-    const likedWeights = this.preferenceSummary.likedTags.map(t => t.weight);
-    const dislikedWeights = this.preferenceSummary.dislikedTags.map(t => t.weight);
+    const likedWeights = this.preferenceSummary.likedTags.map(t => Math.abs(t.weight));
+    const dislikedWeights = this.preferenceSummary.dislikedTags.map(t => Math.abs(t.weight));
     const allWeights = [...likedWeights, ...dislikedWeights];
-    return Math.max(...allWeights, 1); // Minimum 1 to avoid division by zero
+    return Math.max(...allWeights, 0.1); // Minimum 0.1 to avoid division by zero
   }
 
   /**

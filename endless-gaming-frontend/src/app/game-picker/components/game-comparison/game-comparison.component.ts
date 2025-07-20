@@ -32,6 +32,7 @@ export class GameComparisonComponent implements OnInit {
   isLoading = false;
 
   ngOnInit(): void {
+    console.log('🎯 GameComparison: Component initializing...');
     this.loadNextPair();
   }
 
@@ -40,11 +41,15 @@ export class GameComparisonComponent implements OnInit {
    * Load the next pair of games for comparison.
    */
   private loadNextPair(): void {
+    console.log('🎯 GameComparison: Loading next pair...');
     this.currentPair = this.pairService.getNextPair();
     
     if (!this.currentPair) {
+      console.log('🎯 GameComparison: No pair available - emitting comparisonsComplete');
       // No more pairs available - comparisons are complete
       this.comparisonsComplete.emit();
+    } else {
+      console.log('🎯 GameComparison: Loaded pair:', this.currentPair.left.name, 'vs', this.currentPair.right.name);
     }
   }
 

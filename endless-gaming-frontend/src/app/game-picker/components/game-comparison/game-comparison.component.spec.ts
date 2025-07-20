@@ -99,15 +99,18 @@ describe('GameComparisonComponent', () => {
     });
 
     it('should display no pair message when no pair provided', () => {
+      // Ensure PairService returns null for no pairs available
+      mockPairService.getNextPair.and.returnValue(null);
+      
       component.currentPair = null;
       fixture.detectChanges();
 
       const comparisonContainer = fixture.debugElement.query(By.css('.comparison-container'));
       expect(comparisonContainer).toBeFalsy();
 
-      const noPairMessage = fixture.debugElement.query(By.css('.no-pair-message'));
+      const noPairMessage = fixture.debugElement.query(By.css('.no-pairs'));
       expect(noPairMessage).toBeTruthy();
-      expect(noPairMessage.nativeElement.textContent).toContain('No game pair available');
+      expect(noPairMessage.nativeElement.textContent).toContain('No more game pairs available');
     });
 
     it('should render game sections correctly', () => {
