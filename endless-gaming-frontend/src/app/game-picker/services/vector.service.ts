@@ -45,17 +45,22 @@ export class VectorService {
    * Uses the tag dictionary to map tags to indices.
    */
   gameToSparseVector(game: GameRecord, tagDict: TagDictionary): SparseVector {
-    const indices: number[] = [];
-    const values: number[] = [];
+    const indexValuePairs: Array<[number, number]> = [];
     
     // Convert game tags to sparse vector format
     Object.entries(game.tags).forEach(([tag, votes]) => {
       const index = tagDict.tagToIndex[tag];
       if (index !== undefined && votes > 0) {
-        indices.push(index);
-        values.push(votes);
+        indexValuePairs.push([index, votes]);
       }
     });
+    
+    // Sort by indices to ensure ascending order
+    indexValuePairs.sort((a, b) => a[0] - b[0]);
+    
+    // Extract sorted indices and values
+    const indices = indexValuePairs.map(pair => pair[0]);
+    const values = indexValuePairs.map(pair => pair[1]);
     
     return {
       indices: new Uint16Array(indices),

@@ -198,7 +198,7 @@ export class PreferenceService {
 
     this.preferenceSummary$.next({
       likedTags: likedTags.map(tw => ({ tag: tw.tag, weight: tw.weight })),
-      dislikedTags: dislikedTags.map(tw => ({ tag: tw.tag, weight: Math.abs(tw.weight) }))
+      dislikedTags: dislikedTags.map(tw => ({ tag: tw.tag, weight: tw.weight }))
     });
   }
 }

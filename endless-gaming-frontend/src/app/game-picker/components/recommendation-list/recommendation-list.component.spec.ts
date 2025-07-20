@@ -93,9 +93,11 @@ describe('RecommendationListComponent', () => {
 
   describe('template rendering with recommendations', () => {
     beforeEach(() => {
-      // Set games and let component generate recommendations via ngOnInit
+      // Override ngOnInit to prevent automatic generation
+      component.ngOnInit = () => {};
+      
+      // Set games and manually set recommendations
       component.games = mockRecommendations.map(r => r.game);
-      // Manually set recommendations to match expected test data
       component.recommendations = mockRecommendations;
       fixture.detectChanges();
     });
@@ -203,9 +205,11 @@ describe('RecommendationListComponent', () => {
 
   describe('user interactions', () => {
     beforeEach(() => {
-      // Set games and let component generate recommendations via ngOnInit
+      // Override ngOnInit to prevent automatic generation
+      component.ngOnInit = () => {};
+      
+      // Set games and manually set recommendations
       component.games = mockRecommendations.map(r => r.game);
-      // Manually set recommendations to match expected test data
       component.recommendations = mockRecommendations;
       fixture.detectChanges();
     });

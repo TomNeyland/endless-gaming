@@ -35,7 +35,11 @@ export class GameCardComponent {
       return 'Free';
     }
     
-    // Price should already be formatted from backend (e.g., "19.99")
+    // Price might already include $ symbol or be just the number
+    if (this.game.price.startsWith('$')) {
+      return this.game.price;
+    }
+    
     return `$${this.game.price}`;
   }
 

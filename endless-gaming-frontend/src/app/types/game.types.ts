@@ -30,8 +30,7 @@ export interface ChoiceEvent {
   leftId: number;   // App ID of left game
   rightId: number;  // App ID of right game
   pick: 'left' | 'right' | 'skip';  // User's choice
-  timestamp: number;       // Timestamp in epoch milliseconds
-  userId?: string;  // Optional user ID for analytics
+  ts: number;       // Timestamp in epoch milliseconds (backend contract)
 }
 
 /**
