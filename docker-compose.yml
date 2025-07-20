@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  endless-gaming:
+    build: .
+    image: endless-gaming:latest
+    container_name: endless-gaming-collector
+    environment:
+      # Database configuration
+      - DATABASE_URL=sqlite:///data/steam_games.db
+      # Optional: Set Steam API key if using legacy Steam collector
+      # - STEAM_API_KEY=${STEAM_API_KEY}
+      # Rate limiting configuration
+      - MAX_WORKERS=3
+    volumes:
+      # Persist database data
+      - ./data:/app/data
+      # Optional: Mount config files
+      - ./config:/app/config:ro
+    working_dir: /app
+    # Override default command for interactive use
+    # command: ["python", "scripts/collect_games.py", "collect", "--max-pages", "5"]
+    
+  # Optional: PostgreSQL database for production
+  postgres:
+    image: postgres:15-alpine
+    container_name: endless-gaming-db
+    environment:
+      - POSTGRES_DB=endless_gaming
+      - POSTGRES_USER=gamedata
+      - POSTGRES_PASSWORD=secure_password_here
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    profiles:
+      - production
+
+volumes:
+  postgres_data:

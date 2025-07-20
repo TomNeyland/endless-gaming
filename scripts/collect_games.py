@@ -159,6 +159,110 @@ async def collect_metadata_parallel(session, batch_size: int, max_concurrent: in
     return total_processed
 
 
+async def collect_interleaved(session, max_pages=None, batch_size=1000, max_concurrent=3):
+    """
+    Collect games and metadata in interleaved fashion: page -> metadata -> page -> metadata.
+    
+    This approach processes each page of games immediately after fetching it,
+    rather than fetching all pages first then processing metadata.
+    """
+    console.print("🔄 Starting interleaved collection (page -> metadata -> page -> metadata)")
+    
+    collector = SteamSpyAllCollector()
+    steamspy_metadata_collector = SteamSpyMetadataCollector()
+    
+    total_games_processed = 0
+    total_metadata_processed = 0
+    
+    page = 0
+    while True:
+        # Check if we've reached max pages
+        if max_pages is not None and page >= max_pages:
+            break
+            
+        console.print(f"\n📄 === Processing Page {page} ===")
+        
+        if page > 0:
+            console.print("⏰ Waiting for rate limit... fetching next page in ~60 seconds")
+        
+        try:
+            # Fetch single page of games
+            console.print(f"🎮 Fetching page {page} from SteamSpy...")
+            response = await collector.fetch_games_page(page)
+            
+            if not response:
+                console.print("✅ No more games found, collection complete")
+                break
+                
+            # Parse and save games from this page
+            games = collector.parse_all_response(response)
+            if not games:
+                console.print("✅ Empty page received, collection complete")
+                break
+                
+            # Save games to database
+            save_result = await collector.save_games_to_database(games, session)
+            games_this_page = len(games)
+            total_games_processed += games_this_page
+            
+            console.print(Panel(
+                f"Games on page {page}: {games_this_page}\n"
+                f"New: {save_result['new_games']}, Updated: {save_result['updated_games']}, Deactivated: {save_result['deactivated_games']}",
+                title=f"Page {page} Results",
+                border_style="blue"
+            ))
+            
+            # Now collect metadata for games from this page immediately
+            console.print(f"🔄 Collecting metadata for {games_this_page} games from page {page}...")
+            
+            # Create progress callback for this page
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                BarColumn(),
+                TaskProgressColumn(),
+                console=console
+            ) as progress:
+                task = progress.add_task("Fetching metadata...", total=games_this_page)
+                
+                def update_progress(current, total, game_name, top_tags, status):
+                    progress.update(task, completed=current)
+                    
+                    # Format game display with top 3 tags
+                    tags_display = ", ".join(top_tags) if top_tags else "No tags"
+                    game_display = f"{game_name} ({tags_display})"
+                    
+                    # Show progress for each game immediately
+                    status_emoji = "✅" if status == "success" else "❌" if status == "failed" else "⚠️"
+                    progress.console.print(f"{status_emoji} {game_display}")
+                
+                # Collect metadata for games from this page
+                metadata_result = await steamspy_metadata_collector.collect_metadata_for_games(
+                    games, session, batch_size=batch_size, progress_callback=update_progress
+                )
+                
+                total_metadata_processed += metadata_result['total_games_processed']
+            
+            console.print(Panel(
+                f"Metadata processed: {metadata_result['total_games_processed']}\n"
+                f"Success: {metadata_result['successful_fetches']}, Failed: {metadata_result['failed_fetches']}, Not found: {metadata_result['not_found']}",
+                title=f"Page {page} Metadata Results",
+                border_style="green"
+            ))
+            
+            page += 1
+            
+        except Exception as e:
+            console.print(Panel(
+                f"❌ Failed to process page {page}: {str(e)}",
+                title="Error",
+                border_style="red"
+            ))
+            break
+    
+    return total_games_processed, total_metadata_processed
+
+
 @app.command()
 def collect(
     full_refresh: bool = typer.Option(
@@ -222,16 +326,16 @@ def collect(
             total_games = 0
             total_metadata = 0
             
-            # Collect games by popularity (unless metadata-only mode)
-            if not update_metadata:
-                total_games = await collect_games_by_popularity(
-                    session, max_pages=max_pages
+            if update_metadata:
+                # Metadata-only mode: update existing games
+                total_metadata = await collect_metadata_parallel(
+                    session, _batch_size, _max_concurrent
                 )
-            
-            # Collect metadata for all games
-            total_metadata = await collect_metadata_parallel(
-                session, _batch_size, _max_concurrent
-            )
+            else:
+                # Interleaved mode: page -> metadata -> page -> metadata
+                total_games, total_metadata = await collect_interleaved(
+                    session, max_pages=max_pages, batch_size=_batch_size, max_concurrent=_max_concurrent
+                )
             
             console.print(Panel(
                 f"🎉 Collection completed successfully!\n"
