@@ -23,7 +23,12 @@ endless-gaming/
 │   ├── config.py               # Application configuration
 │   ├── pyproject.toml          # Poetry dependency management
 │   └── alembic.ini             # Alembic migration configuration
-└── endless-gaming-frontend/    # Frontend implementation (future)
+└── endless-gaming-frontend/    # Angular frontend (in development)
+    ├── src/app/                # Angular application components
+    ├── public/                 # Static assets
+    ├── angular.json           # Angular CLI configuration
+    ├── package.json           # NPM dependencies
+    └── GAME_PICKER_SPEC.md    # Frontend UX specification
 ```
 
 **Important**: All Python commands must be run from the `endless-gaming-backend/` directory.
@@ -38,17 +43,31 @@ endless-gaming/
 - **Tenacity** for retry logic with exponential backoff
 - **pytest + pytest-asyncio** for comprehensive testing (89 tests)
 
+### Frontend Stack
+- **Angular 20.1.0** (latest version with standalone components)
+- **TypeScript 5.8.2** with strict configuration
+- **SCSS** for component styling
+- **RxJS** for reactive programming and state management
+- **Angular Signals** for modern reactive state handling
+
 ## Development Commands
 
-### Environment Setup
+### Backend Environment Setup
 ```bash
 cd endless-gaming-backend        # Navigate to backend directory
 poetry install                   # Install dependencies
 poetry shell                     # Activate virtual environment
 ```
 
-### Testing (TDD Approach)
+### Frontend Environment Setup
 ```bash
+cd endless-gaming-frontend       # Navigate to frontend directory
+npm install                      # Install dependencies
+```
+
+### Backend Testing (TDD Approach)
+```bash
+cd endless-gaming-backend               # All backend commands from this directory
 poetry run pytest                          # Run all 89 tests
 poetry run pytest tests/test_models.py     # Run specific test file (14 tests)
 poetry run pytest tests/test_rate_limiter.py     # Rate limiter tests (14 tests)
@@ -58,6 +77,15 @@ poetry run pytest tests/test_steamspy_all_collector.py # SteamSpy /all collector
 poetry run pytest tests/test_parallel_fetcher.py # Parallel processing tests (11 tests)
 poetry run pytest -v                       # Verbose output
 poetry run pytest -k "test_name"          # Run specific test
+```
+
+### Frontend Development & Testing
+```bash
+cd endless-gaming-frontend              # All frontend commands from this directory
+npm start                               # Start development server (http://localhost:4200)
+npm run build                           # Build for production
+npm test                                # Run unit tests with Karma
+npm run watch                           # Build in watch mode for development
 ```
 
 ### Data Collection
@@ -258,6 +286,14 @@ This codebase was built using strict Test-Driven Development. When adding new fe
 
 **Never implement code without failing tests first.** This ensures appropriate test coverage for core functionality and validates that tests actually verify the intended behavior. Focus on testing what matters, not exhaustive edge case coverage.
 
+## Important Development Guidelines
+
+**Code Quality Standards**:
+- Follow existing code conventions and patterns in the codebase
+- Mimic code style, use existing libraries and utilities
+- **NEVER assume libraries are available** - check package.json/pyproject.toml first
+- **NEVER include sensitive information** (API keys, tokens) in code or commits
+
 ## Configuration Requirements
 
 Set environment variables for production:
@@ -355,3 +391,64 @@ async def collect_interleaved(session, max_pages=None, batch_size=1000, max_conc
 - Immediate data availability
 - Better error recovery (partial collections still useful)
 - Optimal user experience during long-running operations
+
+## Frontend Architecture
+
+### Angular Application Structure
+
+The frontend is built with Angular 20.1.0 using modern patterns:
+
+```
+src/app/
+├── app.ts              # Main component using Angular Signals
+├── app.config.ts       # Application configuration (providers, routing)
+├── app.routes.ts       # Route definitions
+├── app.html           # Main template
+└── [planned components based on GAME_PICKER_SPEC.md]
+```
+
+### Planned Game Picker Architecture
+
+Based on `/endless-gaming-frontend/GAME_PICKER_SPEC.md`, the frontend will implement a MaxDiff-style game discovery system:
+
+**Core UX Flow**:
+1. **Pairwise Comparison** - Show two games, user picks preferred one or skips
+2. **Preference Learning** - Each choice updates an internal preference model using Steam tags
+3. **Live Feedback** - Real-time display of learned preferences (liked/disliked tags)
+4. **Smart Recommendations** - Generate personalized top 100 game list
+
+**Planned Service Architecture**:
+```
+services/
+├── game-data.service.ts      # Load master.json, cache GameRecord data
+├── vector.service.ts         # Tag normalization, sparse vector conversion
+├── preference.service.ts     # Weight vector management, SGD updates
+├── pair.service.ts           # Uncertainty sampling for game pairs
+└── choice-api.service.ts     # Offline queue, analytics logging
+```
+
+**Data Flow**:
+```
+master.json (≈500KB) → IndexedDB → Sparse Vectors → Preference Model → Recommendations
+```
+
+**Key Technical Features**:
+- **Client-side ML** - Logistic SGD for preference learning
+- **Offline-first** - IndexedDB caching with offline choice queue
+- **Performance** - Sparse vectors, priority queues for top-K games
+- **Real-time updates** - Angular Signals for reactive preference display
+
+### Frontend Development Notes
+
+**Important**: Frontend commands must be run from the `endless-gaming-frontend/` directory.
+
+**Modern Angular Patterns**:
+- Uses **standalone components** (no NgModules)
+- **Angular Signals** for reactive state management
+- **SCSS** for component styling with Angular CLI optimization
+- **TypeScript 5.8.2** with strict configuration
+
+**Recommended Libraries** (from spec):
+- **Dexie.js** - IndexedDB wrapper for offline data storage
+- **fastpriorityqueue** - Efficient top-K game ranking
+- **vectorious** - Typed-array vector operations for ML

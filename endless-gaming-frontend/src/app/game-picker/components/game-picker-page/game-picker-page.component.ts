@@ -17,7 +17,7 @@ import { GamePickerState } from '../../../types/game.types';
 })
 export class GamePickerPageComponent {
   
-  protected readonly state = signal<GamePickerState>('loading');
+  public readonly state = signal<GamePickerState>('loading');
   
   constructor() {
     throw new Error('Not implemented');

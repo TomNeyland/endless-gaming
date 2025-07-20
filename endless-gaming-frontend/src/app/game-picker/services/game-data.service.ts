@@ -1,5 +1,8 @@
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, from, of, throwError } from 'rxjs';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import Dexie, { Table } from 'dexie';
 import { GameRecord } from '../../types/game.types';
 
 /**
@@ -8,17 +11,55 @@ import { GameRecord } from '../../types/game.types';
  * Handles fetching master.json from the backend and caching in IndexedDB
  * for offline access and improved performance.
  */
+interface CacheEntry {
+  id: string;
+  data: GameRecord[];
+  timestamp: number;
+}
+
+class GameDatabase extends Dexie {
+  games!: Table<GameRecord, number>;
+  cache!: Table<CacheEntry, string>;
+
+  constructor() {
+    super('GameDatabase');
+    this.version(1).stores({
+      games: 'appId, name, developer, publisher, *genres',
+      cache: 'id, timestamp'
+    });
+  }
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class GameDataService {
+  private http = inject(HttpClient);
+  private db = new GameDatabase();
+  private readonly CACHE_KEY = 'master_data';
+  private readonly CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+  private readonly API_URL = '/discovery/games/master.json';
+  private gameCache = new Map<number, GameRecord>();
+  private allGamesCache: GameRecord[] = [];
 
   /**
    * Load master game data from backend API.
    * Caches data in IndexedDB for offline access.
    */
   loadMasterData(): Observable<GameRecord[]> {
-    throw new Error('Not implemented');
+    return from(this.getCachedData()).pipe(
+      switchMap(cachedData => {
+        if (cachedData && this.isCacheValid()) {
+          this.populateInMemoryCache(cachedData);
+          return of(cachedData);
+        }
+        return this.fetchFromBackend();
+      }),
+      catchError(error => {
+        console.error('Failed to load master data:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
   /**
@@ -26,7 +67,7 @@ export class GameDataService {
    * Returns null if game not found.
    */
   getGameById(appId: number): GameRecord | null {
-    throw new Error('Not implemented');
+    return this.gameCache.get(appId) || null;
   }
 
   /**
@@ -34,20 +75,99 @@ export class GameDataService {
    * Returns empty array if no data loaded.
    */
   getAllGames(): GameRecord[] {
-    throw new Error('Not implemented');
+    return [...this.allGamesCache];
   }
 
   /**
    * Check if master data is currently cached.
    */
   isCacheValid(): boolean {
-    throw new Error('Not implemented');
+    return this.allGamesCache.length > 0;
   }
 
   /**
    * Clear cached data and force reload on next request.
    */
-  clearCache(): Promise<void> {
-    throw new Error('Not implemented');
+  async clearCache(): Promise<void> {
+    try {
+      await this.db.cache.delete(this.CACHE_KEY);
+      await this.db.games.clear();
+      this.gameCache.clear();
+      this.allGamesCache = [];
+    } catch (error) {
+      console.warn('Cache clear failed:', error);
+    }
+  }
+  
+  /**
+   * Close database connection for cleanup
+   */
+  async closeDatabase(): Promise<void> {
+    try {
+      await this.db.close();
+    } catch (error) {
+      console.warn('Database close failed:', error);
+    }
+  }
+
+  private async getCachedData(): Promise<GameRecord[] | null> {
+    try {
+      const cacheEntry = await this.db.cache.get(this.CACHE_KEY);
+      if (!cacheEntry) return null;
+      
+      const age = Date.now() - cacheEntry.timestamp;
+      if (age >= this.CACHE_TTL) {
+        await this.clearCache();
+        return null;
+      }
+      
+      return cacheEntry.data;
+    } catch (error) {
+      console.error('Error reading from cache:', error);
+      return null;
+    }
+  }
+
+  private fetchFromBackend(): Observable<GameRecord[]> {
+    return this.http.get<GameRecord[]>(this.API_URL).pipe(
+      switchMap(data => 
+        from(this.cacheData(data)).pipe(
+          map(() => data),
+          catchError(cacheError => {
+            console.warn('Cache failed, but data loaded:', cacheError);
+            return of(data);
+          })
+        )
+      ),
+      tap(data => this.populateInMemoryCache(data)),
+      catchError(error => {
+        console.error('Backend fetch failed:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  private async cacheData(games: GameRecord[]): Promise<void> {
+    try {
+      await this.db.transaction('rw', this.db.games, this.db.cache, async () => {
+        await this.db.games.clear();
+        await this.db.games.bulkAdd(games);
+        await this.db.cache.put({
+          id: this.CACHE_KEY,
+          data: games,
+          timestamp: Date.now()
+        });
+      });
+    } catch (error) {
+      console.error('Error caching data:', error);
+    }
+  }
+
+  private populateInMemoryCache(games: GameRecord[]): void {
+    this.gameCache.clear();
+    this.allGamesCache = games;
+    games.forEach(game => {
+      this.gameCache.set(game.appId, game);
+    });
   }
 }

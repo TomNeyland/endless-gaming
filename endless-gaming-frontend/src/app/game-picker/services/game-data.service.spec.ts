@@ -46,8 +46,15 @@ describe('GameDataService', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     httpMock.verify();
+    // Clean up IndexedDB to prevent hanging
+    try {
+      await service.clearCache();
+      await service.closeDatabase();
+    } catch (error) {
+      // Ignore cleanup errors
+    }
   });
 
   it('should be created', () => {
