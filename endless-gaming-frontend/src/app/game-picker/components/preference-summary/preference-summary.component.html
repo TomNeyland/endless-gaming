@@ -1,75 +1,92 @@
-<div class="preference-summary">
+<mat-card class="preference-summary">
   @if (hasPreferences()) {
-    <div class="summary-container">
-      <h3>Your Gaming Preferences</h3>
-      
-      <div class="preferences-grid">
-        <!-- Liked Tags -->
-        <div class="preference-section liked-section">
-          <h4 class="section-title liked-title">
-            <span class="icon">👍</span>
-            You Like
-          </h4>
+    <mat-card-header>
+      <mat-card-title class="mat-headline-5">
+        <mat-icon>insights</mat-icon>
+        Your Gaming Preferences
+      </mat-card-title>
+      <mat-card-subtitle class="mat-body-2">
+        Based on {{ getComparisonCount() }} comparisons
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-accordion>
+        <!-- Liked Tags Section -->
+        <mat-expansion-panel class="liked-panel" [expanded]="true">
+          <mat-expansion-panel-header>
+            <mat-panel-title class="liked-title">
+              <mat-icon class="like-icon">thumb_up</mat-icon>
+              You Like
+              <span class="tag-count">({{ getLikedTags().length }})</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
           
           @if (getLikedTags().length > 0) {
             <div class="tag-list">
               @for (tagData of getLikedTags(); track tagData.tag) {
                 <div class="tag-item liked-tag">
-                  <div class="tag-info">
-                    <span class="tag-name">{{ tagData.tag }}</span>
-                    <span class="tag-weight">{{ formatWeight(tagData.weight) }}</span>
+                  <div class="tag-header">
+                    <span class="tag-name mat-body-1">{{ tagData.tag }}</span>
+                    <span class="tag-weight mat-caption">{{ formatWeight(tagData.weight) }}</span>
                   </div>
-                  <div class="weight-bar">
-                    <div 
-                      class="weight-fill liked-fill" 
-                      [style.width]="getBarWidth(tagData.weight, getMaxWeight())">
-                    </div>
-                  </div>
+                  <mat-progress-bar 
+                    mode="determinate"
+                    [value]="(tagData.weight / getMaxWeight()) * 100"
+                    class="preference-like">
+                  </mat-progress-bar>
                 </div>
               }
             </div>
           } @else {
-            <div class="no-preferences">
+            <div class="no-preferences mat-body-2">
+              <mat-icon>psychology</mat-icon>
               <p>Make some choices to see what you like!</p>
             </div>
           }
-        </div>
+        </mat-expansion-panel>
 
-        <!-- Disliked Tags -->
-        <div class="preference-section disliked-section">
-          <h4 class="section-title disliked-title">
-            <span class="icon">👎</span>
-            You Dislike
-          </h4>
+        <!-- Disliked Tags Section -->
+        <mat-expansion-panel class="disliked-panel" [expanded]="true">
+          <mat-expansion-panel-header>
+            <mat-panel-title class="disliked-title">
+              <mat-icon class="dislike-icon">thumb_down</mat-icon>
+              You Dislike
+              <span class="tag-count">({{ getDislikedTags().length }})</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
           
           @if (getDislikedTags().length > 0) {
             <div class="tag-list">
               @for (tagData of getDislikedTags(); track tagData.tag) {
                 <div class="tag-item disliked-tag">
-                  <div class="tag-info">
-                    <span class="tag-name">{{ tagData.tag }}</span>
-                    <span class="tag-weight">{{ formatWeight(getAbsWeight(tagData.weight)) }}</span>
+                  <div class="tag-header">
+                    <span class="tag-name mat-body-1">{{ tagData.tag }}</span>
+                    <span class="tag-weight mat-caption">{{ formatWeight(getAbsWeight(tagData.weight)) }}</span>
                   </div>
-                  <div class="weight-bar">
-                    <div 
-                      class="weight-fill disliked-fill" 
-                      [style.width]="getBarWidth(getAbsWeight(tagData.weight), getMaxWeight())">
-                    </div>
-                  </div>
+                  <mat-progress-bar 
+                    mode="determinate"
+                    [value]="(getAbsWeight(tagData.weight) / getMaxWeight()) * 100"
+                    class="preference-dislike">
+                  </mat-progress-bar>
                 </div>
               }
             </div>
           } @else {
-            <div class="no-preferences">
+            <div class="no-preferences mat-body-2">
+              <mat-icon>psychology</mat-icon>
               <p>Make some choices to see what you dislike!</p>
             </div>
           }
-        </div>
-      </div>
-    </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </mat-card-content>
   } @else {
-    <div class="no-data">
-      <p>Start comparing games to see your preferences!</p>
-    </div>
+    <mat-card-content>
+      <div class="no-data mat-headline-6">
+        <mat-icon>auto_awesome</mat-icon>
+        <p>Start comparing games to see your preferences!</p>
+      </div>
+    </mat-card-content>
   }
-</div>
+</mat-card>

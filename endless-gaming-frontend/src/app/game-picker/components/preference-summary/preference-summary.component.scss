@@ -1,132 +1,187 @@
+// Material Design preference summary with gaming theme
 .preference-summary {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
+  margin: 16px;
+  max-width: 600px;
 
-  .summary-container {
-    h3 {
-      margin: 0 0 1.5rem 0;
-      text-align: center;
-      color: #333;
-      font-size: 1.4rem;
+  // Card header styling
+  mat-card-header {
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--gaming-text-primary) !important;
+      
+      mat-icon {
+        color: var(--gaming-accent);
+      }
     }
+    
+    mat-card-subtitle {
+      color: var(--gaming-text-secondary) !important;
+      margin-top: 4px !important;
+    }
+  }
 
-    .preferences-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-
-      .preference-section {
-        .section-title {
+  // Expansion panel styling
+  mat-accordion {
+    mat-expansion-panel {
+      background: transparent !important;
+      margin-bottom: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px !important;
+      
+      &.liked-panel {
+        border-left: 4px solid #4caf50;
+      }
+      
+      &.disliked-panel {
+        border-left: 4px solid #f44336;
+      }
+      
+      mat-expansion-panel-header {
+        background: rgba(255, 255, 255, 0.02) !important;
+        border-radius: 8px 8px 0 0 !important;
+        
+        mat-panel-title {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
-          margin: 0 0 1rem 0;
-          font-size: 1.1rem;
-          font-weight: bold;
-
-          .icon {
-            font-size: 1.2rem;
+          gap: 8px;
+          color: var(--gaming-text-primary) !important;
+          font-weight: 600 !important;
+          
+          &.liked-title .like-icon {
+            color: #4caf50;
           }
-
-          &.liked-title {
-            color: #27ae60;
+          
+          &.disliked-title .dislike-icon {
+            color: #f44336;
           }
-
-          &.disliked-title {
-            color: #e74c3c;
-          }
-        }
-
-        .tag-list {
-          .tag-item {
-            margin-bottom: 0.75rem;
-            padding: 0.75rem;
-            border-radius: 8px;
-            background: #f8f9fa;
-
-            &.liked-tag {
-              border-left: 4px solid #27ae60;
-            }
-
-            &.disliked-tag {
-              border-left: 4px solid #e74c3c;
-            }
-
-            .tag-info {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-bottom: 0.5rem;
-
-              .tag-name {
-                font-weight: bold;
-                color: #333;
-              }
-
-              .tag-weight {
-                font-size: 0.9rem;
-                color: #666;
-                font-family: monospace;
-              }
-            }
-
-            .weight-bar {
-              height: 6px;
-              background: #e9ecef;
-              border-radius: 3px;
-              overflow: hidden;
-
-              .weight-fill {
-                height: 100%;
-                border-radius: 3px;
-                transition: width 0.3s ease;
-
-                &.liked-fill {
-                  background: linear-gradient(90deg, #27ae60, #2ecc71);
-                }
-
-                &.disliked-fill {
-                  background: linear-gradient(90deg, #e74c3c, #ec7063);
-                }
-              }
-            }
+          
+          .tag-count {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-left: auto;
           }
         }
-
-        .no-preferences {
-          text-align: center;
-          padding: 2rem 1rem;
-          color: #6c757d;
-          font-style: italic;
-
-          p {
-            margin: 0;
-          }
+      }
+      
+      .mat-expansion-panel-content {
+        .mat-expansion-panel-body {
+          padding: 16px !important;
         }
       }
     }
   }
 
-  .no-data {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: #6c757d;
+  // Tag list styling
+  .tag-list {
+    .tag-item {
+      margin-bottom: 16px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      
+      &.liked-tag {
+        border-left: 3px solid #4caf50;
+      }
+      
+      &.disliked-tag {
+        border-left: 3px solid #f44336;
+      }
+      
+      .tag-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        
+        .tag-name {
+          color: var(--gaming-text-primary) !important;
+          font-weight: 500 !important;
+        }
+        
+        .tag-weight {
+          color: var(--gaming-text-secondary) !important;
+          font-family: 'Roboto Mono', monospace !important;
+          font-size: 0.75rem !important;
+        }
+      }
+      
+      mat-progress-bar {
+        height: 6px;
+        border-radius: 3px;
+        overflow: hidden;
+        
+        &.preference-like {
+          --mdc-linear-progress-active-indicator-color: #4caf50;
+        }
+        
+        &.preference-dislike {
+          --mdc-linear-progress-active-indicator-color: #f44336;
+        }
+      }
+    }
+  }
 
+  // Empty states
+  .no-preferences {
+    text-align: center;
+    padding: 24px;
+    color: var(--gaming-text-secondary) !important;
+    
+    mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+      margin-bottom: 8px;
+      opacity: 0.5;
+    }
+    
     p {
       margin: 0;
-      font-size: 1.1rem;
+      font-style: italic;
+    }
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--gaming-text-secondary) !important;
+    
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+      color: var(--gaming-accent);
+      opacity: 0.7;
+    }
+    
+    p {
+      margin: 0;
     }
   }
 }
 
+// Responsive design
 @media (max-width: 768px) {
   .preference-summary {
-    .summary-container .preferences-grid {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
+    margin: 8px;
+    
+    mat-card-header {
+      mat-card-title {
+        font-size: 1.1rem !important;
+      }
+    }
+    
+    .tag-list .tag-item {
+      padding: 8px;
+      margin-bottom: 12px;
+      
+      .tag-header {
+        margin-bottom: 6px;
+      }
     }
   }
 }
