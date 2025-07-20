@@ -19,8 +19,8 @@ RUN pip install poetry==1.8.5
 WORKDIR /app
 
 # Copy Poetry configuration files
-COPY pyproject.toml ./
-COPY poetry.lock* ./
+COPY endless-gaming-backend/pyproject.toml ./
+COPY endless-gaming-backend/poetry.lock* ./
 
 # Configure poetry and install dependencies
 RUN poetry config virtualenvs.in-project true && \
@@ -52,7 +52,7 @@ WORKDIR /app
 COPY --from=builder /app/.venv /app/.venv
 
 # Copy application code
-COPY . .
+COPY endless-gaming-backend/ .
 
 # Create data directory for SQLite database
 RUN mkdir -p /app/data && chown -R appuser:appuser /app

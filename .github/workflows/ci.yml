@@ -33,7 +33,7 @@ jobs:
       with:
         path: |
           ~/.cache/pypoetry
-          .venv
+          endless-gaming-backend/.venv
         key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
         restore-keys: |
           ${{ runner.os }}-poetry-
@@ -48,6 +48,7 @@ jobs:
         
     - name: Install dependencies
       run: poetry install --no-interaction
+      working-directory: endless-gaming-backend
       
     - name: Run linting with ruff (if available)
       run: |
@@ -56,6 +57,7 @@ jobs:
         else
           echo "Ruff not installed, skipping linting"
         fi
+      working-directory: endless-gaming-backend
       continue-on-error: true
       
     - name: Run type checking with mypy (if available)
@@ -65,6 +67,7 @@ jobs:
         else
           echo "MyPy not installed, skipping type checking"
         fi
+      working-directory: endless-gaming-backend
       continue-on-error: true
       
     - name: Run tests with pytest
@@ -74,6 +77,7 @@ jobs:
           --tb=short \
           --maxfail=10 \
           --durations=10
+      working-directory: endless-gaming-backend
       env:
         # Set test environment variables
         DATABASE_URL: sqlite:///test_steam_games.db
@@ -84,8 +88,8 @@ jobs:
       with:
         name: test-results-${{ matrix.python-version }}
         path: |
-          .pytest_cache/
-          htmlcov/
+          endless-gaming-backend/.pytest_cache/
+          endless-gaming-backend/htmlcov/
         retention-days: 7
 
   docker-build:
@@ -136,6 +140,7 @@ jobs:
         
     - name: Install dependencies
       run: poetry install --no-interaction
+      working-directory: endless-gaming-backend
       
     - name: Run safety check
       run: |
@@ -144,6 +149,7 @@ jobs:
         else
           echo "Safety not installed, skipping security scan"
         fi
+      working-directory: endless-gaming-backend
       continue-on-error: true
       
     - name: Run bandit security linter
@@ -153,6 +159,7 @@ jobs:
         else
           echo "Bandit not installed, skipping security scan"
         fi
+      working-directory: endless-gaming-backend
       continue-on-error: true
       
     - name: Upload security scan results
@@ -161,7 +168,7 @@ jobs:
       with:
         name: security-scan-results
         path: |
-          bandit-report.json
+          endless-gaming-backend/bandit-report.json
         retention-days: 30
 
   coverage:
@@ -187,6 +194,7 @@ jobs:
         
     - name: Install dependencies
       run: poetry install --no-interaction
+      working-directory: endless-gaming-backend
       
     - name: Run tests with coverage
       run: |
@@ -196,6 +204,7 @@ jobs:
           echo "pytest-cov not installed, running tests without coverage"
           poetry run pytest
         fi
+      working-directory: endless-gaming-backend
       env:
         DATABASE_URL: sqlite:///test_steam_games.db
         
@@ -203,7 +212,7 @@ jobs:
       uses: codecov/codecov-action@v3
       if: success()
       with:
-        file: ./coverage.xml
+        file: ./endless-gaming-backend/coverage.xml
         flags: unittests
         name: codecov-umbrella
         fail_ci_if_error: false

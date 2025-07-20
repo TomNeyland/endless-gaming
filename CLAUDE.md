@@ -6,6 +6,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Endless Gaming is a comprehensive Steam gaming platform with a production-ready data collection engine as its foundation. The current implementation focuses on collecting and processing game data from Steam and SteamSpy APIs, with future plans for game recommendation and discovery features. Built with Poetry for dependency management and designed for large-scale data collection (30k+ games) with proper rate limiting, error handling, and multiple deployment options.
 
+## Project Structure
+
+The project is organized with a clean separation between backend and frontend:
+
+```
+endless-gaming/
+├── endless-gaming-backend/     # Python backend (current implementation)
+│   ├── models/                 # SQLAlchemy database models
+│   ├── collectors/             # Data collection components
+│   ├── utils/                  # Shared utilities (rate limiter, HTTP client)
+│   ├── workers/                # Parallel processing workers
+│   ├── scripts/                # CLI scripts for data collection
+│   ├── tests/                  # Comprehensive test suite (89 tests)
+│   ├── alembic/                # Database migrations
+│   ├── config.py               # Application configuration
+│   ├── pyproject.toml          # Poetry dependency management
+│   └── alembic.ini             # Alembic migration configuration
+└── endless-gaming-frontend/    # Frontend implementation (future)
+```
+
+**Important**: All Python commands must be run from the `endless-gaming-backend/` directory.
+
 ## Technology Stack
 
 - **Python 3.12+** with Poetry for dependency management
@@ -20,7 +42,8 @@ Endless Gaming is a comprehensive Steam gaming platform with a production-ready 
 
 ### Environment Setup
 ```bash
-poetry install                    # Install dependencies
+cd endless-gaming-backend        # Navigate to backend directory
+poetry install                   # Install dependencies
 poetry shell                     # Activate virtual environment
 ```
 

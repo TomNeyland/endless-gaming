@@ -3,7 +3,13 @@ name = "endless-gaming"
 version = "0.1.0"
 description = ""
 authors = ["Tom Neyland <tcneyland@gmail.com>"]
-readme = "README.md"
+packages = [
+    {include = "models"},
+    {include = "collectors"},
+    {include = "utils"},
+    {include = "workers"},
+    {include = "scripts"}
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"

@@ -15,7 +15,7 @@ databases:
 jobs:
   - name: database-setup
     kind: PRE_DEPLOY
-    source_dir: /
+    source_dir: /endless-gaming-backend
     environment_slug: python
     
     build_command: |
@@ -40,7 +40,7 @@ jobs:
   - name: daily-full-collection
     kind: CRON
     schedule: "0 2 * * *"  # Run daily at 2 AM UTC
-    source_dir: /
+    source_dir: /endless-gaming-backend
     environment_slug: python
     
     build_command: |
@@ -68,7 +68,7 @@ jobs:
   - name: weekly-maintenance
     kind: CRON
     schedule: "0 1 * * 0"  # Run weekly on Sunday at 1 AM UTC
-    source_dir: /
+    source_dir: /endless-gaming-backend
     environment_slug: python
     
     build_command: |

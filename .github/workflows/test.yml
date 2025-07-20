@@ -28,13 +28,15 @@ jobs:
     - name: Cache dependencies
       uses: actions/cache@v4
       with:
-        path: .venv
+        path: endless-gaming-backend/.venv
         key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
         
     - name: Install dependencies
       run: poetry install
+      working-directory: endless-gaming-backend
       
     - name: Run tests
       run: poetry run pytest -v
+      working-directory: endless-gaming-backend
       env:
         DATABASE_URL: sqlite:///test_steam_games.db
