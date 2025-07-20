@@ -1,180 +1,199 @@
+// Material Design game card with gaming theme
 .game-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  max-width: 400px;
+  margin: 16px;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  &.highlight-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
   }
 
-  .card-header {
+  // Cover image container with aspect ratio
+  .card-image-container {
     position: relative;
-    height: 150px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 100%;
+    padding-top: 56.25%; // 16:9 aspect ratio
+    overflow: hidden;
     
+    .cover-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    
+    &:hover .cover-image {
+      transform: scale(1.05);
+    }
+    
+    // Rank badge overlay
     .rank-badge {
       position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(255, 255, 255, 0.9);
-      color: #333;
-      padding: 0.25rem 0.5rem;
-      border-radius: 12px;
-      font-weight: bold;
-      font-size: 0.8rem;
+      top: 12px;
+      right: 12px;
+      background: var(--gaming-accent);
+      color: var(--gaming-background);
+      padding: 8px 12px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+      
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+
+  // Material card content
+  mat-card-content {
+    padding: 16px !important;
+    
+    mat-card-title {
+      margin-bottom: 8px !important;
+      font-size: 1.25rem !important;
+      line-height: 1.3 !important;
+      color: var(--gaming-text-primary) !important;
     }
     
-    .game-cover {
-      .cover-image {
-        width: 100px;
-        height: 130px;
-        object-fit: cover;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-      }
+    // Price and genre row
+    .metadata-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 16px;
       
-      .cover-placeholder {
-        width: 100px;
-        height: 130px;
-        background: rgba(255, 255, 255, 0.2);
-        border: 2px dashed rgba(255, 255, 255, 0.5);
-        border-radius: 8px;
+      mat-card-subtitle {
+        margin: 0 !important;
         display: flex;
         align-items: center;
-        justify-content: center;
+        gap: 4px;
+        font-size: 0.9rem !important;
         
-        span {
-          color: white;
-          font-size: 2rem;
-          font-weight: bold;
+        &.price-tag {
+          color: var(--gaming-accent) !important;
+          font-weight: 600 !important;
+        }
+        
+        &.genre-tag {
+          color: var(--gaming-text-secondary) !important;
+        }
+        
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
         }
       }
     }
-  }
-
-  .card-content {
-    padding: 1.5rem;
     
-    .game-title {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: #333;
-      line-height: 1.3;
+    // Developer info
+    .developer {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 16px;
+      color: var(--gaming-text-secondary) !important;
+      
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
     }
     
-    .game-price {
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: #27ae60;
-      margin-bottom: 0.5rem;
+    // Tags section with Material chips
+    .tags-section {
+      margin-bottom: 16px;
+      
+      mat-chip-set {
+        mat-chip {
+          background-color: rgba(25, 118, 210, 0.2) !important;
+          color: var(--gaming-primary) !important;
+          font-size: 0.8rem !important;
+          height: 28px !important;
+          
+          &:hover {
+            background-color: rgba(25, 118, 210, 0.3) !important;
+          }
+        }
+      }
     }
     
-    .game-developer {
-      font-size: 0.9rem;
-      color: #666;
-      margin-bottom: 1rem;
+    // Reviews section
+    .reviews {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+      color: var(--gaming-text-secondary) !important;
+      
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
     }
     
-    .preference-score {
-      background: #f8f9fa;
-      padding: 0.5rem;
-      border-radius: 4px;
-      margin-bottom: 1rem;
-      font-weight: bold;
-      color: #495057;
+    // Score section for recommendations
+    .score-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      background: rgba(255, 152, 0, 0.1);
+      border-radius: 8px;
+      border-left: 4px solid var(--gaming-accent);
+      color: var(--gaming-accent) !important;
+      font-weight: 600 !important;
+      
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+    
+    // Empty state
+    .empty-card {
       text-align: center;
-    }
-    
-    .game-tags {
-      margin-bottom: 1rem;
+      padding: 32px;
+      color: var(--gaming-text-secondary) !important;
       
-      .tag-chip {
-        display: inline-block;
-        background: #e9ecef;
-        color: #495057;
-        padding: 0.25rem 0.5rem;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        margin: 0.25rem 0.25rem 0.25rem 0;
-        
-        &:first-child {
-          background: #3498db;
-          color: white;
-        }
-      }
-    }
-    
-    .game-reviews {
-      margin-bottom: 1rem;
-      
-      .review-summary {
-        font-size: 0.9rem;
-        color: #666;
-        margin-bottom: 0.25rem;
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
       }
       
-      .review-percentage {
-        font-size: 0.8rem;
-        color: #27ae60;
-        font-weight: bold;
-      }
-    }
-    
-    .game-genres {
-      .genre-badge {
-        display: inline-block;
-        background: #6c757d;
-        color: white;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.8rem;
-        margin: 0.25rem 0.25rem 0.25rem 0;
+      p {
+        margin: 0;
+        font-style: italic;
       }
     }
   }
 }
 
-.game-card-placeholder {
-  background: #f8f9fa;
-  border: 2px dashed #dee2e6;
-  border-radius: 12px;
-  height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  .placeholder-content {
-    text-align: center;
-    color: #6c757d;
-  }
-}
-
-// Compact version for list display
-.game-card.compact {
-  .card-header {
-    height: 80px;
+// Responsive adjustments
+@media (max-width: 768px) {
+  .game-card {
+    margin: 8px;
+    max-width: 100%;
     
-    .game-cover {
-      .cover-image,
-      .cover-placeholder {
-        width: 60px;
-        height: 70px;
-      }
-    }
-  }
-  
-  .card-content {
-    padding: 1rem;
-    
-    .game-title {
-      font-size: 1.1rem;
+    .metadata-row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
     }
   }
 }

@@ -1,57 +1,77 @@
-<div class="game-card" 
-     [class.highlight-hover]="highlightOnHover"
-     [class.has-score]="showScore">
+<mat-card 
+  class="game-card" 
+  [class.highlight-hover]="highlightOnHover"
+  [class.has-score]="showScore"
+  appearance="outlined">
   
   @if (hasValidGame()) {
-    <div class="card-content">
-      <!-- Cover Image -->
-      <div class="cover-section">
-        <img 
-          [src]="getCoverImage()" 
-          [alt]="game!.name"
-          (error)="onImageError($event)"
-          class="cover-image">
-        
-        <!-- Rank badge for recommendations -->
-        @if (showScore && rank) {
-          <div class="rank-badge">
-            #{{ rank }}
-          </div>
-        }
+    <!-- Cover Image Header -->
+    <div class="card-image-container">
+      <img 
+        mat-card-image
+        [src]="getCoverImage()" 
+        [alt]="game!.name"
+        (error)="onImageError($event)"
+        class="cover-image">
+      
+      <!-- Rank badge for recommendations -->
+      @if (showScore && rank) {
+        <div class="rank-badge mat-elevation-z2">
+          <mat-icon>star</mat-icon>
+          {{ rank }}
+        </div>
+      }
+    </div>
+
+    <!-- Game Content -->
+    <mat-card-content>
+      <mat-card-title>{{ game!.name }}</mat-card-title>
+      
+      <div class="metadata-row">
+        <mat-card-subtitle class="price-tag">
+          <mat-icon>attach_money</mat-icon>
+          {{ getFormattedPrice() }}
+        </mat-card-subtitle>
+        <mat-card-subtitle class="genre-tag">
+          <mat-icon>category</mat-icon>
+          {{ getPrimaryGenre() }}
+        </mat-card-subtitle>
       </div>
 
-      <!-- Game Info -->
-      <div class="info-section">
-        <h3 class="game-title">{{ game!.name }}</h3>
-        
-        <div class="metadata">
-          <div class="price">{{ getFormattedPrice() }}</div>
-          <div class="genre">{{ getPrimaryGenre() }}</div>
-        </div>
+      <div class="developer mat-body-2">
+        <mat-icon>business</mat-icon>
+        {{ getDeveloperText() }}
+      </div>
 
-        <div class="developer">{{ getDeveloperText() }}</div>
-
-        <!-- Tags -->
-        <div class="tags">
+      <!-- Tags as Material Chips -->
+      <div class="tags-section">
+        <mat-chip-set>
           @for (tagData of getTopTags(3); track tagData.tag) {
-            <span class="tag">{{ tagData.tag }}</span>
+            <mat-chip class="tag-chip">{{ tagData.tag }}</mat-chip>
           }
-        </div>
-
-        <!-- Reviews -->
-        <div class="reviews">{{ getReviewText() }}</div>
-
-        <!-- Score for recommendations -->
-        @if (showScore && score !== undefined) {
-          <div class="score">
-            Score: {{ getFormattedScore() }}
-          </div>
-        }
+        </mat-chip-set>
       </div>
-    </div>
+
+      <!-- Reviews -->
+      <div class="reviews mat-body-2">
+        <mat-icon>rate_review</mat-icon>
+        {{ getReviewText() }}
+      </div>
+
+      <!-- Score for recommendations -->
+      @if (showScore && score !== undefined) {
+        <div class="score-section mat-headline-6">
+          <mat-icon>analytics</mat-icon>
+          Score: {{ getFormattedScore() }}
+        </div>
+      }
+    </mat-card-content>
   } @else {
-    <div class="empty-card">
-      <p>No game data available</p>
-    </div>
+    <mat-card-content>
+      <div class="empty-card mat-body-1">
+        <mat-icon>error_outline</mat-icon>
+        <p>No game data available</p>
+      </div>
+    </mat-card-content>
   }
-</div>
+</mat-card>

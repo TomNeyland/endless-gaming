@@ -1,5 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
 import { GameRecord } from '../../../types/game.types';
 
 /**
@@ -11,7 +14,7 @@ import { GameRecord } from '../../../types/game.types';
 @Component({
   selector: 'app-game-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatCardModule, MatChipsModule, MatIconModule],
   templateUrl: './game-card.component.html',
   styleUrl: './game-card.component.scss'
 })
