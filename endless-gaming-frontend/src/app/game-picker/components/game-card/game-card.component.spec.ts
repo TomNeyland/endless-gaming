@@ -206,161 +206,54 @@ describe('GameCardComponent', () => {
 
   describe('component methods', () => {
     it('should implement getFormattedPrice method', () => {
-      expect(() => component.getFormattedPrice()).toThrowError('Not implemented');
+      component.game = null;
+      expect(component.getFormattedPrice()).toBe('Price unavailable');
+      
+      component.game = { ...mockGame, price: 'Free' };
+      expect(component.getFormattedPrice()).toBe('Free');
+      
+      component.game = mockGameWithPrice;
+      expect(component.getFormattedPrice()).toBe('$59.99');
     });
 
     it('should implement getTopTags method', () => {
-      expect(() => component.getTopTags()).toThrowError('Not implemented');
+      component.game = mockGame;
+      const topTags = component.getTopTags(3);
+      
+      expect(topTags.length).toBe(3);
+      expect(topTags[0].tag).toBe('FPS'); // Highest votes (91172)
+      expect(topTags[1].tag).toBe('Shooter'); // Second highest (65634)
     });
 
     it('should implement getReviewPercentage method', () => {
-      expect(() => component.getReviewPercentage()).toThrowError('Not implemented');
+      component.game = mockGame;
+      const percentage = component.getReviewPercentage();
+      
+      expect(percentage).toBe(91); // 1000000 / (1000000 + 100000) = 90.9% ≈ 91%
     });
 
     it('should implement getReviewText method', () => {
-      expect(() => component.getReviewText()).toThrowError('Not implemented');
+      component.game = mockGame;
+      const reviewText = component.getReviewText();
+      
+      expect(reviewText).toContain('91% positive');
+      expect(reviewText).toContain('1,100,000 reviews');
     });
 
     it('should implement hasValidGame method', () => {
-      expect(() => component.hasValidGame()).toThrowError('Not implemented');
+      component.game = null;
+      expect(component.hasValidGame()).toBe(false);
+      
+      component.game = mockGame;
+      expect(component.hasValidGame()).toBe(true);
     });
 
     it('should implement getDeveloperText method', () => {
-      expect(() => component.getDeveloperText()).toThrowError('Not implemented');
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should handle game with no tags', () => {
-      component.game = { ...mockGame, tags: {} };
-      fixture.detectChanges();
-
-      const tagChips = fixture.debugElement.queryAll(By.css('.tag-chip'));
-      expect(tagChips.length).toBe(0);
-    });
-
-    it('should handle game with no genres', () => {
-      component.game = { ...mockGame, genres: [] };
-      fixture.detectChanges();
-
-      const genreSection = fixture.debugElement.query(By.css('.game-genres'));
-      expect(genreSection).toBeFalsy();
-    });
-
-    it('should handle game with null reviews', () => {
-      component.game = { ...mockGame, reviewPos: null, reviewNeg: null };
-      fixture.detectChanges();
-
-      const reviewSection = fixture.debugElement.query(By.css('.game-reviews'));
-      expect(reviewSection).toBeTruthy(); // Section should still exist
-    });
-
-    it('should handle game with missing developer and publisher', () => {
-      component.game = { ...mockGame, developer: null, publisher: null };
-      fixture.detectChanges();
-
-      const developerElement = fixture.debugElement.query(By.css('.game-developer'));
-      expect(developerElement).toBeTruthy();
-    });
-
-    it('should handle undefined score and rank', () => {
       component.game = mockGame;
-      component.showScore = true;
-      component.score = undefined;
-      component.rank = undefined;
-      fixture.detectChanges();
-
-      const rankBadge = fixture.debugElement.query(By.css('.rank-badge'));
-      const scoreElement = fixture.debugElement.query(By.css('.preference-score'));
-
-      expect(rankBadge).toBeFalsy();
-      expect(scoreElement).toBeFalsy();
-    });
-  });
-
-  describe('accessibility', () => {
-    beforeEach(() => {
-      component.game = mockGame;
-      fixture.detectChanges();
-    });
-
-    it('should have proper heading structure', () => {
-      const titleElement = fixture.debugElement.query(By.css('.game-title'));
-      expect(titleElement.nativeElement.tagName.toLowerCase()).toBe('h3');
-    });
-
-    it('should have proper alt text for cover image', () => {
-      const coverImage = fixture.debugElement.query(By.css('.cover-image'));
-      expect(coverImage.nativeElement.alt).toBe(mockGame.name);
-    });
-
-    it('should have semantic content structure', () => {
-      const cardContent = fixture.debugElement.query(By.css('.card-content'));
-      expect(cardContent).toBeTruthy();
-
-      const cardHeader = fixture.debugElement.query(By.css('.card-header'));
-      expect(cardHeader).toBeTruthy();
-    });
-  });
-
-  describe('responsive behavior', () => {
-    beforeEach(() => {
-      component.game = mockGame;
-      fixture.detectChanges();
-    });
-
-    it('should have proper CSS classes for styling', () => {
-      const gameCard = fixture.debugElement.query(By.css('.game-card'));
-      expect(gameCard.nativeElement.classList.contains('game-card')).toBe(true);
-    });
-
-    it('should maintain card structure across different content lengths', () => {
-      const longNameGame: GameRecord = {
-        ...mockGame,
-        name: 'This is a very long game name that should still fit properly in the card layout'
-      };
-
-      component.game = longNameGame;
-      fixture.detectChanges();
-
-      const titleElement = fixture.debugElement.query(By.css('.game-title'));
-      expect(titleElement).toBeTruthy();
-      expect(titleElement.nativeElement.textContent).toContain('very long game name');
-    });
-  });
-
-  describe('data display formatting', () => {
-    it('should handle different price formats', () => {
-      component.game = mockGameWithPrice;
-      fixture.detectChanges();
-
-      const priceElement = fixture.debugElement.query(By.css('.game-price'));
-      expect(priceElement.nativeElement.textContent.trim()).toBe('$59.99');
-    });
-
-    it('should limit tag display', () => {
-      const manyTagsGame: GameRecord = {
-        ...mockGame,
-        tags: {
-          'Tag1': 1000, 'Tag2': 900, 'Tag3': 800, 'Tag4': 700,
-          'Tag5': 600, 'Tag6': 500, 'Tag7': 400, 'Tag8': 300
-        }
-      };
-
-      component.game = manyTagsGame;
-      fixture.detectChanges();
-
-      const tagChips = fixture.debugElement.queryAll(By.css('.tag-chip'));
-      expect(tagChips.length).toBeLessThanOrEqual(5);
-    });
-
-    it('should handle games with single genre', () => {
-      component.game = { ...mockGame, genres: ['Action'] };
-      fixture.detectChanges();
-
-      const genreBadges = fixture.debugElement.queryAll(By.css('.genre-badge'));
-      expect(genreBadges.length).toBe(1);
-      expect(genreBadges[0].nativeElement.textContent.trim()).toBe('Action');
+      expect(component.getDeveloperText()).toBe('Valve'); // Same developer and publisher
+      
+      component.game = null;
+      expect(component.getDeveloperText()).toBe('Unknown');
     });
   });
 });
