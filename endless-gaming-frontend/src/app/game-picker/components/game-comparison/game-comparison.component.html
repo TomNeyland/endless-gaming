@@ -1,0 +1,38 @@
+<div class="game-comparison">
+  @if (hasValidPair()) {
+    <div class="comparison-container">
+      <div class="game-choice left-choice">
+        <!-- Game card component will go here -->
+        <div class="placeholder-card">
+          <h3>{{ gamePair?.left.name }}</h3>
+          <p>Left Game Placeholder</p>
+        </div>
+        <button (click)="selectLeft()" class="choice-btn left-btn">
+          Choose This Game
+        </button>
+      </div>
+
+      <div class="vs-section">
+        <div class="vs-text">VS</div>
+        <button (click)="skip()" class="skip-btn">
+          Skip Both
+        </button>
+      </div>
+
+      <div class="game-choice right-choice">
+        <!-- Game card component will go here -->
+        <div class="placeholder-card">
+          <h3>{{ gamePair?.right.name }}</h3>
+          <p>Right Game Placeholder</p>
+        </div>
+        <button (click)="selectRight()" class="choice-btn right-btn">
+          Choose This Game
+        </button>
+      </div>
+    </div>
+  } @else {
+    <div class="no-pair-message">
+      <p>No game pair available for comparison.</p>
+    </div>
+  }
+</div>

@@ -1,0 +1,75 @@
+<div class="preference-summary">
+  @if (hasPreferences()) {
+    <div class="summary-container">
+      <h3>Your Gaming Preferences</h3>
+      
+      <div class="preferences-grid">
+        <!-- Liked Tags -->
+        <div class="preference-section liked-section">
+          <h4 class="section-title liked-title">
+            <span class="icon">👍</span>
+            You Like
+          </h4>
+          
+          @if (getLikedTags().length > 0) {
+            <div class="tag-list">
+              @for (tagData of getLikedTags(); track tagData.tag) {
+                <div class="tag-item liked-tag">
+                  <div class="tag-info">
+                    <span class="tag-name">{{ tagData.tag }}</span>
+                    <span class="tag-weight">{{ formatWeight(tagData.weight) }}</span>
+                  </div>
+                  <div class="weight-bar">
+                    <div 
+                      class="weight-fill liked-fill" 
+                      [style.width]="getBarWidth(tagData.weight, getMaxWeight())">
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="no-preferences">
+              <p>Make some choices to see what you like!</p>
+            </div>
+          }
+        </div>
+
+        <!-- Disliked Tags -->
+        <div class="preference-section disliked-section">
+          <h4 class="section-title disliked-title">
+            <span class="icon">👎</span>
+            You Dislike
+          </h4>
+          
+          @if (getDislikedTags().length > 0) {
+            <div class="tag-list">
+              @for (tagData of getDislikedTags(); track tagData.tag) {
+                <div class="tag-item disliked-tag">
+                  <div class="tag-info">
+                    <span class="tag-name">{{ tagData.tag }}</span>
+                    <span class="tag-weight">{{ formatWeight(Math.abs(tagData.weight)) }}</span>
+                  </div>
+                  <div class="weight-bar">
+                    <div 
+                      class="weight-fill disliked-fill" 
+                      [style.width]="getBarWidth(Math.abs(tagData.weight), getMaxWeight())">
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="no-preferences">
+              <p>Make some choices to see what you dislike!</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="no-data">
+      <p>Start comparing games to see your preferences!</p>
+    </div>
+  }
+</div>

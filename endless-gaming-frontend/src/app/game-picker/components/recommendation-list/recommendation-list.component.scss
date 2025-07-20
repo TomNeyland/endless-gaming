@@ -1,0 +1,219 @@
+.recommendation-list {
+  .list-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    
+    h2 {
+      margin: 0 0 0.5rem 0;
+      color: #333;
+      font-size: 2rem;
+    }
+    
+    .subtitle {
+      margin: 0;
+      color: #666;
+      font-size: 1.1rem;
+    }
+  }
+
+  .recommendations-container {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+
+    .recommendation-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 1.5rem;
+      align-items: center;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      }
+
+      // Special styling for top recommendations
+      &[data-rank="1"] {
+        border: 2px solid #f1c40f;
+        background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+      }
+
+      &[data-rank="2"], &[data-rank="3"] {
+        border: 1px solid #e9ecef;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      }
+
+      .rank-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 80px;
+
+        .rank-number {
+          font-size: 1.5rem;
+          font-weight: bold;
+          color: #333;
+          
+          // Special styling for top 3
+          &:has([data-rank="1"]) {
+            color: #f1c40f;
+          }
+        }
+
+        .score-badge {
+          padding: 0.25rem 0.75rem;
+          border-radius: 20px;
+          font-size: 0.8rem;
+          font-weight: bold;
+          color: white;
+          font-family: monospace;
+          min-width: 60px;
+          text-align: center;
+        }
+      }
+
+      .game-section {
+        flex: 1;
+
+        .placeholder-game-info {
+          .game-name {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            line-height: 1.3;
+          }
+
+          .game-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+
+            .game-price {
+              font-weight: bold;
+              color: #27ae60;
+            }
+
+            .game-developer {
+              color: #666;
+              font-size: 0.9rem;
+            }
+          }
+
+          .game-tags-preview {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+
+            .tag-preview {
+              background: #e9ecef;
+              color: #495057;
+              padding: 0.25rem 0.5rem;
+              border-radius: 12px;
+              font-size: 0.8rem;
+
+              &:first-child {
+                background: #3498db;
+                color: white;
+              }
+            }
+          }
+        }
+      }
+
+      .action-section {
+        .view-details-btn {
+          padding: 0.75rem 1.5rem;
+          background: #3498db;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+
+          &:hover {
+            background: #2980b9;
+          }
+        }
+      }
+    }
+  }
+
+  .list-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+
+    p {
+      margin: 0;
+      color: #666;
+      font-style: italic;
+    }
+  }
+
+  .no-recommendations {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #666;
+
+    h2 {
+      margin: 0 0 1rem 0;
+      color: #333;
+    }
+
+    p {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+  }
+
+  // Custom scrollbar for recommendations container
+  .recommendations-container::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .recommendations-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  .recommendations-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+
+    &:hover {
+      background: #a8a8a8;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .recommendation-list {
+    .recommendations-container .recommendation-item {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto;
+      text-align: center;
+      gap: 1rem;
+
+      .rank-section {
+        flex-direction: row;
+        justify-content: center;
+      }
+
+      .action-section {
+        justify-self: center;
+      }
+    }
+  }
+}

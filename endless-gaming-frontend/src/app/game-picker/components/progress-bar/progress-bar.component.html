@@ -1,0 +1,38 @@
+<div class="progress-bar-container">
+  @if (hasProgress()) {
+    <div class="progress-section">
+      @if (showCount) {
+        <div class="progress-text">
+          {{ getProgressText() }}
+        </div>
+      }
+
+      <div class="progress-bar">
+        <div class="progress-track">
+          <div 
+            class="progress-fill"
+            [style.width]="getProgressWidth()"
+            [style.background-color]="getProgressColor()">
+          </div>
+        </div>
+        
+        @if (showPercentage) {
+          <div class="progress-percentage">
+            {{ getPercentageText() }}
+          </div>
+        }
+      </div>
+
+      @if (isComplete()) {
+        <div class="completion-message">
+          <span class="checkmark">✓</span>
+          Comparisons Complete!
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="no-progress">
+      <p>Progress not available</p>
+    </div>
+  }
+</div>

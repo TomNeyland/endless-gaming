@@ -1,0 +1,65 @@
+<div class="game-card" *ngIf="hasValidGame()">
+  <div class="card-header">
+    @if (showScore && rank) {
+      <div class="rank-badge">#{{ rank }}</div>
+    }
+    <div class="game-cover">
+      @if (game?.coverUrl) {
+        <img [src]="game.coverUrl" [alt]="game.name" class="cover-image" />
+      } @else {
+        <div class="cover-placeholder">
+          <span>{{ game?.name?.charAt(0) || '?' }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="card-content">
+    <h3 class="game-title">{{ game?.name }}</h3>
+    
+    <div class="game-price">
+      {{ getFormattedPrice() }}
+    </div>
+
+    <div class="game-developer">
+      {{ getDeveloperText() }}
+    </div>
+
+    @if (showScore && score !== undefined) {
+      <div class="preference-score">
+        Score: {{ score | number:'1.2-2' }}
+      </div>
+    }
+
+    <div class="game-tags">
+      @for (tag of getTopTags(); track tag.tag) {
+        <span class="tag-chip">{{ tag.tag }}</span>
+      }
+    </div>
+
+    <div class="game-reviews">
+      <div class="review-summary">
+        {{ getReviewText() }}
+      </div>
+      @if (getReviewPercentage() !== null) {
+        <div class="review-percentage">
+          {{ getReviewPercentage() }}% positive
+        </div>
+      }
+    </div>
+
+    @if (game?.genres && game.genres.length > 0) {
+      <div class="game-genres">
+        @for (genre of game.genres; track genre) {
+          <span class="genre-badge">{{ genre }}</span>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<div class="game-card-placeholder" *ngIf="!hasValidGame()">
+  <div class="placeholder-content">
+    <p>No game data available</p>
+  </div>
+</div>

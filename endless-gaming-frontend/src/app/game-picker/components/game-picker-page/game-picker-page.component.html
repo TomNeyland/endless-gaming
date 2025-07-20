@@ -1,0 +1,37 @@
+<div class="game-picker-page">
+  <!-- Loading State -->
+  @if (state() === 'loading') {
+    <div class="loading-state">
+      <h1>Loading Games...</h1>
+      <div class="spinner"></div>
+    </div>
+  }
+
+  <!-- Comparison State -->
+  @if (state() === 'comparing') {
+    <div class="comparison-state">
+      <h1>Find Your Perfect Games</h1>
+      <!-- Progress component will go here -->
+      <!-- Preference summary will go here -->
+      <!-- Game comparison will go here -->
+    </div>
+  }
+
+  <!-- Recommendations State -->
+  @if (state() === 'recommendations') {
+    <div class="recommendations-state">
+      <h1>Your Personalized Game Recommendations</h1>
+      <!-- Recommendation list will go here -->
+      <button (click)="resetGamePicker()" class="restart-btn">Start Over</button>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (state() === 'error') {
+    <div class="error-state">
+      <h1>Something went wrong</h1>
+      <p>Unable to load game data. Please try again.</p>
+      <button (click)="startGamePicker()" class="retry-btn">Retry</button>
+    </div>
+  }
+</div>

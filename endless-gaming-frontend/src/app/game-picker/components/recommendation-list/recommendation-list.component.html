@@ -1,0 +1,64 @@
+<div class="recommendation-list">
+  @if (hasRecommendations()) {
+    <div class="list-header">
+      <h2>Your Top {{ maxRecommendations }} Game Recommendations</h2>
+      <p class="subtitle">Based on your preferences, here are games you might love!</p>
+    </div>
+
+    <div class="recommendations-container">
+      @for (recommendation of getDisplayRecommendations(); track trackByAppId($index, recommendation)) {
+        <div 
+          class="recommendation-item"
+          (click)="onRecommendationClick(recommendation)"
+          [attr.data-rank]="recommendation.rank">
+          
+          <div class="rank-section">
+            <div class="rank-number">{{ getRankText(recommendation.rank) }}</div>
+            <div 
+              class="score-badge"
+              [style.background-color]="getScoreColor(recommendation.score)">
+              {{ formatScore(recommendation.score) }}
+            </div>
+          </div>
+
+          <div class="game-section">
+            <!-- Game card component will go here -->
+            <div class="placeholder-game-info">
+              <h3 class="game-name">{{ recommendation.game.name }}</h3>
+              <div class="game-meta">
+                <span class="game-price">{{ recommendation.game.price || 'Price not available' }}</span>
+                @if (recommendation.game.developer) {
+                  <span class="game-developer">by {{ recommendation.game.developer }}</span>
+                }
+              </div>
+              <div class="game-tags-preview">
+                @if (recommendation.game.tags && Object.keys(recommendation.game.tags).length > 0) {
+                  @for (tag of Object.keys(recommendation.game.tags).slice(0, 3); track tag) {
+                    <span class="tag-preview">{{ tag }}</span>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="action-section">
+            <button class="view-details-btn" type="button">
+              View Details
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (recommendations.length > maxRecommendations) {
+      <div class="list-footer">
+        <p>Showing top {{ maxRecommendations }} of {{ recommendations.length }} recommendations</p>
+      </div>
+    }
+  } @else {
+    <div class="no-recommendations">
+      <h2>No Recommendations Available</h2>
+      <p>Complete some game comparisons to get personalized recommendations!</p>
+    </div>
+  }
+</div>
