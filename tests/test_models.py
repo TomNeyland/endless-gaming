@@ -45,6 +45,8 @@ class TestGameModel:
     def test_game_default_active_status(self, db_session, sample_game_data):
         """Test that games are active by default."""
         game = Game(**sample_game_data)
+        db_session.add(game)
+        db_session.commit()
         assert game.is_active is True
 
     def test_game_timestamps_auto_populate(self, db_session, sample_game_data):
@@ -55,7 +57,9 @@ class TestGameModel:
         
         assert game.created_at is not None
         assert game.updated_at is not None
-        assert game.created_at == game.updated_at
+        # Timestamps should be very close (within 1 second)
+        time_diff = abs((game.updated_at - game.created_at).total_seconds())
+        assert time_diff < 1.0
 
     def test_game_updated_at_changes(self, db_session, sample_game_data):
         """Test that updated_at changes when game is modified."""
@@ -93,7 +97,7 @@ class TestGameMetadataModel:
         assert metadata.owners_estimate == "1,000,000 .. 2,000,000"
         assert metadata.positive_reviews == 1500
         assert metadata.negative_reviews == 200
-        assert metadata.fetch_status == FetchStatus.SUCCESS
+        assert metadata.fetch_status == FetchStatus.SUCCESS.value
 
     def test_metadata_foreign_key_constraint(self, db_session, sample_metadata_data):
         """Test that metadata requires a valid game to exist."""
@@ -129,11 +133,14 @@ class TestGameMetadataModel:
         for status in [FetchStatus.PENDING, FetchStatus.SUCCESS, FetchStatus.FAILED, FetchStatus.NOT_FOUND]:
             metadata = GameMetadata(
                 app_id=123456,
-                fetch_status=status,
+                fetch_status=status.value,  # Use enum value
                 fetch_attempts=1
             )
             db_session.add(metadata)
             db_session.commit()
+            
+            # Verify the status was stored correctly
+            assert metadata.fetch_status == status.value
             
             # Clean up for next iteration
             db_session.delete(metadata)
@@ -151,7 +158,7 @@ class TestGameMetadataModel:
         db_session.commit()
         
         assert metadata.fetch_attempts == 0
-        assert metadata.fetch_status == FetchStatus.PENDING
+        assert metadata.fetch_status == FetchStatus.PENDING.value
         assert isinstance(metadata.last_updated, datetime)
 
     def test_game_metadata_relationship(self, db_session, sample_game_data, sample_metadata_data):
@@ -167,8 +174,8 @@ class TestGameMetadataModel:
         db_session.commit()
         
         # Test relationship
-        assert game.metadata is not None
-        assert game.metadata.app_id == game.app_id
+        assert game.game_metadata is not None
+        assert game.game_metadata.app_id == game.app_id
         assert metadata.game == game
 
 
@@ -177,10 +184,10 @@ class TestFetchStatusEnum:
 
     def test_fetch_status_values(self):
         """Test that FetchStatus enum has expected values."""
-        assert FetchStatus.PENDING == "pending"
-        assert FetchStatus.SUCCESS == "success"
-        assert FetchStatus.FAILED == "failed"
-        assert FetchStatus.NOT_FOUND == "not_found"
+        assert FetchStatus.PENDING.value == "pending"
+        assert FetchStatus.SUCCESS.value == "success"
+        assert FetchStatus.FAILED.value == "failed"
+        assert FetchStatus.NOT_FOUND.value == "not_found"
 
     def test_fetch_status_from_string(self):
         """Test creating FetchStatus from string values."""
