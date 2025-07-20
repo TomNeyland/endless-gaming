@@ -112,8 +112,8 @@ jobs:
         
     - name: Test Docker Compose
       run: |
-        # Test docker-compose configuration
-        docker-compose config
+        # Test docker compose configuration (using modern docker compose command)
+        docker compose config
 
   security-scan:
     name: Security Scan
