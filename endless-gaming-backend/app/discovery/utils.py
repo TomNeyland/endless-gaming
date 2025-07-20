@@ -21,5 +21,44 @@ def to_game_record(game: Game) -> Dict[str, Any]:
     Returns:
         Dictionary containing game record data in camelCase format
     """
-    # TDD: Initially raise NotImplementedError - tests should fail first
-    raise NotImplementedError("to_game_record function not yet implemented")
+    metadata = game.game_metadata
+    
+    # Convert price format
+    price = None
+    if metadata and metadata.price:
+        if metadata.price == "0":
+            price = "Free"
+        else:
+            price = metadata.price
+    
+    # Handle tags - ensure we have a dictionary
+    tags = {}
+    if metadata and metadata.tags_json:
+        if isinstance(metadata.tags_json, dict):
+            tags = metadata.tags_json
+        elif isinstance(metadata.tags_json, str):
+            try:
+                tags = json.loads(metadata.tags_json)
+            except (json.JSONDecodeError, TypeError):
+                tags = {}
+    
+    # Handle genres - convert single genre string to list
+    genres = []
+    if metadata and metadata.genre:
+        genres = [metadata.genre] if isinstance(metadata.genre, str) else metadata.genre
+    
+    # Build camelCase record
+    record = {
+        "appId": game.app_id,
+        "name": game.name,
+        "coverUrl": None,  # Not implemented yet - would need Steam store data
+        "price": price,
+        "developer": metadata.developer if metadata else None,
+        "publisher": metadata.publisher if metadata else None,
+        "tags": tags,
+        "genres": genres,
+        "reviewPos": metadata.positive_reviews if metadata else None,
+        "reviewNeg": metadata.negative_reviews if metadata else None,
+    }
+    
+    return record

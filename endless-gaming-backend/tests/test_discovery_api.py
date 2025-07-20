@@ -48,9 +48,13 @@ class TestMasterJsonEndpoint:
     """Test the GET /discovery/games/master.json endpoint."""
 
     @pytest.fixture
-    def client(self):
-        """Create test client."""
+    def client(self, db_engine):
+        """Create test client with test database."""
         app = create_app(TestingConfig)
+        # Override the app's database engine with the test engine
+        app.db_engine = db_engine
+        from sqlalchemy.orm import sessionmaker
+        app.db_session_factory = sessionmaker(bind=db_engine)
         return app.test_client()
 
     @pytest.fixture
