@@ -364,8 +364,8 @@ class TestSteamSpyMetadataCollector:
         
         # Mock progress callback
         progress_updates = []
-        def mock_progress_callback(current, total, status):
-            progress_updates.append((current, total, status))
+        def mock_progress_callback(current, total, game_name, top_tags, status):
+            progress_updates.append((current, total, game_name, top_tags, status))
         
         # Mock SteamSpy responses
         mock_response = {"appid": 1, "name": "Test", "developer": "Test"}

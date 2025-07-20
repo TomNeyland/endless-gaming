@@ -14,7 +14,7 @@ This is a production-ready Python system for collecting comprehensive game data 
 - **Pydantic Settings** for configuration management
 - **PostgreSQL** (psycopg2-binary) or SQLite for database
 - **Tenacity** for retry logic with exponential backoff
-- **pytest + pytest-asyncio** for comprehensive testing (62 tests)
+- **pytest + pytest-asyncio** for comprehensive testing (89 tests)
 
 ## Development Commands
 
@@ -26,22 +26,27 @@ poetry shell                     # Activate virtual environment
 
 ### Testing (TDD Approach)
 ```bash
-poetry run pytest                          # Run all 62 tests
+poetry run pytest                          # Run all 89 tests
 poetry run pytest tests/test_models.py     # Run specific test file (14 tests)
 poetry run pytest tests/test_rate_limiter.py     # Rate limiter tests (14 tests)
 poetry run pytest tests/test_steam_collector.py  # Steam collector tests (16 tests)
 poetry run pytest tests/test_steamspy_collector.py # SteamSpy collector tests (18 tests)
+poetry run pytest tests/test_steamspy_all_collector.py # SteamSpy /all collector tests (16 tests)
+poetry run pytest tests/test_parallel_fetcher.py # Parallel processing tests (11 tests)
 poetry run pytest -v                       # Verbose output
 poetry run pytest -k "test_name"          # Run specific test
 ```
 
-### Data Collection (When CLI is implemented)
+### Data Collection (CLI Implemented)
 ```bash
-# These commands are planned but CLI scripts not yet implemented
-python scripts/collect_games.py                    # Collect all game data
-python scripts/collect_games.py --full-refresh     # Rebuild entire database
-python scripts/collect_games.py --update-metadata  # Update metadata only
-python scripts/collect_games.py --batch-size 100   # Override batch size
+# Production-ready CLI scripts with rich interface
+poetry run python scripts/collect_games.py                      # Collect games by popularity + metadata
+poetry run python scripts/collect_games.py --full-refresh       # Rebuild entire database
+poetry run python scripts/collect_games.py --update-metadata    # Update metadata only
+poetry run python scripts/collect_games.py --batch-size 1000    # Override batch size (default: 1000)
+poetry run python scripts/collect_games.py --max-pages 5        # Limit to first 5 pages (5000 games)
+poetry run python scripts/collect_games.py status               # Show database statistics
+poetry run python scripts/setup_db.py                           # Initialize/manage database
 ```
 
 ## Architecture Overview
@@ -53,36 +58,49 @@ models/               # SQLAlchemy models with full relationships
 └── game_metadata.py # GameMetadata model (SteamSpy data, fetch status)
 
 collectors/          # Data collection classes (production-ready)
-├── steam_collector.py     # SteamGameListCollector - fetches game lists
-└── steamspy_collector.py  # SteamSpyMetadataCollector - fetches individual metadata
+├── steam_collector.py         # SteamGameListCollector - legacy Steam API approach
+├── steamspy_all_collector.py  # SteamSpyAllCollector - popularity-based game collection
+└── steamspy_collector.py      # SteamSpyMetadataCollector - fetches individual metadata
+
+workers/             # Parallel processing system
+└── parallel_fetcher.py    # ParallelMetadataFetcher - hybrid batch+queue approach
+
+scripts/             # CLI interfaces with rich progress display
+├── collect_games.py       # Main data collection CLI
+└── setup_db.py           # Database management CLI
 
 utils/               # Core utilities (robust implementations)
 ├── rate_limiter.py  # SimpleRateLimiter with aiolimiter integration
 └── http_client.py   # HTTPClient with tenacity retry logic
 
-tests/               # Comprehensive test suite (62 tests total)
-├── test_models.py          # Database model tests (14 tests)
-├── test_rate_limiter.py    # Rate limiting tests (14 tests) 
-├── test_steam_collector.py # Steam API tests (16 tests)
-└── test_steamspy_collector.py # SteamSpy API tests (18 tests)
+tests/               # Comprehensive test suite (89 tests total)
+├── test_models.py                 # Database model tests (14 tests)
+├── test_rate_limiter.py           # Rate limiting tests (14 tests) 
+├── test_steam_collector.py        # Steam API tests (16 tests)
+├── test_steamspy_collector.py     # SteamSpy API tests (18 tests)
+├── test_steamspy_all_collector.py # SteamSpy /all API tests (16 tests)
+└── test_parallel_fetcher.py       # Parallel processing tests (11 tests)
 ```
 
 ### Key Design Patterns (Production Implementation)
 
 **Rate Limiting Strategy**: Uses `aiolimiter.AsyncLimiter` with endpoint-specific limits:
-- Steam Web API: 100,000/day (requires `STEAM_API_KEY` environment variable)
-- Steam Store API: 200/5 minutes  
-- SteamSpy API: 60/minute (most restrictive - handles 23k+ calls over ~6.4 hours)
+- Steam Web API: 100,000/day (legacy, requires `STEAM_API_KEY` environment variable)
+- Steam Store API: 200/5 minutes (legacy)
+- SteamSpy API: 60/minute (for individual metadata calls)
+- SteamSpy /all API: 1/minute (primary collection method, returns 1000 games per page)
 
 **Data Flow Architecture**: 
-1. `SteamGameListCollector.collect_and_save_games()` - fetches complete game list from Steam
-2. `SteamSpyMetadataCollector.collect_metadata_for_games()` - fetches individual metadata for each game
-3. Database operations use upsert logic (create new, update existing, deactivate missing)
+1. `SteamSpyAllCollector.collect_and_save_games()` - fetches games by popularity from SteamSpy /all (1000 per page)
+2. `ParallelMetadataFetcher.process_games_parallel()` - coordinates parallel metadata collection
+3. `SteamSpyMetadataCollector.collect_metadata_for_games()` - fetches individual metadata with enhanced progress display
+4. Database operations use upsert logic (create new, update existing, deactivate missing)
 
-**Concurrency Pattern**: Hybrid batch + asyncio.gather approach:
-- Process games in configurable batches (default 50) for progress tracking
+**Concurrency Pattern**: Hybrid batch + queue approach:
+- Process games in configurable batches (default 1000 to match SteamSpy page size)
 - Within each batch, use `asyncio.gather()` for concurrent API calls
 - Rate limiter automatically throttles requests across all concurrent workers
+- Enhanced progress display shows "<gamename> (<top 3 tags>)" during metadata collection
 
 ### Database Models (SQLAlchemy 2.0)
 
@@ -106,12 +124,33 @@ tests/               # Comprehensive test suite (62 tests total)
 
 ## Critical Implementation Details
 
+### SteamSpy All Collector (Primary Collection Method)
+The `SteamSpyAllCollector` uses SteamSpy's `/all` endpoint to fetch games in popularity order:
+```python
+from collectors.steamspy_all_collector import SteamSpyAllCollector
+
+collector = SteamSpyAllCollector()
+result = await collector.collect_and_save_games(
+    session, 
+    max_pages=5,  # Fetch first 5000 games (5 pages × 1000 games)
+    progress_callback=my_callback
+)
+```
+
+**Key Features**:
+- Returns games sorted by popularity (owner count)
+- 1000 games per page with automatic pagination
+- Rate limited to 1 request per minute for /all endpoint
+- Upsert logic: creates new games, updates existing, deactivates missing
+- Returns statistics: `{'new_games': N, 'updated_games': N, 'deactivated_games': N, 'total_games_processed': N, 'pages_processed': N}`
+
 ### Rate Limiter Integration
 All collectors use the shared `SimpleRateLimiter` instance with `APIEndpoint` enum:
 ```python
 from utils.rate_limiter import SimpleRateLimiter, APIEndpoint
 rate_limiter = SimpleRateLimiter()
-await rate_limiter.make_request(APIEndpoint.STEAMSPY_API, url)
+await rate_limiter.make_request(APIEndpoint.STEAMSPY_ALL_API, url)  # 1/minute
+await rate_limiter.make_request(APIEndpoint.STEAMSPY_API, url)      # 60/minute
 ```
 
 ### Database Session Management
@@ -128,10 +167,11 @@ SteamSpy returns prices in cents - automatic conversion to dollar strings:
 - `""` or `None` → `None`
 
 ### Progress Tracking
-`SteamSpyMetadataCollector` supports optional progress callbacks:
+`SteamSpyMetadataCollector` supports enhanced progress callbacks with game names and tags:
 ```python
-def progress_callback(current, total, status):
-    print(f"Progress: {current}/{total} - Status: {status}")
+def progress_callback(current, total, game_name, top_tags, status):
+    tags_display = ", ".join(top_tags[:3]) if top_tags else "No tags"
+    print(f"[{current}/{total}] {game_name} ({tags_display}) - {status}")
 
 await collector.collect_metadata_for_games(games, session, progress_callback=progress_callback)
 ```
@@ -179,7 +219,9 @@ This codebase was built using strict Test-Driven Development. When adding new fe
 ## Configuration Requirements
 
 Set environment variables for production:
-- `STEAM_API_KEY`: Required for Steam Web API access
+- `STEAM_API_KEY`: Optional, only needed for legacy Steam Web API access
 - `DATABASE_URL`: SQLAlchemy connection string (defaults to SQLite)
+
+**Note**: The primary collection method now uses SteamSpy's `/all` endpoint, so `STEAM_API_KEY` is no longer required for standard operations.
 
 All other settings have sensible defaults via `config.py` with pydantic-settings.

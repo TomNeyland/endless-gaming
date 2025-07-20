@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from config import settings
 from models import Base
 from models.game import Game
-from collectors.steam_collector import SteamGameListCollector
+from collectors.steamspy_all_collector import SteamSpyAllCollector
 from collectors.steamspy_collector import SteamSpyMetadataCollector
 from workers.parallel_fetcher import ParallelMetadataFetcher
 
@@ -48,9 +48,7 @@ def validate_environment():
     """Validate required environment variables and settings."""
     errors = []
     
-    # Check for Steam API key if using Steam Web API
-    if not os.getenv("STEAM_API_KEY"):
-        errors.append("STEAM_API_KEY environment variable is required")
+    # No Steam API key required since we use SteamSpy /all endpoint
     
     # Test database connection
     try:
@@ -71,22 +69,35 @@ def validate_environment():
     console.print("✅ Environment validation passed")
 
 
-async def collect_steam_games(session, progress_callback=None):
-    """Collect Steam game list and save to database."""
-    collector = SteamGameListCollector()
+async def collect_games_by_popularity(session, max_pages=None, progress_callback=None):
+    """Collect games from SteamSpy in popularity order and save to database."""
+    collector = SteamSpyAllCollector()
     
-    console.print("🎮 Fetching Steam game list...")
-    games_created, games_updated, games_deactivated = await collector.collect_and_save_games(session)
+    console.print("🎮 Fetching games by popularity from SteamSpy...")
+    console.print("⏰ Note: SteamSpy /all API is rate limited to 1 request per minute")
+    
+    def page_progress_callback(page, total_pages, games_in_page, status):
+        console.print(f"📄 Page {page}: {games_in_page} games fetched and saved - {status}")
+        if progress_callback:
+            progress_callback(f"Page {page}: {games_in_page} games", status)
+    
+    result = await collector.collect_and_save_games(
+        session, 
+        max_pages=max_pages,
+        progress_callback=page_progress_callback
+    )
     
     console.print(Panel(
-        f"Games created: {games_created}\n"
-        f"Games updated: {games_updated}\n"
-        f"Games deactivated: {games_deactivated}",
-        title="Steam Collection Results",
+        f"Games created: {result['new_games']}\n"
+        f"Games updated: {result['updated_games']}\n"
+        f"Games deactivated: {result['deactivated_games']}\n"
+        f"Total processed: {result['total_games_processed']}\n"
+        f"Pages processed: {result['pages_processed']}",
+        title="Game Collection Results (by Popularity)",
         border_style="green"
     ))
     
-    return games_created + games_updated
+    return result['total_games_processed']
 
 
 async def collect_metadata_parallel(session, batch_size: int, max_concurrent: int, progress_callback=None):
@@ -119,10 +130,19 @@ async def collect_metadata_parallel(session, batch_size: int, max_concurrent: in
     ) as progress:
         task = progress.add_task("Fetching metadata...", total=len(games))
         
-        def update_progress(current, total, status):
+        def update_progress(current, total, game_name, top_tags, status):
             progress.update(task, completed=current)
+            
+            # Format game display with top 3 tags
+            tags_display = ", ".join(top_tags) if top_tags else "No tags"
+            game_display = f"{game_name} ({tags_display})"
+            
+            # Show progress for each game immediately
+            status_emoji = "✅" if status == "success" else "❌" if status == "failed" else "⚠️"
+            progress.console.print(f"{status_emoji} {game_display}")
+            
             if current % 100 == 0 or current == total:
-                progress.console.print(f"📊 Progress: {current}/{total} ({status})")
+                progress.console.print(f"📊 Progress: {current}/{total} total processed")
         
         completed_batches = await parallel_fetcher.process_games_parallel(
             games, session, progress_callback=update_progress
@@ -161,6 +181,11 @@ def collect(
         "--max-concurrent", 
         help="Override maximum concurrent requests"
     ),
+    max_pages: int = typer.Option(
+        None,
+        "--max-pages",
+        help="Maximum pages of games to fetch (1000 games per page)"
+    ),
     skip_validation: bool = typer.Option(
         False,
         "--skip-validation",
@@ -178,14 +203,15 @@ def collect(
         if not skip_validation:
             validate_environment()
         
-        # Use settings defaults if not overridden
-        _batch_size = batch_size or settings.batch_size
+        # Use settings defaults if not overridden (1000 batch size for SteamSpy pages)
+        _batch_size = batch_size or 1000
         _max_concurrent = max_concurrent or settings.max_workers
         
         console.print(Panel(
             f"Mode: {'Full refresh' if full_refresh else 'Update metadata only' if update_metadata else 'Incremental update'}\n"
             f"Batch size: {_batch_size}\n"
             f"Max concurrent: {_max_concurrent}\n"
+            f"Max pages: {max_pages or 'unlimited'}\n"
             f"Database: {settings.database_url}",
             title="Collection Configuration",
             border_style="blue"
@@ -196,9 +222,11 @@ def collect(
             total_games = 0
             total_metadata = 0
             
-            # Collect Steam games (unless metadata-only mode)
+            # Collect games by popularity (unless metadata-only mode)
             if not update_metadata:
-                total_games = await collect_steam_games(session)
+                total_games = await collect_games_by_popularity(
+                    session, max_pages=max_pages
+                )
             
             # Collect metadata for all games
             total_metadata = await collect_metadata_parallel(

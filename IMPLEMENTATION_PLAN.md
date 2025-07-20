@@ -91,12 +91,7 @@
 - [ ] Add shared rate limiter across all workers
 - [ ] Implement progress tracking with rich progress bars
 - [ ] Add batch processing for memory efficiency
-
-### 5.2 Hybrid Batch + Queue Processing
-- [ ] Implement hybrid approach: batches for progress, queue within batches
-- [ ] Add intermediate database saves between batches
-- [ ] Implement resume capability after interruption
-- [ ] Add memory usage optimization
+- [ ] Update each record as its loaded
 
 ## Phase 6: CLI Scripts
 

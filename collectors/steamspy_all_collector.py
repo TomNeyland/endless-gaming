@@ -56,6 +56,7 @@ class SteamSpyAllCollector:
         """
         url = self.build_steamspy_all_url(page)
         self.logger.info(f"Fetching SteamSpy page {page} from: {url}")
+        self.logger.info(f"Making rate-limited request (1/minute)...")
         
         try:
             response = await self.rate_limiter.make_request(
@@ -221,6 +222,9 @@ class SteamSpyAllCollector:
             # Check if we've reached max pages
             if max_pages is not None and page >= max_pages:
                 break
+            
+            if page > 0:
+                print(f"⏰ Waiting for rate limit... fetching page {page} in ~60 seconds")
             
             try:
                 # Fetch games page

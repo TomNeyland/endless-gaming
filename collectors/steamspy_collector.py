@@ -209,16 +209,17 @@ class SteamSpyMetadataCollector:
         games: List[Game],
         session: Session,
         batch_size: int = 50,
-        progress_callback: Optional[Callable[[int, int, str], None]] = None
+        progress_callback: Optional[Callable[[int, int, str, List[str], str], None]] = None
     ) -> Dict[str, int]:
         """
-        Collect metadata for a list of games with batch processing.
+        Collect metadata for a list of games, saving each immediately after fetch.
         
         Args:
             games: List of Game objects to fetch metadata for
             session: Database session
-            batch_size: Number of games to process in each batch
+            batch_size: Number of games to process concurrently (for rate limiting)
             progress_callback: Optional callback for progress updates
+                Signature: (current, total, game_name, top_tags, status)
             
         Returns:
             Dictionary with operation counts and statistics
@@ -230,7 +231,7 @@ class SteamSpyMetadataCollector:
         
         self.logger.info(f"Starting metadata collection for {total_games} games")
         
-        # Process games in batches
+        # Process games in batches for concurrent fetching but save immediately
         for i in range(0, total_games, batch_size):
             batch = games[i:i + batch_size]
             batch_start = i + 1
@@ -247,8 +248,14 @@ class SteamSpyMetadataCollector:
             # Execute batch concurrently (rate limiter handles throttling)
             batch_metadata = await asyncio.gather(*tasks)
             
-            # Count results
-            for metadata in batch_metadata:
+            # Process each game immediately: save to DB and call progress callback
+            for j, metadata in enumerate(batch_metadata):
+                game = batch[j]  # Get corresponding game
+                
+                # Save this single game's metadata immediately
+                await self.save_metadata_to_database([metadata], session)
+                
+                # Update counters
                 if metadata.fetch_status == FetchStatus.SUCCESS.value:
                     successful_fetches += 1
                 elif metadata.fetch_status == FetchStatus.NOT_FOUND.value:
@@ -256,13 +263,19 @@ class SteamSpyMetadataCollector:
                 else:
                     failed_fetches += 1
                 
-                # Progress callback
+                # Call progress callback immediately after saving
                 if progress_callback:
                     current = successful_fetches + failed_fetches + not_found
-                    progress_callback(current, total_games, metadata.fetch_status)
-            
-            # Save batch to database
-            await self.save_metadata_to_database(batch_metadata, session)
+                    
+                    # Extract top 3 tags if available
+                    top_tags = []
+                    if metadata.tags_json and isinstance(metadata.tags_json, dict):
+                        # Sort tags by vote count (value) and take top 3
+                        sorted_tags = sorted(metadata.tags_json.items(), key=lambda x: x[1], reverse=True)
+                        top_tags = [tag[0] for tag in sorted_tags[:3]]
+                    
+                    # Call progress callback with enhanced info
+                    progress_callback(current, total_games, game.name, top_tags, metadata.fetch_status)
             
             self.logger.info(
                 f"Completed batch {batch_start}-{batch_end}: "
