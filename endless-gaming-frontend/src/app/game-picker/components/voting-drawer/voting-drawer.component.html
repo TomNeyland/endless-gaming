@@ -55,7 +55,7 @@
                   <span class="price">{{ getGamePrice(getLeftGame()!) }}</span>
                 </div>
                 <div class="game-tags">
-                  @for (tag of getGameTags(getLeftGame()!); track tag) {
+                  @for (tag of leftGameTags(); track tag) {
                     <span class="tag-chip">{{ tag }}</span>
                   }
                 </div>
@@ -98,7 +98,7 @@
                   <span class="price">{{ getGamePrice(getRightGame()!) }}</span>
                 </div>
                 <div class="game-tags">
-                  @for (tag of getGameTags(getRightGame()!); track tag) {
+                  @for (tag of rightGameTags(); track tag) {
                     <span class="tag-chip">{{ tag }}</span>
                   }
                 </div>

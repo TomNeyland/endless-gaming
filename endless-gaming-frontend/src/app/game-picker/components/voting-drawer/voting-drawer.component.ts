@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, inject, OnInit, OnChanges, SimpleChanges, signal, Input } from '@angular/core';
+import { Component, EventEmitter, Output, inject, OnInit, OnChanges, SimpleChanges, signal, computed, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
@@ -52,6 +52,17 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
   public readonly currentPair = signal<GamePair | null>(null);
   public readonly isVoting = signal(false);
   public readonly votingStats = signal({ totalVotes: 0, sessionVotes: 0 });
+
+  // Optimized tag computation using signals
+  public readonly leftGameTags = computed(() => {
+    const game = this.getLeftGame();
+    return game ? this.getGameTags(game) : [];
+  });
+
+  public readonly rightGameTags = computed(() => {
+    const game = this.getRightGame();
+    return game ? this.getGameTags(game) : [];
+  });
 
   ngOnInit(): void {
     console.log('🗳️ VotingDrawer: ngOnInit called');
