@@ -2,6 +2,8 @@
   class="game-card" 
   [class.highlight-hover]="highlightOnHover"
   [class.has-score]="showScore"
+  [class.clickable]="hasValidGame()"
+  (click)="openSteamStore()"
   appearance="outlined">
   
   @if (hasValidGame()) {

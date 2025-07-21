@@ -64,14 +64,6 @@
                   </mat-chip-set>
                 </div>
 
-                <button 
-                  mat-raised-button 
-                  color="primary"
-                  class="view-game-btn"
-                  (click)="onRecommendationClick(recommendation); $event.stopPropagation()">
-                  <mat-icon>open_in_new</mat-icon>
-                  View Game
-                </button>
               </mat-card-content>
             </mat-card>
           }
@@ -132,16 +124,6 @@
                   </div>
                 </div>
 
-                <!-- Action Button -->
-                <div class="compact-action">
-                  <button 
-                    mat-icon-button 
-                    color="primary"
-                    (click)="onRecommendationClick(recommendation); $event.stopPropagation()"
-                    matTooltip="View Game">
-                    <mat-icon>open_in_new</mat-icon>
-                  </button>
-                </div>
               </div>
             </mat-list-item>
           }

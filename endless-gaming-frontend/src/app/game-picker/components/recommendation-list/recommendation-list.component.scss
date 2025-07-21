@@ -341,7 +341,7 @@
         
         .compact-content {
           display: grid;
-          grid-template-columns: 60px 160px minmax(200px, 1fr) auto;
+          grid-template-columns: 60px 160px minmax(200px, 1fr);
           gap: 16px;
           align-items: flex-start;
           width: 100%;
@@ -438,13 +438,6 @@
                 }
               }
             }
-          }
-          
-          .compact-action {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 90px; // Match new thumbnail height
           }
         }
       }
@@ -658,7 +651,7 @@
     }
     
     .compact-section .compact-list .compact-item .compact-content {
-      grid-template-columns: 50px 60px minmax(150px, 1fr) auto;
+      grid-template-columns: 50px 60px minmax(150px, 1fr);
       gap: 12px;
       padding: 12px;
       
@@ -699,14 +692,7 @@
   .recommendation-list {
     .compact-section .compact-list .compact-item .compact-content {
       grid-template-columns: 40px 50px 1fr;
-      grid-template-rows: auto auto;
       gap: 8px;
-      
-      .compact-action {
-        grid-column: 1 / -1;
-        justify-self: center;
-        margin-top: 8px;
-      }
     }
   }
 }

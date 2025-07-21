@@ -322,14 +322,13 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Handle recommendation item click.
+   * Handle recommendation item click - open Steam store page.
    */
   onRecommendationClick(recommendation: GameRecommendation): void {
-    // Could navigate to game details or open Steam store page
-    console.log('Clicked recommendation:', recommendation.game.name);
-    
-    // Example: Open Steam store page (if we want to add this feature)
-    // window.open(`https://store.steampowered.com/app/${recommendation.game.appId}`, '_blank');
+    if (recommendation.game?.appId) {
+      const steamUrl = `https://store.steampowered.com/app/${recommendation.game.appId}`;
+      window.open(steamUrl, '_blank');
+    }
   }
 
   /**

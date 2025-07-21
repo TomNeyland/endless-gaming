@@ -31,6 +31,20 @@ export class GameCardComponent {
   imageError = false;
 
   /**
+   * Open Steam store page for this game.
+   */
+  openSteamStore(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    
+    if (this.game?.appId) {
+      const steamUrl = `https://store.steampowered.com/app/${this.game.appId}`;
+      window.open(steamUrl, '_blank');
+    }
+  }
+
+  /**
    * Get formatted price display.
    */
   getFormattedPrice(): string {
