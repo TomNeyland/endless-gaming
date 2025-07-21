@@ -272,46 +272,62 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 800px) {
   .game-card {
-    margin: 8px 4px;
+    margin: 0;
     max-width: 100%;
+    width: 100%;
     
     mat-card-content {
       padding: 16px !important;
       
       mat-card-title {
         font-size: 1.1rem !important;
-        margin-bottom: 10px !important;
+        margin-bottom: 12px !important;
+        text-align: center;
       }
     }
     
     .metadata-row {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 8px;
-      margin-bottom: 10px;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
     }
     
     .developer {
       min-height: 32px;
       margin-bottom: 12px;
+      text-align: center;
+      justify-content: center;
     }
     
     .tags-section {
       margin-bottom: 12px;
+      text-align: center;
       
-      mat-chip-set mat-chip {
-        height: 26px !important;
-        font-size: 0.7rem !important;
+      mat-chip-set {
+        justify-content: center;
+        
+        mat-chip {
+          height: 26px !important;
+          font-size: 0.7rem !important;
+        }
       }
+    }
+    
+    .reviews {
+      text-align: center;
+      justify-content: center;
     }
   }
 }
 
 @media (max-width: 480px) {
   .game-card {
-    margin: 4px 2px;
+    margin: 0;
+    width: 100%;
     
     mat-card-content {
       padding: 12px !important;
@@ -319,13 +335,31 @@
       mat-card-title {
         font-size: 1rem !important;
         line-height: 1.2 !important;
+        text-align: center;
       }
     }
     
-    .tags-section mat-chip-set mat-chip {
-      height: 24px !important;
-      font-size: 0.65rem !important;
-      padding: 0 6px;
+    .metadata-row {
+      flex-direction: column;
+      gap: 8px;
+      text-align: center;
+    }
+    
+    .developer {
+      min-height: 28px;
+      margin-bottom: 10px;
+    }
+    
+    .tags-section {
+      mat-chip-set mat-chip {
+        height: 24px !important;
+        font-size: 0.65rem !important;
+        padding: 0 6px;
+      }
+    }
+    
+    .reviews {
+      font-size: 0.8rem;
     }
   }
 }
