@@ -20,10 +20,18 @@ export class PreferenceService {
   private tagDict: TagDictionary | null = null;
   private comparisonCount = 0;
   private readonly learningRate = 0.1;
+  
+  // Sliding window preference history for adaptive weighting
+  private preferenceHistory: Array<{
+    winnerGame: GameRecord;
+    loserGame: GameRecord;
+    timestamp: number;
+    weightUpdate: { winnerVec: any; loserVec: any; gradient: number; };
+  }> = [];
 
   /**
    * Update preferences based on a user choice.
-   * Uses logistic SGD to update the weight vector.
+   * Uses sliding window weighted SGD to emphasize recent preferences.
    */
   updatePreferences(winnerGame: GameRecord, loserGame: GameRecord): void {
     if (!this.tagDict) {
@@ -38,17 +46,67 @@ export class PreferenceService {
     const winnerScore = this.vectorService.dotProduct(winnerVec, this.weightVector);
     const loserScore = this.vectorService.dotProduct(loserVec, this.weightVector);
 
-    // Logistic SGD update
+    // Logistic SGD calculation
     const scoreDiff = winnerScore - loserScore;
     const probability = 1 / (1 + Math.exp(-scoreDiff));
     const gradient = 1 - probability;
 
-    // Update weights based on feature differences
-    this.updateWeightsFromVector(winnerVec, gradient * this.learningRate);
-    this.updateWeightsFromVector(loserVec, -gradient * this.learningRate);
+    // Store this preference in history for sliding window
+    this.preferenceHistory.push({
+      winnerGame,
+      loserGame,
+      timestamp: Date.now(),
+      weightUpdate: { winnerVec, loserVec, gradient }
+    });
+
+    // Rebuild weight vector using sliding window approach
+    this.rebuildWeightsWithSlidingWindow();
 
     this.comparisonCount++;
     this.updatePreferenceSummary();
+  }
+
+  /**
+   * Rebuild the entire weight vector using sliding window weighting.
+   * This ensures recent preferences have more influence than historical ones.
+   */
+  private rebuildWeightsWithSlidingWindow(): void {
+    if (!this.tagDict || this.preferenceHistory.length === 0) {
+      return;
+    }
+
+    // Reset weight vector
+    this.weightVector = new Float32Array(this.tagDict.size);
+
+    const weights = this.getSlidingWindowWeights();
+    const { recentStart, mediumStart } = this.getSlidingWindowIndices();
+    const totalVotes = this.preferenceHistory.length;
+
+    // Apply updates with sliding window weights
+    for (let i = 0; i < totalVotes; i++) {
+      const entry = this.preferenceHistory[i];
+      const { winnerVec, loserVec, gradient } = entry.weightUpdate;
+      
+      // Determine which window this vote belongs to and its weight
+      let windowWeight: number;
+      if (i >= recentStart) {
+        // Recent window (last 5 votes)
+        windowWeight = weights.recent / Math.min(5, totalVotes - recentStart);
+      } else if (i >= mediumStart) {
+        // Medium-term window (last 40% excluding recent 5)
+        const mediumTermSize = recentStart - mediumStart;
+        windowWeight = mediumTermSize > 0 ? weights.mediumTerm / mediumTermSize : 0;
+      } else {
+        // Historical window (everything else)
+        const historicalSize = mediumStart;
+        windowWeight = historicalSize > 0 ? weights.historical / historicalSize : 0;
+      }
+
+      // Apply weighted SGD update
+      const weightedLearningRate = this.learningRate * windowWeight;
+      this.updateWeightsFromVector(winnerVec, gradient * weightedLearningRate);
+      this.updateWeightsFromVector(loserVec, -gradient * weightedLearningRate);
+    }
   }
 
   /**
@@ -91,24 +149,26 @@ export class PreferenceService {
 
   /**
    * Reset all preferences and start over.
-   * Clears weight vector and comparison count.
+   * Clears weight vector, comparison count, and preference history.
    */
   resetPreferences(): void {
     if (this.tagDict) {
       this.weightVector = new Float32Array(this.tagDict.size);
     }
     this.comparisonCount = 0;
+    this.preferenceHistory = [];
     this.updatePreferenceSummary();
   }
 
   /**
    * Initialize the preference model with tag dictionary.
-   * Sets up the weight vector dimensions.
+   * Sets up the weight vector dimensions and clears history.
    */
   initializeModel(tagDict: TagDictionary): void {
     this.tagDict = tagDict;
     this.weightVector = new Float32Array(tagDict.size);
     this.comparisonCount = 0;
+    this.preferenceHistory = [];
     this.updatePreferenceSummary();
   }
 
@@ -158,10 +218,11 @@ export class PreferenceService {
   }
 
   /**
-   * Calculate model confidence based on weight vector magnitude and comparison count.
+   * Calculate model confidence based on recent preference consistency and weight strength.
    * Returns a value between 0 (no confidence) and 1 (high confidence).
    * 
    * Confidence is based on:
+   * - Recent preference consistency (sliding window focus)
    * - Weight vector magnitude (stronger preferences = higher confidence)
    * - Number of comparisons (more data = higher confidence)
    * - Weight distribution (focused weights = higher confidence)
@@ -171,26 +232,93 @@ export class PreferenceService {
       return 0;
     }
 
-    // Factor 1: Weight vector magnitude (normalized)
+    // Factor 1: Recent preference consistency (emphasize last 5-10 votes)
+    const recentConsistency = this.calculateRecentPreferenceConsistency();
+
+    // Factor 2: Weight vector magnitude (normalized)
     const weightMagnitude = Math.sqrt(this.weightVector.reduce((sum, w) => sum + w * w, 0));
     const normalizedMagnitude = Math.min(weightMagnitude / 5, 1); // Cap at reasonable max
 
-    // Factor 2: Comparison count (diminishing returns)
-    const comparisonFactor = Math.min(this.comparisonCount / 20, 1);
+    // Factor 3: Comparison count (diminishing returns, but prioritize recent data)
+    const recentVotes = Math.min(this.preferenceHistory.length, 10);
+    const comparisonFactor = Math.min(recentVotes / 10, 1);
 
-    // Factor 3: Weight concentration (focused vs scattered preferences)
+    // Factor 4: Weight concentration (focused vs scattered preferences)
     const sortedWeights = Array.from(this.weightVector).map(Math.abs).sort((a, b) => b - a);
     const top10Sum = sortedWeights.slice(0, 10).reduce((sum, w) => sum + w, 0);
     const totalSum = sortedWeights.reduce((sum, w) => sum + w, 0);
     const concentrationFactor = totalSum > 0 ? top10Sum / totalSum : 0;
 
-    // Combine factors with weights
+    // Combine factors with emphasis on recent consistency
     const confidence = 
-      0.4 * normalizedMagnitude +     // 40% based on weight strength
-      0.3 * comparisonFactor +        // 30% based on data amount
-      0.3 * concentrationFactor;      // 30% based on focus
+      0.4 * recentConsistency +       // 40% based on recent preference patterns
+      0.25 * normalizedMagnitude +    // 25% based on weight strength  
+      0.2 * comparisonFactor +        // 20% based on data amount
+      0.15 * concentrationFactor;     // 15% based on focus
 
     return Math.max(0, Math.min(1, confidence));
+  }
+
+  /**
+   * Calculate consistency of recent preferences to assess model confidence.
+   * Looks at prediction accuracy on recent votes.
+   */
+  private calculateRecentPreferenceConsistency(): number {
+    if (this.preferenceHistory.length < 3) {
+      return 0; // Need at least 3 votes for consistency assessment
+    }
+
+    // Look at last 10 votes (or all if fewer)
+    const recentVotes = this.preferenceHistory.slice(-10);
+    let correctPredictions = 0;
+
+    for (const vote of recentVotes) {
+      // Calculate what our model would have predicted
+      const winnerScore = this.vectorService.dotProduct(vote.weightUpdate.winnerVec, this.weightVector);
+      const loserScore = this.vectorService.dotProduct(vote.weightUpdate.loserVec, this.weightVector);
+      
+      // Model correctly predicted if winner has higher score
+      if (winnerScore > loserScore) {
+        correctPredictions++;
+      }
+    }
+
+    return correctPredictions / recentVotes.length;
+  }
+
+  /**
+   * Get sliding window weights for preference learning.
+   * 35% weight to last 5 votes, 35% to last 40% of votes, 30% to all historical votes.
+   */
+  private getSlidingWindowWeights(): { recent: number; mediumTerm: number; historical: number } {
+    const totalVotes = this.preferenceHistory.length;
+    
+    if (totalVotes <= 5) {
+      // Not enough data for sliding window, use equal weighting
+      return { recent: 0.33, mediumTerm: 0.33, historical: 0.34 };
+    }
+
+    return {
+      recent: 0.35,      // Last 5 votes
+      mediumTerm: 0.35,  // Last 40% of all votes (excluding the recent 5)
+      historical: 0.30   // All historical votes
+    };
+  }
+
+  /**
+   * Get indices for sliding window segments.
+   */
+  private getSlidingWindowIndices(): { recentStart: number; mediumStart: number } {
+    const totalVotes = this.preferenceHistory.length;
+    
+    // Recent: last 5 votes
+    const recentStart = Math.max(0, totalVotes - 5);
+    
+    // Medium term: last 40% of votes, excluding the recent 5
+    const mediumTermSize = Math.max(0, Math.floor(totalVotes * 0.4) - 5);
+    const mediumStart = Math.max(0, recentStart - mediumTermSize);
+    
+    return { recentStart, mediumStart };
   }
 
   /**
