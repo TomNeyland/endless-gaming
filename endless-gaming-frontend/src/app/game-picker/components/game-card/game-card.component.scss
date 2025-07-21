@@ -16,7 +16,7 @@
   .card-image-container {
     position: relative;
     width: 100%;
-    padding-top: 56.25%; // 16:9 aspect ratio
+    padding-top: 46.7%; // Steam header aspect ratio (460x215)
     overflow: hidden;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     
