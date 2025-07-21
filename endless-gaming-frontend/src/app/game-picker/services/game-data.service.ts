@@ -6,9 +6,9 @@ import Dexie, { Table } from 'dexie';
 import { GameRecord } from '../../types/game.types';
 
 /**
- * Service for loading and caching game data from the backend API.
+ * Service for loading and caching game data from static master.json file.
  * 
- * Handles fetching master.json from the backend and caching in IndexedDB
+ * Handles fetching master.json from static assets and caching in IndexedDB
  * for offline access and improved performance.
  */
 interface CacheEntry {
@@ -38,12 +38,12 @@ export class GameDataService {
   private db = new GameDatabase();
   private readonly CACHE_KEY = 'master_data';
   private readonly CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
-  private readonly API_URL = '/api/discovery/games/master.json';
+  private readonly API_URL = './master.json';
   private gameCache = new Map<number, GameRecord>();
   private allGamesCache: GameRecord[] = [];
 
   /**
-   * Load master game data from backend API.
+   * Load master game data from static JSON file.
    * Caches data in IndexedDB for offline access.
    */
   loadMasterData(): Observable<GameRecord[]> {
@@ -59,11 +59,11 @@ export class GameDataService {
           this.populateInMemoryCache(cachedData);
           return of(cachedData);
         }
-        return this.fetchFromBackend();
+        return this.fetchFromStaticFile();
       }),
       catchError(error => {
-        console.error('Cache check failed, fetching from backend:', error);
-        return this.fetchFromBackend();
+        console.error('Cache check failed, fetching from static file:', error);
+        return this.fetchFromStaticFile();
       })
     );
   }
@@ -85,8 +85,8 @@ export class GameDataService {
   }
 
   /**
-   * Get games as Observable, loading from backend if needed.
-   * Returns cached data immediately if available, otherwise loads from API.
+   * Get games as Observable, loading from static file if needed.
+   * Returns cached data immediately if available, otherwise loads from static file.
    */
   getGames(): Observable<GameRecord[]> {
     console.log('📡 GameDataService: getGames called');
@@ -99,9 +99,9 @@ export class GameDataService {
       return of(this.getAllGames());
     }
 
-    // Otherwise, load from backend
-    console.log('📡 GameDataService: No valid cache, fetching from backend...');
-    return this.fetchFromBackend();
+    // Otherwise, load from static file
+    console.log('📡 GameDataService: No valid cache, fetching from static file...');
+    return this.fetchFromStaticFile();
   }
 
   /**
@@ -137,13 +137,13 @@ export class GameDataService {
   }
 
   /**
-   * Fetch games from backend API.
+   * Fetch games from static JSON file.
    */
-  private fetchFromBackend(): Observable<GameRecord[]> {
+  private fetchFromStaticFile(): Observable<GameRecord[]> {
     console.log('📡 GameDataService: Fetching from', this.API_URL);
     return this.http.get<GameRecord[]>(this.API_URL).pipe(
       tap(data => {
-        console.log('📡 GameDataService: Received data from backend:', data.length, 'games');
+        console.log('📡 GameDataService: Received data from static file:', data.length, 'games');
         if (data.length > 0) {
           console.log('📡 GameDataService: First game:', data[0].name);
         }
@@ -153,7 +153,7 @@ export class GameDataService {
         this.populateInMemoryCache(data);
       }),
       catchError(error => {
-        console.error('📡 GameDataService: Failed to fetch games from backend:', error);
+        console.error('📡 GameDataService: Failed to fetch games from static file:', error);
         return throwError(() => error);
       })
     );
@@ -175,8 +175,8 @@ export class GameDataService {
       
       return cacheEntry.data;
     } catch (error) {
-      // In tests, IndexedDB operations might fail - this is OK, just fetch from backend
-      console.warn('Cache read failed, will fetch from backend:', error);
+      // In tests, IndexedDB operations might fail - this is OK, just fetch from static file
+      console.warn('Cache read failed, will fetch from static file:', error);
       return null;
     }
   }
