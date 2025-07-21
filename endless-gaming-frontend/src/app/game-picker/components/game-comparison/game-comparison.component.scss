@@ -246,35 +246,100 @@
 }
 
 // Responsive design
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .game-comparison {
     padding: 16px;
+    max-width: 1200px;
     
     .comparison-container {
-      gap: 24px;
+      gap: 32px;
       
       .game-section .comparison-card {
-        max-width: 320px;
+        max-width: 350px;
+      }
+      
+      .vs-section {
+        min-width: 160px;
+        
+        mat-card-content {
+          padding: 28px 20px !important;
+        }
+        
+        .vs-content .vs-text {
+          font-size: 2.2rem !important;
+        }
       }
     }
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
   .game-comparison {
+    .comparison-container {
+      gap: 24px;
+      
+      .game-section .comparison-card {
+        max-width: 300px;
+      }
+      
+      .vs-section {
+        min-width: 140px;
+        
+        .vs-content {
+          gap: 20px;
+          
+          .vs-text {
+            font-size: 2rem !important;
+            letter-spacing: 2px;
+          }
+          
+          .skip-btn {
+            min-width: 120px;
+            height: 40px;
+            font-size: 0.9rem !important;
+          }
+        }
+      }
+      
+      .game-section .choice-btn {
+        min-width: 200px;
+        height: 48px;
+        font-size: 1rem !important;
+      }
+    }
+  }
+}
+
+@media (max-width: 800px) {
+  .game-comparison {
+    padding: 12px;
+    
     .comparison-container {
       grid-template-columns: 1fr;
       grid-template-rows: auto auto auto;
       gap: 32px;
       text-align: center;
+      max-width: 500px;
+      margin: 0 auto;
       
       .vs-section {
         order: 2;
         margin: 0 auto;
-        max-width: 200px;
+        max-width: 220px;
         
-        .vs-content .vs-text {
-          font-size: 2rem !important;
+        .vs-content {
+          gap: 24px;
+          
+          .vs-text {
+            font-size: 2.5rem !important;
+            letter-spacing: 3px;
+          }
+          
+          .skip-btn {
+            min-width: 140px;
+            height: 44px;
+            font-size: 0.95rem !important;
+          }
         }
       }
       
@@ -283,6 +348,11 @@
       }
       
       .game-section {
+        .comparison-card {
+          max-width: 100%;
+          margin: 0 auto;
+        }
+        
         .choice-btn {
           min-width: 240px;
           height: 52px;
@@ -295,18 +365,40 @@
 
 @media (max-width: 480px) {
   .game-comparison {
-    padding: 12px;
+    padding: 8px;
     
     .comparison-container {
-      gap: 24px;
+      gap: 20px;
+      max-width: 100%;
+      
+      .vs-section {
+        max-width: 200px;
+        
+        .vs-content {
+          gap: 20px;
+          
+          .vs-text {
+            font-size: 2rem !important;
+            letter-spacing: 2px;
+          }
+          
+          .skip-btn {
+            min-width: 120px;
+            height: 40px;
+            font-size: 0.9rem !important;
+          }
+        }
+      }
       
       .game-section {
         .comparison-card {
           max-width: 100%;
+          margin: 0;
         }
         
         .choice-btn {
-          min-width: 200px;
+          min-width: 220px;
+          height: 48px;
           font-size: 1rem !important;
         }
       }

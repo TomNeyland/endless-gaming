@@ -261,15 +261,71 @@
 }
 
 // Responsive adjustments
+@media (max-width: 1000px) {
+  .game-card {
+    margin: 12px 8px;
+    max-width: 100%;
+    
+    mat-card-content {
+      padding: 16px !important;
+    }
+  }
+}
+
 @media (max-width: 768px) {
   .game-card {
-    margin: 8px;
+    margin: 8px 4px;
     max-width: 100%;
+    
+    mat-card-content {
+      padding: 16px !important;
+      
+      mat-card-title {
+        font-size: 1.1rem !important;
+        margin-bottom: 10px !important;
+      }
+    }
     
     .metadata-row {
       flex-direction: column;
       align-items: stretch;
       gap: 8px;
+      margin-bottom: 10px;
+    }
+    
+    .developer {
+      min-height: 32px;
+      margin-bottom: 12px;
+    }
+    
+    .tags-section {
+      margin-bottom: 12px;
+      
+      mat-chip-set mat-chip {
+        height: 26px !important;
+        font-size: 0.7rem !important;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .game-card {
+    margin: 4px 2px;
+    
+    mat-card-content {
+      padding: 12px !important;
+      
+      mat-card-title {
+        font-size: 1rem !important;
+        line-height: 1.2 !important;
+      }
+    }
+    
+    .tags-section mat-chip-set mat-chip {
+      height: 24px !important;
+      font-size: 0.65rem !important;
+      padding: 0 6px;
     }
   }
 }
