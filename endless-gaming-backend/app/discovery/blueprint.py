@@ -43,13 +43,14 @@ def has_million_plus_owners(owners_estimate: str) -> bool:
 
 
 @bp.route('/games/master.json')
-@cache.cached(timeout=86400, key_prefix="master_json_1m_owners_v1")
+@cache.cached(timeout=86400, key_prefix="master_json_1m_owners_tags_v2")
 def get_master_json():
     """
     Get all active games with 1M+ owners and their metadata in JSON format.
+    Filters out games without tags since they can't contribute to preference learning.
     
     Returns:
-        JSON response containing array of game records for games with 1M+ estimated owners
+        JSON response containing array of game records for games with 1M+ estimated owners and valid tags
     """
     try:
         # Use the app's database session factory
@@ -68,19 +69,30 @@ def get_master_json():
             ]
             
             # Query all active games with their metadata, filtered for 1M+ owners
+            # Also filter out games without tags since they can't contribute to preference learning
             games = (
                 session.query(Game)
                 .join(Game.game_metadata)
                 .filter(Game.is_active.is_(True))
                 .filter(GameMetadata.owners_estimate.in_(million_plus_ranges))
+                .filter(GameMetadata.tags_json.isnot(None))  # Has tags data
+                .filter(GameMetadata.tags_json != '{}')      # Not empty JSON object
+                .filter(GameMetadata.tags_json != '')       # Not empty string
                 .order_by(GameMetadata.score_rank)
                 .limit(1000)
                 .options(joinedload(Game.game_metadata))
                 .all()
             )
             
-            # Convert to game records
-            payload = [to_game_record(game) for game in games]
+            # Convert to game records and filter out any remaining games without valid tags
+            game_records = []
+            for game in games:
+                record = to_game_record(game)
+                # Additional client-side check: ensure tags dict has actual content
+                if record.get('tags') and len(record['tags']) > 0:
+                    game_records.append(record)
+            
+            payload = game_records
             
             # Set cache headers for browser caching
             response = jsonify(payload)

@@ -709,29 +709,14 @@ export class PairService {
    * Filters out DLCs, expansions, editions, and games with nearly identical tags.
    */
   private areGamesTooSimilar(game1: GameRecord, game2: GameRecord): boolean {
-    const namesSimilar = this.areNamesTooSimilar(game1.name, game2.name);
-    const tagSimilarity = this.calculateTagSimilarity(game1, game2);
-    const tagsTooSimilar = tagSimilarity > 0.92;
-    
-    // Debug logging for similarity analysis
-    if (namesSimilar || tagsTooSimilar || tagSimilarity > 0.8) {
-      console.log(`🔍 Similarity Check: "${game1.name}" vs "${game2.name}"`, {
-        namesSimilar,
-        tagSimilarity: tagSimilarity.toFixed(3),
-        tagsTooSimilar,
-        filtered: namesSimilar || tagsTooSimilar,
-        game1Tags: Object.keys(game1.tags || {}).slice(0, 5),
-        game2Tags: Object.keys(game2.tags || {}).slice(0, 5)
-      });
-    }
-
     // 1. Name similarity check - catch DLCs, expansions, editions
-    if (namesSimilar) {
+    if (this.areNamesTooSimilar(game1.name, game2.name)) {
       return true;
     }
 
     // 2. Tag similarity check - catch games with nearly identical tag profiles
-    if (tagsTooSimilar) {
+    const tagSimilarity = this.calculateTagSimilarity(game1, game2);
+    if (tagSimilarity > 0.92) { // Very conservative threshold
       return true;
     }
 

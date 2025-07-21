@@ -21,16 +21,16 @@ Instead of treating all votes equally, the system applies **gradual decay** to o
 
 ### Decay Factors by Vote History
 
-- **Early voting (≤5 votes)**: 0.95 decay - Very light decay to build initial preferences
-- **Medium voting (6-20 votes)**: 0.92 decay - Light decay for stable learning
-- **Many votes (20+ votes)**: 0.88 decay - Moderate decay for sliding window effect
+- **Early voting (≤5 votes)**: 0.98 decay - Very light decay to build initial preferences
+- **Medium voting (6-20 votes)**: 0.96 decay - Light decay for stable learning
+- **Many votes (20+ votes)**: 0.94 decay - Moderate decay for sliding window effect
 
 ### Mathematical Properties
 
-- **Recent 5 votes**: Maintain ~85-100% of original influence
-- **Medium-term votes**: Gradually decay to ~60-80% influence over time
-- **Historical votes**: Smoothly fade to ~10-30% influence but never disappear
-- **Memory span**: Effective preference memory of ~15-25 votes depending on decay rate
+- **Recent 5 votes**: Maintain ~90-100% of original influence
+- **Medium-term votes**: Gradually decay to ~75-85% influence over time
+- **Historical votes**: Smoothly fade to ~40-60% influence but never disappear
+- **Memory span**: Effective preference memory of ~25-35 votes depending on decay rate
 
 ## Benefits Over Previous Approach
 

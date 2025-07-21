@@ -79,8 +79,20 @@ export class GamePickerPageComponent implements OnInit {
     this.gameDataService.getGames().subscribe({
       next: (games) => {
         console.log('🎮 GamePickerPage: Received games from service:', games.length, 'games');
-        this.games = games;
-        this.initializeServices(games);
+        
+        // Filter out games without tags - they can't contribute to preference learning
+        const gamesWithTags = games.filter(game => {
+          const hasValidTags = game.tags && Object.keys(game.tags).length > 0;
+          if (!hasValidTags) {
+            console.log(`🎮 GamePickerPage: Filtering out "${game.name}" - no tags`);
+          }
+          return hasValidTags;
+        });
+        
+        console.log('🎮 GamePickerPage: Filtered to', gamesWithTags.length, 'games with tags (removed', games.length - gamesWithTags.length, 'games without tags)');
+        
+        this.games = gamesWithTags;
+        this.initializeServices(gamesWithTags);
         console.log('🎮 GamePickerPage: Services initialized, transitioning to comparing state');
         this.state.set('comparing');
       },

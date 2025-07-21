@@ -93,23 +93,23 @@ export class PreferenceService {
 
   /**
    * Calculate decay factor for sliding window effect.
-   * Returns value between 0.85-0.95 to gradually reduce older preference influence.
+   * Returns value between 0.92-0.98 to gradually reduce older preference influence.
    */
   private calculateDecayFactor(): number {
     const totalVotes = this.preferenceHistory.length;
     
     // Early voting: minimal decay to build up preferences
     if (totalVotes <= 5) {
-      return 0.95; // Very light decay
+      return 0.98; // Very light decay
     }
     
     // As we get more votes, increase decay to emphasize recent preferences
     if (totalVotes <= 20) {
-      return 0.92; // Light decay
+      return 0.96; // Light decay
     }
     
     // For many votes, stronger decay to maintain sliding window effect
-    return 0.88; // Moderate decay
+    return 0.94; // Moderate decay (less harsh than before)
   }
 
   /**
