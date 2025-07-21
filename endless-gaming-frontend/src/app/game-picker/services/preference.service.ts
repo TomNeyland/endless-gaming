@@ -31,12 +31,15 @@ export class PreferenceService {
 
   /**
    * Update preferences based on a user choice.
-   * Uses sliding window weighted SGD to emphasize recent preferences.
+   * Uses incremental SGD with sliding window decay to emphasize recent preferences.
    */
   updatePreferences(winnerGame: GameRecord, loserGame: GameRecord): void {
     if (!this.tagDict) {
       throw new Error('Model not initialized. Call initializeModel() first.');
     }
+
+    // Apply sliding window decay to existing weights before new update
+    this.applySlidingWindowDecay();
 
     // Convert games to sparse vectors
     const winnerVec = this.vectorService.gameToSparseVector(winnerGame, this.tagDict);
@@ -51,7 +54,7 @@ export class PreferenceService {
     const probability = 1 / (1 + Math.exp(-scoreDiff));
     const gradient = 1 - probability;
 
-    // Store this preference in history for sliding window
+    // Store this preference in history for confidence calculation
     this.preferenceHistory.push({
       winnerGame,
       loserGame,
@@ -59,54 +62,54 @@ export class PreferenceService {
       weightUpdate: { winnerVec, loserVec, gradient }
     });
 
-    // Rebuild weight vector using sliding window approach
-    this.rebuildWeightsWithSlidingWindow();
+    // Apply incremental SGD update with full learning rate (this is the "recent" vote)
+    this.updateWeightsFromVector(winnerVec, gradient * this.learningRate);
+    this.updateWeightsFromVector(loserVec, -gradient * this.learningRate);
 
     this.comparisonCount++;
     this.updatePreferenceSummary();
+    
+    // Debug logging to track preference summary health
+    this.logPreferenceSummaryDebugInfo();
   }
 
   /**
-   * Rebuild the entire weight vector using sliding window weighting.
-   * This ensures recent preferences have more influence than historical ones.
+   * Apply sliding window decay to existing weight vector.
+   * Recent preferences maintain full strength, older ones are gradually decayed.
    */
-  private rebuildWeightsWithSlidingWindow(): void {
-    if (!this.tagDict || this.preferenceHistory.length === 0) {
-      return;
+  private applySlidingWindowDecay(): void {
+    if (!this.tagDict || this.preferenceHistory.length < 2) {
+      return; // No decay needed for first vote or if no history
     }
 
-    // Reset weight vector
-    this.weightVector = new Float32Array(this.tagDict.size);
+    // Calculate decay factor based on sliding window position
+    const decayFactor = this.calculateDecayFactor();
+    
+    // Apply decay to all weights
+    for (let i = 0; i < this.weightVector.length; i++) {
+      this.weightVector[i] *= decayFactor;
+    }
+  }
 
-    const weights = this.getSlidingWindowWeights();
-    const { recentStart, mediumStart } = this.getSlidingWindowIndices();
+  /**
+   * Calculate decay factor for sliding window effect.
+   * Returns value between 0.85-0.95 to gradually reduce older preference influence.
+   */
+  private calculateDecayFactor(): number {
     const totalVotes = this.preferenceHistory.length;
-
-    // Apply updates with sliding window weights
-    for (let i = 0; i < totalVotes; i++) {
-      const entry = this.preferenceHistory[i];
-      const { winnerVec, loserVec, gradient } = entry.weightUpdate;
-      
-      // Determine which window this vote belongs to and its weight
-      let windowWeight: number;
-      if (i >= recentStart) {
-        // Recent window (last 5 votes)
-        windowWeight = weights.recent / Math.min(5, totalVotes - recentStart);
-      } else if (i >= mediumStart) {
-        // Medium-term window (last 40% excluding recent 5)
-        const mediumTermSize = recentStart - mediumStart;
-        windowWeight = mediumTermSize > 0 ? weights.mediumTerm / mediumTermSize : 0;
-      } else {
-        // Historical window (everything else)
-        const historicalSize = mediumStart;
-        windowWeight = historicalSize > 0 ? weights.historical / historicalSize : 0;
-      }
-
-      // Apply weighted SGD update
-      const weightedLearningRate = this.learningRate * windowWeight;
-      this.updateWeightsFromVector(winnerVec, gradient * weightedLearningRate);
-      this.updateWeightsFromVector(loserVec, -gradient * weightedLearningRate);
+    
+    // Early voting: minimal decay to build up preferences
+    if (totalVotes <= 5) {
+      return 0.95; // Very light decay
     }
+    
+    // As we get more votes, increase decay to emphasize recent preferences
+    if (totalVotes <= 20) {
+      return 0.92; // Light decay
+    }
+    
+    // For many votes, stronger decay to maintain sliding window effect
+    return 0.88; // Moderate decay
   }
 
   /**
@@ -287,39 +290,32 @@ export class PreferenceService {
   }
 
   /**
-   * Get sliding window weights for preference learning.
-   * 35% weight to last 5 votes, 35% to last 40% of votes, 30% to all historical votes.
+   * Debug logging to track preference summary health and weight magnitudes.
    */
-  private getSlidingWindowWeights(): { recent: number; mediumTerm: number; historical: number } {
-    const totalVotes = this.preferenceHistory.length;
-    
-    if (totalVotes <= 5) {
-      // Not enough data for sliding window, use equal weighting
-      return { recent: 0.33, mediumTerm: 0.33, historical: 0.34 };
-    }
+  private logPreferenceSummaryDebugInfo(): void {
+    if (!this.tagDict) return;
 
-    return {
-      recent: 0.35,      // Last 5 votes
-      mediumTerm: 0.35,  // Last 40% of all votes (excluding the recent 5)
-      historical: 0.30   // All historical votes
-    };
+    // Calculate weight statistics
+    const nonZeroWeights = Array.from(this.weightVector).filter(w => Math.abs(w) > 0);
+    const significantWeights = Array.from(this.weightVector).filter(w => Math.abs(w) > 0.01);
+    const weightMagnitude = Math.sqrt(this.weightVector.reduce((sum, w) => sum + w * w, 0));
+    
+    // Get current preference summary
+    const currentSummary = this.preferenceSummary$.value;
+    const hasPreferences = currentSummary.likedTags.length > 0 || currentSummary.dislikedTags.length > 0;
+
+    console.log(`🔍 Preference Debug [Vote ${this.comparisonCount}]:`, {
+      hasPreferences,
+      weightMagnitude: weightMagnitude.toFixed(3),
+      nonZeroWeights: nonZeroWeights.length,
+      significantWeights: significantWeights.length,
+      likedTags: currentSummary.likedTags.length,
+      dislikedTags: currentSummary.dislikedTags.length,
+      maxWeight: Math.max(...Array.from(this.weightVector).map(Math.abs)).toFixed(4),
+      minSignificantWeight: significantWeights.length > 0 ? Math.min(...significantWeights.map(Math.abs)).toFixed(4) : '0'
+    });
   }
 
-  /**
-   * Get indices for sliding window segments.
-   */
-  private getSlidingWindowIndices(): { recentStart: number; mediumStart: number } {
-    const totalVotes = this.preferenceHistory.length;
-    
-    // Recent: last 5 votes
-    const recentStart = Math.max(0, totalVotes - 5);
-    
-    // Medium term: last 40% of votes, excluding the recent 5
-    const mediumTermSize = Math.max(0, Math.floor(totalVotes * 0.4) - 5);
-    const mediumStart = Math.max(0, recentStart - mediumTermSize);
-    
-    return { recentStart, mediumStart };
-  }
 
   /**
    * Update weights from a sparse vector.
