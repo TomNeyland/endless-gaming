@@ -118,6 +118,10 @@ poetry run python scripts/collect_games.py collect --batch-size 1000    # Overri
 poetry run python scripts/collect_games.py status                       # Show database statistics
 poetry run python scripts/setup_db.py                                   # Initialize/manage database
 
+# Export master.json data (same as /discovery/games/master.json endpoint)
+poetry run python scripts/export_master_json.py ../endless-gaming-frontend/src/assets/master.json  # Export to frontend
+poetry run python scripts/export_master_json.py /tmp/master.json        # Export to custom path
+
 # Docker deployment
 docker-compose run --rm endless-gaming python scripts/collect_games.py collect --max-pages 2
 
@@ -164,7 +168,8 @@ workers/             # Parallel processing system
 
 scripts/             # CLI interfaces with rich progress display
 ├── collect_games.py       # Main data collection CLI
-└── setup_db.py           # Database management CLI
+├── setup_db.py           # Database management CLI
+└── export_master_json.py # Export master.json data to file
 
 utils/               # Core utilities (robust implementations)
 ├── rate_limiter.py  # SimpleRateLimiter with aiolimiter integration
