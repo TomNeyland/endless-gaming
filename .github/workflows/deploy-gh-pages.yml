@@ -49,16 +49,13 @@ jobs:
     - name: Build for GitHub Pages
       run: npm run build -- --configuration github-pages
       
-    - name: Copy master.json to dist
-      run: cp master.json dist/
-      
     - name: Setup GitHub Pages
       uses: actions/configure-pages@v4
       
     - name: Upload build artifacts
       uses: actions/upload-pages-artifact@v3
       with:
-        path: endless-gaming-frontend/dist
+        path: endless-gaming-frontend/dist/endless-gaming-frontend/browser
 
   deploy:
     name: Deploy to GitHub Pages  
