@@ -105,9 +105,9 @@ export class GamePickerPageComponent implements OnInit {
     console.log('🎮 GamePickerPage: Initializing preference model...');
     this.preferenceService.initializeModel(tagDict);
     
-    // Initialize pair service with games
+    // Initialize pair service with games and tag dictionary for performance caching
     console.log('🎮 GamePickerPage: Initializing pair service...');
-    this.pairService.initializeWithGames(games);
+    this.pairService.initializeWithGames(games, tagDict);
     
     // Check if pair service has pairs available
     const firstPair = this.pairService.getNextPair();
@@ -180,7 +180,9 @@ export class GamePickerPageComponent implements OnInit {
     
     // Initialize the pair service with current games if needed
     if (this.games.length > 0) {
-      this.pairService.initializeWithGames(this.games);
+      // We need the tag dictionary for caching - rebuild it
+      const tagDict = this.vectorService.buildTagDictionary(this.games);
+      this.pairService.initializeWithGames(this.games, tagDict);
     }
   }
 

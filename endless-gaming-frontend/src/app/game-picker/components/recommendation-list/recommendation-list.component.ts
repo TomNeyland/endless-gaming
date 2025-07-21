@@ -104,10 +104,7 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
     const previousRecommendations = [...this.recommendations];
     const containerElement = document.querySelector('.recommendation-list') as HTMLElement;
     
-    // Brief delay to show loading state
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // Generate new recommendations
+    // Generate new recommendations immediately
     this.recommendations = this.preferenceService.rankGames(this.games)
       .slice(0, this.maxRecommendations);
     
@@ -117,21 +114,21 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
     // Calculate changes for animation feedback
     const changes = this.calculateRankingChanges(previousRecommendations, this.recommendations);
     
-    // Perform FLIP animations if there are changes
+    // Perform FLIP animations if there are changes (fire and forget)
     if (changes.length > 0 && containerElement) {
-      try {
-        // Wait for DOM update
-        await new Promise(resolve => setTimeout(resolve, 50));
-        
-        // Animate reordering
-        await this.animationService.animateReorder(containerElement);
-        
-        // Highlight changed cards
-        await this.highlightChangedCards(changes);
-        
-      } catch (error) {
-        console.warn('Animation failed:', error);
-      }
+      // Don't block the UI - run animations in the background
+      setTimeout(async () => {
+        try {
+          // Animate reordering
+          await this.animationService.animateReorder(containerElement);
+          
+          // Highlight changed cards
+          await this.highlightChangedCards(changes);
+          
+        } catch (error) {
+          console.warn('Animation failed:', error);
+        }
+      }, 0);
     }
     
     this.isRefreshing.set(false);

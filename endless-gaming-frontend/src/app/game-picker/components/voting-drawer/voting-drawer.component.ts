@@ -110,13 +110,10 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
 
     this.isVoting.set(true);
 
-    // Animate vote feedback on the appropriate button
-    await this.animateVoteFeedback(pick);
-
-    // Record the choice
+    // Record the choice immediately
     this.pairService.recordChoice(pair.left, pair.right, pick);
 
-    // Emit vote event for parent components
+    // Emit vote event for parent components (triggers recommendation refresh)
     this.voteCast.emit({
       leftGame: pair.left,
       rightGame: pair.right,
@@ -126,17 +123,18 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
     // Update stats
     this.updateVotingStats();
 
-    // Brief pause for button animation, then load next pair
-    setTimeout(() => {
-      this.loadNextPair();
-      this.isVoting.set(false);
-    }, 200);
+    // Fire and forget button animation (non-blocking)
+    this.animateVoteFeedback(pick);
+
+    // Load next pair immediately
+    this.loadNextPair();
+    this.isVoting.set(false);
   }
 
   /**
-   * Animate vote feedback on buttons.
+   * Animate vote feedback on buttons (fire and forget).
    */
-  private async animateVoteFeedback(pick: 'left' | 'right' | 'skip'): Promise<void> {
+  private animateVoteFeedback(pick: 'left' | 'right' | 'skip'): void {
     try {
       let buttonElement: HTMLElement | null = null;
       
@@ -150,7 +148,8 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
 
       if (buttonElement) {
         const feedbackType = pick === 'skip' ? 'skip' : 'success';
-        await this.animationService.animateVoteFeedback(buttonElement, feedbackType);
+        // Fire and forget - don't await the animation
+        this.animationService.animateVoteFeedback(buttonElement, feedbackType);
       }
     } catch (error) {
       console.warn('Vote feedback animation failed:', error);
