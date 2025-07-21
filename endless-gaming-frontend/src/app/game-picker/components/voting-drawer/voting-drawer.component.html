@@ -51,7 +51,14 @@
               
               <mat-card-content>
                 <h3 class="game-title">{{ getLeftGame()!.name }}</h3>
-                <p class="game-description">{{ getGameDescription(getLeftGame()!) }}</p>
+                <div class="game-meta">
+                  <span class="price">{{ getGamePrice(getLeftGame()!) }}</span>
+                </div>
+                <div class="game-tags">
+                  @for (tag of getGameTags(getLeftGame()!); track tag) {
+                    <span class="tag-chip">{{ tag }}</span>
+                  }
+                </div>
               </mat-card-content>
             </mat-card>
             
@@ -87,7 +94,14 @@
               
               <mat-card-content>
                 <h3 class="game-title">{{ getRightGame()!.name }}</h3>
-                <p class="game-description">{{ getGameDescription(getRightGame()!) }}</p>
+                <div class="game-meta">
+                  <span class="price">{{ getGamePrice(getRightGame()!) }}</span>
+                </div>
+                <div class="game-tags">
+                  @for (tag of getGameTags(getRightGame()!); track tag) {
+                    <span class="tag-chip">{{ tag }}</span>
+                  }
+                </div>
               </mat-card-content>
             </mat-card>
             
