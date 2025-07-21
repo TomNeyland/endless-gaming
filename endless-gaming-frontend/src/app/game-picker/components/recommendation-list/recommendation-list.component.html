@@ -79,15 +79,74 @@
       </div>
     }
 
-    <!-- Compact List for Remaining Recommendations -->
+    <!-- Split Layout: Filters + Compact List -->
     @if (getCompactRecommendations().length > 0) {
-      <div class="compact-section">
-        <h3 class="section-title mat-headline-6">
-          <mat-icon>list</mat-icon>
-          More Recommendations
-        </h3>
+      <div class="split-layout">
+        <!-- Filters Panel (30%) -->
+        <div class="filters-panel">
+          <h3 class="section-title mat-headline-6">
+            <mat-icon>tune</mat-icon>
+            Filters
+          </h3>
+          
+          <div class="filter-content">
+            <!-- Price Filter -->
+            <div class="filter-group">
+              <h4 class="filter-title mat-body-1">Price Range</h4>
+              <div class="price-options">
+                <mat-checkbox>Free</mat-checkbox>
+                <mat-checkbox>Under $10</mat-checkbox>
+                <mat-checkbox>$10 - $30</mat-checkbox>
+                <mat-checkbox>$30+</mat-checkbox>
+              </div>
+            </div>
 
-        <mat-list class="compact-list">
+            <!-- Genre Filter -->
+            <div class="filter-group">
+              <h4 class="filter-title mat-body-1">Genres</h4>
+              <div class="genre-chips">
+                <mat-chip-set>
+                  <mat-chip-option>Action</mat-chip-option>
+                  <mat-chip-option>Adventure</mat-chip-option>
+                  <mat-chip-option>Indie</mat-chip-option>
+                  <mat-chip-option>Strategy</mat-chip-option>
+                  <mat-chip-option>RPG</mat-chip-option>
+                </mat-chip-set>
+              </div>
+            </div>
+
+            <!-- Tag Filter -->
+            <div class="filter-group">
+              <h4 class="filter-title mat-body-1">Popular Tags</h4>
+              <div class="tag-chips">
+                <mat-chip-set>
+                  <mat-chip-option>Singleplayer</mat-chip-option>
+                  <mat-chip-option>Multiplayer</mat-chip-option>
+                  <mat-chip-option>Co-op</mat-chip-option>
+                  <mat-chip-option>Puzzle</mat-chip-option>
+                  <mat-chip-option>Atmospheric</mat-chip-option>
+                </mat-chip-set>
+              </div>
+            </div>
+
+            <!-- Clear Filters -->
+            <div class="filter-actions">
+              <button mat-stroked-button color="accent" class="clear-filters-btn">
+                <mat-icon>clear_all</mat-icon>
+                Clear All
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compact List (70%) -->
+        <div class="compact-section">
+          <h3 class="section-title mat-headline-6">
+            <mat-icon>list</mat-icon>
+            More Recommendations
+          </h3>
+
+          <mat-list class="compact-list">
           @for (recommendation of getCompactRecommendations(); track trackByAppId($index + 3, recommendation)) {
             <mat-list-item 
               class="compact-item"
@@ -135,7 +194,8 @@
               </div>
             </mat-list-item>
           }
-        </mat-list>
+          </mat-list>
+        </div>
       </div>
     }
 

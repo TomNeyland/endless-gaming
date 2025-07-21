@@ -8,6 +8,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { GameRecommendation, GameRecord } from '../../../types/game.types';
 import { PreferenceService } from '../../services/preference.service';
 import { PairService } from '../../services/pair.service';
@@ -33,7 +34,8 @@ import { Subscription } from 'rxjs';
     MatChipsModule,
     MatBadgeModule,
     MatTooltipModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatCheckboxModule
   ],
   templateUrl: './recommendation-list.component.html',
   styleUrl: './recommendation-list.component.scss'

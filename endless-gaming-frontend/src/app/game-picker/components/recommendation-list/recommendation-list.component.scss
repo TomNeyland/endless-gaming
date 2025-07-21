@@ -256,9 +256,55 @@
     }
   }
 
+  // Split Layout - Filters and Compact Recommendations
+  .split-layout {
+    display: grid;
+    grid-template-columns: 30% 70%;
+    gap: 24px;
+    margin-bottom: 32px;
+    align-items: flex-start;
+  }
+
+  // Filters Panel
+  .filters-panel {
+    background: var(--gaming-surface);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 20px;
+    max-height: 80vh;
+    overflow-y: auto;
+    
+    .filter-content {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .filter-group .filter-title {
+      color: var(--gaming-text-primary) !important;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    
+    .price-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .clear-filters-btn {
+      width: 100%;
+      border-color: var(--gaming-accent) !important;
+      color: var(--gaming-accent) !important;
+      margin-top: 16px;
+    }
+  }
+
   // Compact Section - Remaining Recommendations
   .compact-section {
-    margin-bottom: 32px;
+    // Remove margin since it's now inside split-layout
     
     .compact-list {
       background: var(--gaming-surface);
@@ -582,6 +628,24 @@
 @media (max-width: 768px) {
   .recommendation-list {
     padding: 0 8px;
+    
+    // Stack filters above list on mobile
+    .split-layout {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr;
+      gap: 16px;
+      
+      .filters-panel {
+        position: relative;
+        top: auto;
+        max-height: none;
+        order: 1;
+      }
+      
+      .compact-section {
+        order: 2;
+      }
+    }
     
     // Enhanced touch interactions for mobile
     .premium-section {
