@@ -158,6 +158,42 @@ export class PreferenceService {
   }
 
   /**
+   * Calculate model confidence based on weight vector magnitude and comparison count.
+   * Returns a value between 0 (no confidence) and 1 (high confidence).
+   * 
+   * Confidence is based on:
+   * - Weight vector magnitude (stronger preferences = higher confidence)
+   * - Number of comparisons (more data = higher confidence)
+   * - Weight distribution (focused weights = higher confidence)
+   */
+  getModelConfidence(): number {
+    if (!this.tagDict || this.comparisonCount === 0) {
+      return 0;
+    }
+
+    // Factor 1: Weight vector magnitude (normalized)
+    const weightMagnitude = Math.sqrt(this.weightVector.reduce((sum, w) => sum + w * w, 0));
+    const normalizedMagnitude = Math.min(weightMagnitude / 5, 1); // Cap at reasonable max
+
+    // Factor 2: Comparison count (diminishing returns)
+    const comparisonFactor = Math.min(this.comparisonCount / 20, 1);
+
+    // Factor 3: Weight concentration (focused vs scattered preferences)
+    const sortedWeights = Array.from(this.weightVector).map(Math.abs).sort((a, b) => b - a);
+    const top10Sum = sortedWeights.slice(0, 10).reduce((sum, w) => sum + w, 0);
+    const totalSum = sortedWeights.reduce((sum, w) => sum + w, 0);
+    const concentrationFactor = totalSum > 0 ? top10Sum / totalSum : 0;
+
+    // Combine factors with weights
+    const confidence = 
+      0.4 * normalizedMagnitude +     // 40% based on weight strength
+      0.3 * comparisonFactor +        // 30% based on data amount
+      0.3 * concentrationFactor;      // 30% based on focus
+
+    return Math.max(0, Math.min(1, confidence));
+  }
+
+  /**
    * Update weights from a sparse vector.
    * Helper method for SGD updates.
    */

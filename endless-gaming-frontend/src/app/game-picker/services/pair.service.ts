@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { GameRecord, GamePair, ProgressInfo, MLConfig } from '../../types/game.types';
+import { GameRecord, GamePair, ProgressInfo, MLConfig, TagDictionary } from '../../types/game.types';
 import { PreferenceService } from './preference.service';
+import { VectorService } from './vector.service';
 
 /**
  * Service for managing game pair selection and comparison progress.
@@ -13,8 +14,10 @@ import { PreferenceService } from './preference.service';
 })
 export class PairService {
   private preferenceService = inject(PreferenceService);
+  private vectorService = inject(VectorService);
   
   private games: GameRecord[] = [];
+  private tagDict: TagDictionary | null = null;
   private choiceHistory: Array<{
     leftGame: GameRecord;
     rightGame: GameRecord;
@@ -23,6 +26,11 @@ export class PairService {
   }> = [];
   
   private usedPairs = new Set<string>(); // Track all used pairs to prevent duplicates
+  
+  // Performance caches
+  private scoreCache = new Map<number, number>(); // gameId -> score
+  private vectorCache = new Map<number, any>(); // gameId -> SparseVector
+  private cacheVersion = 0; // Increment when preferences change to invalidate caches
   
   private readonly TARGET_COMPARISONS = 5;
   private readonly MIN_UNCERTAINTY = 0.1; // Minimum uncertainty threshold
@@ -84,8 +92,10 @@ export class PairService {
     // Update preferences if not skipped
     if (pick === 'left') {
       this.preferenceService.updatePreferences(leftGame, rightGame);
+      this.invalidateCaches(); // Preference model changed
     } else if (pick === 'right') {
       this.preferenceService.updatePreferences(rightGame, leftGame);
+      this.invalidateCaches(); // Preference model changed
     }
   }
 
@@ -149,11 +159,18 @@ export class PairService {
    * Initialize the pair service with available games.
    * Sets up the candidate pool for uncertainty sampling.
    */
-  initializeWithGames(games: GameRecord[]): void {
+  initializeWithGames(games: GameRecord[], tagDict?: TagDictionary): void {
     console.log('🎲 PairService: Initializing with', games.length, 'games');
     this.games = [...games];
     this.choiceHistory = [];
     this.usedPairs.clear(); // Clear used pairs for fresh start
+    
+    // Store tag dictionary for vector caching
+    if (tagDict) {
+      this.tagDict = tagDict;
+      this.precomputeVectors();
+    }
+    
     console.log('🎲 PairService: Initialization complete. Can create pairs:', this.games.length >= 2);
   }
 
@@ -164,6 +181,7 @@ export class PairService {
   resetProgress(): void {
     this.choiceHistory = [];
     this.usedPairs.clear(); // Clear used pairs to allow all pairs again
+    this.invalidateCaches(); // Clear performance caches
     this.preferenceService.resetPreferences();
   }
 
@@ -259,8 +277,8 @@ export class PairService {
   }
 
   /**
-   * Get preference-guided pair using hybrid sampling approach.
-   * One game from high-preference pool, second game for maximum uncertainty.
+   * Get preference-guided pair using optimized batch processing.
+   * Uses pre-computed scores and efficient sampling instead of nested loops.
    */
   private getPreferenceGuidedPair(): GamePair | null {
     if (this.games.length < 2) {
@@ -277,36 +295,39 @@ export class PairService {
       preferencePercentile = 0.2; // Top 20% (maximum targeting)
     }
 
-    const highPreferenceGames = this.getHighPreferenceGames(preferencePercentile);
-    if (highPreferenceGames.length === 0) {
-      // Fallback to regular uncertainty sampling if no preference data
+    // Batch compute scores for all games at once using caching
+    const gamesWithScores = this.batchComputeGameScores();
+    if (gamesWithScores.length === 0) {
       return this.getUncertaintyBasedPair();
     }
 
+    // Get high-preference games from pre-sorted array
+    const topCount = Math.max(1, Math.ceil(gamesWithScores.length * preferencePercentile));
+    const highPreferenceGames = gamesWithScores.slice(0, topCount).map(item => item.game);
+
+    // Efficiently sample candidate pairs with random sampling depth
+    const maxPairs = this.getRandomSamplingDepth();
+    const candidatePairs = this.generateCandidatePairs(highPreferenceGames, maxPairs);
+    
+    if (candidatePairs.length === 0) {
+      return this.getUncertaintyBasedPair();
+    }
+
+    // Find best uncertainty among candidates using cached scores with threshold filtering
     let bestPair: GamePair | null = null;
     let maxUncertainty = -1;
 
-    // For each high-preference game, find the best uncertainty-based pairing
-    for (const preferredGame of highPreferenceGames) {
-      for (const candidateGame of this.games) {
-        // Skip pairing with itself
-        if (candidateGame.appId === preferredGame.appId) {
-          continue;
-        }
-
-        const pair = { left: preferredGame, right: candidateGame };
-        const pairKey = this.createPairKey(pair);
-
-        // Skip already used pairs
-        if (this.usedPairs.has(pairKey)) {
-          continue;
-        }
-
-        const uncertainty = this.calculateUncertainty(preferredGame, candidateGame);
-        if (uncertainty > maxUncertainty) {
-          maxUncertainty = uncertainty;
-          bestPair = pair;
-        }
+    for (const pair of candidatePairs) {
+      const uncertainty = this.calculateUncertaintyFromCachedScores(pair.left, pair.right, gamesWithScores);
+      
+      // Early termination: if we find a pair with very high uncertainty, use it immediately
+      if (uncertainty > 0.8) {
+        return pair;
+      }
+      
+      if (uncertainty > maxUncertainty && uncertainty >= this.MIN_UNCERTAINTY) {
+        maxUncertainty = uncertainty;
+        bestPair = pair;
       }
     }
 
@@ -395,38 +416,7 @@ export class PairService {
     return `${Math.min(appId1, appId2)}-${Math.max(appId1, appId2)}`;
   }
 
-  /**
-   * Get high-preference games based on current preference model.
-   * Returns games the user is likely to prefer, sorted by score.
-   */
-  private getHighPreferenceGames(percentile: number): GameRecord[] {
-    if (this.games.length === 0 || percentile <= 0 || percentile > 1) {
-      return [];
-    }
 
-    // Calculate scores for all games
-    const gamesWithScores = this.games.map(game => ({
-      game,
-      score: this.preferenceService.calculateGameScore(game)
-    }));
-
-    // Sort by score descending (highest preference first)
-    gamesWithScores.sort((a, b) => b.score - a.score);
-
-    // Return top percentile of games
-    const topCount = Math.max(1, Math.ceil(this.games.length * percentile));
-    return gamesWithScores.slice(0, topCount).map(item => item.game);
-  }
-
-  /**
-   * Apply diversity penalty to avoid repetitive pairs.
-   * Reduces likelihood of showing similar games repeatedly.
-   */
-  private applyDiversityPenalty(candidates: GamePair[], recentPairs: GamePair[]): GamePair[] {
-    return candidates.filter(candidate => 
-      !recentPairs.some(recent => this.isPairSame(candidate, recent))
-    );
-  }
 
   /**
    * Enable infinite voting mode for continuous preference refinement.
@@ -461,8 +451,11 @@ export class PairService {
       return null;
     }
 
-    // Get top games by current preference score
-    const topGames = this.getHighPreferenceGames(topPercentile);
+    // Get top games using optimized batch scoring
+    const gamesWithScores = this.batchComputeGameScores();
+    const topCount = Math.max(2, Math.ceil(gamesWithScores.length * topPercentile));
+    const topGames = gamesWithScores.slice(0, topCount).map(item => item.game);
+    
     if (topGames.length < 2) {
       // Not enough top games, fall back to regular pairing
       return this.getPreferenceGuidedPair();
@@ -471,7 +464,7 @@ export class PairService {
     let bestPair: GamePair | null = null;
     let maxUncertainty = -1;
 
-    // Find the most uncertain pair among top games
+    // Find the most uncertain pair among top games (using O(n²) here is ok since topGames is small)
     for (let i = 0; i < topGames.length; i++) {
       for (let j = i + 1; j < topGames.length; j++) {
         const pair = { left: topGames[i], right: topGames[j] };
@@ -483,7 +476,7 @@ export class PairService {
           continue;
         }
 
-        const uncertainty = this.calculateUncertainty(topGames[i], topGames[j]);
+        const uncertainty = this.calculateUncertaintyFromCachedScores(topGames[i], topGames[j], gamesWithScores);
         if (uncertainty > maxUncertainty) {
           maxUncertainty = uncertainty;
           bestPair = pair;
@@ -509,5 +502,200 @@ export class PairService {
       .map(choice => this.createPairKey({ left: choice.leftGame, right: choice.rightGame }));
 
     return recentPairKeys.includes(pairKey);
+  }
+
+  /**
+   * Invalidate all performance caches when preferences change.
+   */
+  private invalidateCaches(): void {
+    this.cacheVersion++;
+    this.scoreCache.clear();
+    // Note: Vector cache doesn't need clearing as vectors don't change with preferences
+  }
+
+  /**
+   * Get cached game score or compute and cache it.
+   */
+  private getCachedGameScore(game: GameRecord): number {
+    const cacheKey = game.appId;
+    if (this.scoreCache.has(cacheKey)) {
+      return this.scoreCache.get(cacheKey)!;
+    }
+    
+    const score = this.preferenceService.calculateGameScore(game);
+    this.scoreCache.set(cacheKey, score);
+    return score;
+  }
+
+  /**
+   * Pre-compute and cache sparse vectors for all games.
+   */
+  private precomputeVectors(): void {
+    if (!this.tagDict) {
+      return;
+    }
+    
+    console.log('🎲 PairService: Pre-computing vectors for', this.games.length, 'games');
+    this.vectorCache.clear();
+    
+    this.games.forEach(game => {
+      const vector = this.vectorService.gameToSparseVector(game, this.tagDict!);
+      this.vectorCache.set(game.appId, vector);
+    });
+    
+    console.log('🎲 PairService: Vector pre-computation complete');
+  }
+
+  /**
+   * Get cached sparse vector or compute and cache it.
+   */
+  private getCachedGameVector(game: GameRecord): any {
+    const cacheKey = game.appId;
+    if (this.vectorCache.has(cacheKey)) {
+      return this.vectorCache.get(cacheKey);
+    }
+    
+    if (this.tagDict) {
+      const vector = this.vectorService.gameToSparseVector(game, this.tagDict);
+      this.vectorCache.set(cacheKey, vector);
+      return vector;
+    }
+    
+    return null;
+  }
+
+  /**
+   * Batch compute and cache scores for all games.
+   * Returns sorted array (highest score first) for efficient access.
+   */
+  private batchComputeGameScores(): Array<{ game: GameRecord; score: number }> {
+    const gamesWithScores = this.games.map(game => ({
+      game,
+      score: this.getCachedGameScore(game)
+    }));
+
+    // Sort by score descending (highest preference first)
+    gamesWithScores.sort((a, b) => b.score - a.score);
+    return gamesWithScores;
+  }
+
+  /**
+   * Generate candidate pairs efficiently without nested loops.
+   * Samples pairs from high-preference games with all other games, filtering by uncertainty threshold and diversity.
+   */
+  private generateCandidatePairs(highPreferenceGames: GameRecord[], maxPairs: number): GamePair[] {
+    const candidates: GamePair[] = [];
+    const sampled = new Set<string>();
+    
+    // Get recent pair keys for diversity checking (O(1) lookups)
+    const recentPairKeys = new Set(
+      this.choiceHistory
+        .slice(-this.DIVERSITY_WINDOW)
+        .map(choice => this.createPairKey({ left: choice.leftGame, right: choice.rightGame }))
+    );
+
+    // For each high-preference game, sample some pairings with other games
+    const pairsPerGame = Math.ceil(maxPairs / highPreferenceGames.length);
+    
+    for (const preferredGame of highPreferenceGames) {
+      let pairsForThisGame = 0;
+      const otherGames = this.games.filter(g => g.appId !== preferredGame.appId);
+      
+      // Shuffle other games for random sampling
+      for (let i = otherGames.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [otherGames[i], otherGames[j]] = [otherGames[j], otherGames[i]];
+      }
+
+      for (const candidateGame of otherGames) {
+        if (pairsForThisGame >= pairsPerGame || candidates.length >= maxPairs) {
+          break;
+        }
+
+        const pair = { left: preferredGame, right: candidateGame };
+        const pairKey = this.createPairKey(pair);
+
+        // Skip already used pairs, duplicates, and recent pairs for diversity
+        if (!this.usedPairs.has(pairKey) && !sampled.has(pairKey) && !recentPairKeys.has(pairKey)) {
+          // Quick uncertainty check - only add pairs that meet minimum threshold
+          const uncertainty = this.calculateUncertainty(preferredGame, candidateGame);
+          if (uncertainty >= this.MIN_UNCERTAINTY) {
+            candidates.push(pair);
+            sampled.add(pairKey);
+            pairsForThisGame++;
+          }
+        }
+      }
+    }
+
+    return candidates;
+  }
+
+  /**
+   * Calculate uncertainty using pre-computed scores to avoid redundant score calculations.
+   */
+  private calculateUncertaintyFromCachedScores(
+    game1: GameRecord, 
+    game2: GameRecord, 
+    gamesWithScores: Array<{ game: GameRecord; score: number }>
+  ): number {
+    // Find scores in pre-computed array
+    const score1 = gamesWithScores.find(g => g.game.appId === game1.appId)?.score ?? 0;
+    const score2 = gamesWithScores.find(g => g.game.appId === game2.appId)?.score ?? 0;
+    
+    // Calculate probability using logistic function
+    const scoreDiff = score1 - score2;
+    const probability = 1 / (1 + Math.exp(-scoreDiff));
+    
+    // Uncertainty is highest when probability is close to 0.5
+    return 1 - Math.abs(probability - 0.5) * 2;
+  }
+
+  /**
+   * Get random sampling depth based on model confidence for current vote.
+   * Uses weighted random selection across 5 different sampling mechanisms.
+   * Each vote independently selects a mechanism to maintain variety.
+   */
+  private getRandomSamplingDepth(): number {
+    const confidence = this.preferenceService.getModelConfidence();
+    
+    // Define sampling mechanisms with their pair ranges
+    const mechanisms = [
+      { name: 'ultra-focused', min: 10, max: 25 },
+      { name: 'focused', min: 25, max: 50 },
+      { name: 'balanced', min: 50, max: 75 },
+      { name: 'exploratory', min: 75, max: 100 },
+      { name: 'wide-discovery', min: 100, max: 150 }
+    ];
+
+    // Dynamic weights based on confidence
+    let weights: number[];
+    if (confidence > 0.7) {
+      // High confidence: bias toward focused mechanisms
+      weights = [0.30, 0.35, 0.25, 0.08, 0.02];
+    } else if (confidence < 0.3) {
+      // Low confidence: bias toward exploratory mechanisms  
+      weights = [0.05, 0.15, 0.25, 0.30, 0.25];
+    } else {
+      // Medium confidence: balanced distribution
+      weights = [0.15, 0.25, 0.30, 0.20, 0.10];
+    }
+
+    // Weighted random selection
+    const random = Math.random();
+    let cumulativeWeight = 0;
+    let selectedMechanism = mechanisms[2]; // Default to balanced
+
+    for (let i = 0; i < mechanisms.length; i++) {
+      cumulativeWeight += weights[i];
+      if (random <= cumulativeWeight) {
+        selectedMechanism = mechanisms[i];
+        break;
+      }
+    }
+
+    // Return random value within selected mechanism's range
+    const { min, max } = selectedMechanism;
+    return min + Math.floor(Math.random() * (max - min + 1));
   }
 }
