@@ -28,6 +28,29 @@
     mat-icon {
       color: var(--gaming-text-primary) !important;
     }
+    
+    .restart-button {
+      background: var(--gaming-accent) !important;
+      color: var(--gaming-background) !important;
+      font-weight: 600 !important;
+      border-radius: 20px !important;
+      padding: 0 16px !important;
+      height: 36px !important;
+      
+      mat-icon {
+        margin-right: 6px;
+        color: var(--gaming-background) !important;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+      
+      &:hover {
+        background: rgba(255, 152, 0, 0.9) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+      }
+    }
   }
 
   // State Cards for Loading and Error

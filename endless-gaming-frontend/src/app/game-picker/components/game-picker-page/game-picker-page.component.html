@@ -10,8 +10,9 @@
     <span class="toolbar-title">Endless Gaming</span>
     <span class="spacer"></span>
     @if (state() === 'comparing' || state() === 'recommendations') {
-      <button mat-icon-button (click)="resetGamePicker()" matTooltip="Start Over">
+      <button mat-raised-button (click)="resetGamePicker()" class="restart-button">
         <mat-icon>refresh</mat-icon>
+        Restart
       </button>
     }
   </mat-toolbar>

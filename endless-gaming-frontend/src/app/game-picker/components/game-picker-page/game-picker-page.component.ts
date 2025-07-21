@@ -147,6 +147,9 @@ export class GamePickerPageComponent implements OnInit {
    * Reset and start over.
    */
   resetGamePicker(): void {
+    // Close voting drawer if open
+    this.votingDrawerService.closeDrawer();
+    
     this.pairService.resetProgress();
     this.preferenceService.resetPreferences();
     this.state.set('comparing');
