@@ -116,8 +116,18 @@
                     <span class="compact-score">Score: {{ formatScore(recommendation.score) }}</span>
                   </div>
                   <div class="compact-tags">
-                    @for (tagData of getTopTags(recommendation.game, 2); track tagData.tag) {
+                    @for (tagData of getTopTags(recommendation.game, 5); track tagData.tag) {
                       <span class="compact-tag">{{ tagData.tag }}</span>
+                    }
+                    @if (getTopTags(recommendation.game).length > 5 && !expandedTags.has(recommendation.game.appId)) {
+                      <span class="more-tags-btn" (click)="toggleTagExpansion(recommendation.game.appId, $event)">
+                        +{{ getTopTags(recommendation.game).length - 5 }} more...
+                      </span>
+                    }
+                    @if (expandedTags.has(recommendation.game.appId)) {
+                      <span class="more-tags-btn" (click)="toggleTagExpansion(recommendation.game.appId, $event)">
+                        show less
+                      </span>
                     }
                   </div>
                 </div>

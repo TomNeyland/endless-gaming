@@ -408,15 +408,34 @@
             
             .compact-tags {
               display: flex;
-              gap: 8px;
+              gap: 6px;
+              flex-wrap: wrap;
               
               .compact-tag {
-                background: rgba(25, 118, 210, 0.2);
-                color: var(--gaming-primary);
+                background: rgba(255, 152, 0, 0.2);
+                color: var(--gaming-accent);
+                border: 1px solid rgba(255, 152, 0, 0.4);
                 padding: 2px 8px;
                 border-radius: 12px;
                 font-size: 0.75rem;
                 white-space: nowrap;
+                font-weight: 500;
+              }
+              
+              .more-tags-btn {
+                background: rgba(255, 255, 255, 0.1);
+                color: var(--gaming-text-secondary);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 0.75rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                
+                &:hover {
+                  background: rgba(255, 255, 255, 0.2);
+                  color: var(--gaming-text-primary);
+                }
               }
             }
           }

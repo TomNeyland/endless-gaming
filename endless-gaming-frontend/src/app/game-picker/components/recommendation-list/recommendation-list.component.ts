@@ -53,6 +53,9 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   // Reactive state for live updates
   public readonly isRefreshing = signal(false);
   public readonly lastUpdateTime = signal<Date | null>(null);
+  
+  // Track which games have expanded tags
+  public expandedTags = new Set<number>();
 
   ngOnInit(): void {
     this.generateRecommendations();
@@ -408,5 +411,18 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
       totalComparisons: this.pairService.getComparisonCount(),
       canContinue: this.canStartVoting()
     };
+  }
+
+  /**
+   * Toggle tag expansion for a specific game.
+   */
+  toggleTagExpansion(appId: number, event: Event): void {
+    event.stopPropagation(); // Prevent triggering parent click events
+    
+    if (this.expandedTags.has(appId)) {
+      this.expandedTags.delete(appId);
+    } else {
+      this.expandedTags.add(appId);
+    }
   }
 }
