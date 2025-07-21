@@ -261,6 +261,9 @@
 }
 
 // Responsive adjustments
+// TODO: Still working on metadata visibility logic for vertical layout
+// Need to hide developer/price/reviews at medium sizes (tablet) but show at smallest (mobile)
+// Previous approach with display: none !important at 480px worked better for hiding metadata
 @media (max-width: 1000px) {
   .game-card {
     margin: 12px 8px;
@@ -272,7 +275,7 @@
   }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 1500px) {
   .game-card {
     margin: 0;
     max-width: 100%;
@@ -289,18 +292,11 @@
     }
     
     .metadata-row {
-      flex-direction: row;
-      justify-content: center;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 12px;
+      display: none;
     }
     
     .developer {
-      min-height: 32px;
-      margin-bottom: 12px;
-      text-align: center;
-      justify-content: center;
+      display: none;
     }
     
     .tags-section {
@@ -318,8 +314,7 @@
     }
     
     .reviews {
-      text-align: center;
-      justify-content: center;
+      display: none;
     }
   }
 }
