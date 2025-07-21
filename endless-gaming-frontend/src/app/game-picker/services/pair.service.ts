@@ -617,6 +617,11 @@ export class PairService {
 
         // Skip already used pairs, duplicates, and recent pairs for diversity
         if (!this.usedPairs.has(pairKey) && !sampled.has(pairKey) && !recentPairKeys.has(pairKey)) {
+          // Skip games that are too similar (DLCs, editions, etc.)
+          if (this.areGamesTooSimilar(preferredGame, candidateGame)) {
+            continue;
+          }
+          
           // Quick uncertainty check - only add pairs that meet minimum threshold
           const uncertainty = this.calculateUncertainty(preferredGame, candidateGame);
           if (uncertainty >= this.MIN_UNCERTAINTY) {
@@ -697,5 +702,113 @@ export class PairService {
     // Return random value within selected mechanism's range
     const { min, max } = selectedMechanism;
     return min + Math.floor(Math.random() * (max - min + 1));
+  }
+
+  /**
+   * Check if two games are too similar to provide meaningful comparison.
+   * Filters out DLCs, expansions, editions, and games with nearly identical tags.
+   */
+  private areGamesTooSimilar(game1: GameRecord, game2: GameRecord): boolean {
+    // 1. Name similarity check - catch DLCs, expansions, editions
+    if (this.areNamesTooSimilar(game1.name, game2.name)) {
+      return true;
+    }
+
+    // 2. Tag similarity check - catch games with nearly identical tag profiles
+    const tagSimilarity = this.calculateTagSimilarity(game1, game2);
+    if (tagSimilarity > 0.92) { // Very conservative threshold
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if game names suggest they're the same series/DLC/edition.
+   * Conservative approach to avoid false positives.
+   */
+  private areNamesTooSimilar(name1: string, name2: string): boolean {
+    // Normalize names for comparison
+    const normalize = (name: string) => 
+      name.toLowerCase()
+        .replace(/[^\w\s]/g, ' ')  // Remove punctuation
+        .replace(/\s+/g, ' ')      // Normalize spaces
+        .trim();
+
+    const norm1 = normalize(name1);
+    const norm2 = normalize(name2);
+
+    // Extract base name by removing common expansion/edition markers
+    const extractBaseName = (name: string) => {
+      return name
+        .replace(/\b(dlc|expansion|pack|edition|bundle|collection|goty|deluxe|premium|ultimate|complete|enhanced|directors cut|remastered|redux|definitive)\b/gi, '')
+        .replace(/\b(episode|chapter|part|volume|season)\s*\d+/gi, '')
+        .replace(/\s*[:\-]\s*.*/g, '') // Remove subtitle after colon/dash
+        .trim();
+    };
+
+    const base1 = extractBaseName(norm1);
+    const base2 = extractBaseName(norm2);
+
+    // If base names are identical or very similar, they're likely the same game
+    if (base1 === base2 && base1.length > 3) {
+      return true;
+    }
+
+    // Check for substring containment (one name contains most of the other)
+    const shorter = base1.length < base2.length ? base1 : base2;
+    const longer = base1.length < base2.length ? base2 : base1;
+    
+    if (shorter.length > 5 && longer.includes(shorter)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Calculate tag similarity between two games using cosine similarity.
+   * Returns 0-1 where 1 means identical tag profiles.
+   */
+  private calculateTagSimilarity(game1: GameRecord, game2: GameRecord): number {
+    const tags1 = game1.tags || {};
+    const tags2 = game2.tags || {};
+
+    // Get all unique tags
+    const allTags = new Set([...Object.keys(tags1), ...Object.keys(tags2)]);
+    
+    if (allTags.size === 0) {
+      return 1; // Both games have no tags, consider them identical
+    }
+
+    // Create normalized vectors (0-1 scale based on max votes per game)
+    const getMaxVotes = (tags: {[key: string]: number}) => 
+      Math.max(1, ...Object.values(tags)); // Prevent division by zero
+
+    const max1 = getMaxVotes(tags1);
+    const max2 = getMaxVotes(tags2);
+
+    let dotProduct = 0;
+    let magnitude1 = 0;
+    let magnitude2 = 0;
+
+    for (const tag of allTags) {
+      const value1 = (tags1[tag] || 0) / max1;
+      const value2 = (tags2[tag] || 0) / max2;
+      
+      dotProduct += value1 * value2;
+      magnitude1 += value1 * value1;
+      magnitude2 += value2 * value2;
+    }
+
+    magnitude1 = Math.sqrt(magnitude1);
+    magnitude2 = Math.sqrt(magnitude2);
+
+    if (magnitude1 === 0 || magnitude2 === 0) {
+      return 1; // One game has no tags, avoid division by zero
+    }
+
+    // Cosine similarity
+    return dotProduct / (magnitude1 * magnitude2);
   }
 }
