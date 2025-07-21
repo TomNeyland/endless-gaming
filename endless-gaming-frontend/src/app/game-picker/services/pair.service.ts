@@ -709,14 +709,29 @@ export class PairService {
    * Filters out DLCs, expansions, editions, and games with nearly identical tags.
    */
   private areGamesTooSimilar(game1: GameRecord, game2: GameRecord): boolean {
+    const namesSimilar = this.areNamesTooSimilar(game1.name, game2.name);
+    const tagSimilarity = this.calculateTagSimilarity(game1, game2);
+    const tagsTooSimilar = tagSimilarity > 0.92;
+    
+    // Debug logging for similarity analysis
+    if (namesSimilar || tagsTooSimilar || tagSimilarity > 0.8) {
+      console.log(`🔍 Similarity Check: "${game1.name}" vs "${game2.name}"`, {
+        namesSimilar,
+        tagSimilarity: tagSimilarity.toFixed(3),
+        tagsTooSimilar,
+        filtered: namesSimilar || tagsTooSimilar,
+        game1Tags: Object.keys(game1.tags || {}).slice(0, 5),
+        game2Tags: Object.keys(game2.tags || {}).slice(0, 5)
+      });
+    }
+
     // 1. Name similarity check - catch DLCs, expansions, editions
-    if (this.areNamesTooSimilar(game1.name, game2.name)) {
+    if (namesSimilar) {
       return true;
     }
 
     // 2. Tag similarity check - catch games with nearly identical tag profiles
-    const tagSimilarity = this.calculateTagSimilarity(game1, game2);
-    if (tagSimilarity > 0.92) { // Very conservative threshold
+    if (tagsTooSimilar) {
       return true;
     }
 
@@ -749,6 +764,21 @@ export class PairService {
 
     const base1 = extractBaseName(norm1);
     const base2 = extractBaseName(norm2);
+
+    // Debug logging for name analysis
+    if (name1.toLowerCase().includes('f.e.a.r') || name2.toLowerCase().includes('f.e.a.r') || 
+        norm1.includes('f e a r') || norm2.includes('f e a r')) {
+      console.log(`🔍 Name Analysis: "${name1}" vs "${name2}"`, {
+        norm1,
+        norm2,
+        base1,
+        base2,
+        baseNamesEqual: base1 === base2,
+        baseLength1: base1.length,
+        baseLength2: base2.length,
+        wouldFilter: (base1 === base2 && base1.length > 3)
+      });
+    }
 
     // If base names are identical or very similar, they're likely the same game
     if (base1 === base2 && base1.length > 3) {
