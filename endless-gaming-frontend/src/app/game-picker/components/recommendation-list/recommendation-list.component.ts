@@ -57,6 +57,11 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.generateRecommendations();
     this.subscribeToPreferenceUpdates();
+    
+    // Auto-open voting drawer when user reaches recommendations page
+    setTimeout(() => {
+      this.votingDrawerService.openDrawer();
+    }, 500); // Small delay for better UX
   }
 
   ngOnDestroy(): void {
