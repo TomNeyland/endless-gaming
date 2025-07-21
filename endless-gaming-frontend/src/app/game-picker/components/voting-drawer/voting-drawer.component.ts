@@ -7,6 +7,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { PreferenceSummaryComponent } from '../preference-summary/preference-summary.component';
 import { GameRecord, GamePair } from '../../../types/game.types';
 import { PairService } from '../../services/pair.service';
 import { AnimationService } from '../../services/animation.service';
@@ -28,7 +29,8 @@ import { AnimationService } from '../../services/animation.service';
     MatCardModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
-    MatToolbarModule
+    MatToolbarModule,
+    PreferenceSummaryComponent
   ],
   templateUrl: './voting-drawer.component.html',
   styleUrl: './voting-drawer.component.scss'
