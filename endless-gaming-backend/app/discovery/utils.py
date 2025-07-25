@@ -70,6 +70,8 @@ def to_game_record(game: Game) -> Dict[str, Any]:
         "supportedLanguages": storefront.supported_languages if storefront else None,
         "priceData": storefront.price_overview if storefront else None,
         "pcRequirements": storefront.pc_requirements if storefront else None,
+        "screenshots": storefront.screenshots if storefront else None,
+        "movies": storefront.movies if storefront else None,
         
         # SteamSpy fields (preserved for backwards compatibility and unique data)
         "price": price,

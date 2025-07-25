@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { GameRecord, GameRecommendation } from '../../types/game.types';
 import Dexie, { Table } from 'dexie';
+import { AgeCategory, matchesAgeFilter } from '../../utils/game-age.utils';
 
 /**
  * Game filtering interfaces and types
@@ -33,6 +34,11 @@ export interface GameFilters {
   // Advanced filters
   scoreRange: PriceRange;  // ML preference score range
   topNOnly: number | null;  // Limit to top N results
+  
+  // Age-based filters
+  ageCategories: AgeCategory[];  // ['new', 'recent', 'established', 'classic']
+  releaseYearRange: PriceRange;  // Min/max release year
+  maxGameAge: number | null;     // Maximum age in years
   
   // Search
   searchText: string;
@@ -91,6 +97,9 @@ const DEFAULT_FILTERS: GameFilters = {
   excludedPublishers: [],
   scoreRange: { min: -10, max: 10 },
   topNOnly: null,
+  ageCategories: [],
+  releaseYearRange: { min: 1970, max: new Date().getFullYear() },
+  maxGameAge: null,
   searchText: ''
 };
 
@@ -437,6 +446,19 @@ export class GameFilterService {
         }
       }
       
+      // Age-based filters
+      if (filters.ageCategories.length > 0 || filters.maxGameAge !== null || 
+          filters.releaseYearRange.min > 1970 || filters.releaseYearRange.max < new Date().getFullYear()) {
+        if (!matchesAgeFilter(
+          game.releaseDate,
+          filters.ageCategories,
+          filters.releaseYearRange,
+          filters.maxGameAge
+        )) {
+          return false;
+        }
+      }
+      
       return true;
     });
     
@@ -497,7 +519,11 @@ export class GameFilterService {
       filters.priceRange.min > DEFAULT_FILTERS.priceRange.min ||
       filters.priceRange.max < DEFAULT_FILTERS.priceRange.max ||
       filters.scoreRange.min > DEFAULT_FILTERS.scoreRange.min ||
-      filters.scoreRange.max < DEFAULT_FILTERS.scoreRange.max
+      filters.scoreRange.max < DEFAULT_FILTERS.scoreRange.max ||
+      filters.ageCategories.length > 0 ||
+      filters.releaseYearRange.min > DEFAULT_FILTERS.releaseYearRange.min ||
+      filters.releaseYearRange.max < DEFAULT_FILTERS.releaseYearRange.max ||
+      filters.maxGameAge !== null
     );
   }
   
@@ -523,6 +549,12 @@ export class GameFilterService {
         filters.priceRange.max < DEFAULT_FILTERS.priceRange.max) count++;
     if (filters.scoreRange.min > DEFAULT_FILTERS.scoreRange.min || 
         filters.scoreRange.max < DEFAULT_FILTERS.scoreRange.max) count++;
+    
+    // Age-based filters
+    if (filters.ageCategories.length > 0) count++;
+    if (filters.releaseYearRange.min > DEFAULT_FILTERS.releaseYearRange.min ||
+        filters.releaseYearRange.max < DEFAULT_FILTERS.releaseYearRange.max) count++;
+    if (filters.maxGameAge !== null) count++;
     
     return count;
   }

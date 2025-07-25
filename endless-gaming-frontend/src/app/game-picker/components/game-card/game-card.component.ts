@@ -1,10 +1,13 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { GameRecord } from '../../../types/game.types';
+import { GameDetailsService } from '../../services/game-details.service';
+import { getAgeBadge } from '../../../utils/game-age.utils';
 
 /**
  * Component for displaying individual game information.
@@ -15,11 +18,12 @@ import { GameRecord } from '../../../types/game.types';
 @Component({
   selector: 'app-game-card',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatChipsModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [CommonModule, MatCardModule, MatChipsModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule],
   templateUrl: './game-card.component.html',
   styleUrl: './game-card.component.scss'
 })
 export class GameCardComponent {
+  private gameDetailsService = inject(GameDetailsService);
   
   @Input() game: GameRecord | null = null;
   @Input() showScore = false;
@@ -255,5 +259,66 @@ export class GameCardComponent {
   onImageLoad(): void {
     this.imageLoading = false;
     this.imageError = false;
+  }
+
+  /**
+   * Open game details modal.
+   */
+  openGameDetails(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    
+    if (this.game) {
+      this.gameDetailsService.openGameDetails(this.game);
+    }
+  }
+
+  /**
+   * Check if game has rich content (screenshots or videos).
+   */
+  hasRichContent(): boolean {
+    return this.hasScreenshots() || this.hasVideos();
+  }
+
+  /**
+   * Check if game has screenshots.
+   */
+  hasScreenshots(): boolean {
+    return !!(this.game?.screenshots && this.game.screenshots.length > 0);
+  }
+
+  /**
+   * Check if game has videos.
+   */
+  hasVideos(): boolean {
+    return !!(this.game?.movies && this.game.movies.length > 0);
+  }
+
+  /**
+   * Get age badge text for display.
+   */
+  getAgeBadgeText(): string {
+    return getAgeBadge(this.game?.releaseDate);
+  }
+
+  /**
+   * Get truncated description for hover preview.
+   */
+  getTruncatedDescription(maxLength: number = 120): string {
+    if (!this.game?.shortDescription) return '';
+    
+    if (this.game.shortDescription.length <= maxLength) {
+      return this.game.shortDescription;
+    }
+    
+    const truncated = this.game.shortDescription.substring(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(' ');
+    
+    if (lastSpace > maxLength * 0.8) {
+      return truncated.substring(0, lastSpace) + '...';
+    }
+    
+    return truncated + '...';
   }
 }

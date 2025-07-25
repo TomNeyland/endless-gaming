@@ -15,6 +15,7 @@ import { Subscription } from 'rxjs';
 
 import { GameFilterService, FilterStats } from '../../services/game-filter.service';
 import { GameRecord } from '../../../types/game.types';
+import { AgeCategory } from '../../../utils/game-age.utils';
 
 /**
  * Clean, simple filter panel with instant filtering (no apply button needed).
@@ -67,6 +68,11 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
   public minReviewScore = 0;
   public minReviewCount = 0;
   public topNOnly: number | null = null;
+  
+  // Age filter form models
+  public ageCategories: AgeCategory[] = [];
+  public releaseYearRange = { min: 1970, max: new Date().getFullYear() };
+  public maxGameAge: number | null = null;
   
   // Top N options
   public readonly topNOptions = [
@@ -128,6 +134,9 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
     this.minReviewScore = filters.minReviewScore;
     this.minReviewCount = filters.minReviewCount;
     this.topNOnly = filters.topNOnly;
+    this.ageCategories = [...filters.ageCategories];
+    this.releaseYearRange = { ...filters.releaseYearRange };
+    this.maxGameAge = filters.maxGameAge;
   }
   
   /**
@@ -253,6 +262,32 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
     this.gameFilterService.updateFilters({ excludedTags: [...this.excludedTags] });
   }
   
+  // Age filter change handlers
+  
+  /**
+   * Handle age categories change (instant)
+   */
+  public onAgeCategoriesChange(categories: AgeCategory[]): void {
+    this.ageCategories = categories;
+    this.gameFilterService.updateFilters({ ageCategories: [...categories] });
+  }
+  
+  /**
+   * Handle release year range change (instant)
+   */
+  public onReleaseYearRangeChange(range: { min: number, max: number }): void {
+    this.releaseYearRange = range;
+    this.gameFilterService.updateFilters({ releaseYearRange: { ...range } });
+  }
+  
+  /**
+   * Handle max age change (instant)
+   */
+  public onMaxAgeChange(maxAge: number | null): void {
+    this.maxGameAge = maxAge;
+    this.gameFilterService.updateFilters({ maxGameAge: maxAge });
+  }
+  
   /**
    * Get filtered tags for autocomplete with frequency information
    */
@@ -308,5 +343,12 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
    */
   public formatPercentage(value: number): string {
     return `${value}%`;
+  }
+  
+  /**
+   * Get current year for year range slider max
+   */
+  public getCurrentYear(): number {
+    return new Date().getFullYear();
   }
 }

@@ -286,3 +286,57 @@ class TestSteamStoreCollector:
             assert progress_calls[0] == (1, 3, "Test Game 0", FetchStatus.SUCCESS.value)
             assert progress_calls[1] == (2, 3, "Test Game 1", FetchStatus.SUCCESS.value)
             assert progress_calls[2] == (3, 3, "Test Game 2", FetchStatus.SUCCESS.value)
+    
+    def test_parse_steam_store_data_with_media(self):
+        """Test parsing Steam Store data with screenshots and movies."""
+        collector = SteamStoreCollector()
+        
+        sample_screenshots = [
+            {
+                "id": 0,
+                "path_thumbnail": "https://cdn.akamai.steamstatic.com/steam/apps/730/ss_0_600x338.jpg",
+                "path_full": "https://cdn.akamai.steamstatic.com/steam/apps/730/ss_0_1920x1080.jpg"
+            },
+            {
+                "id": 1,
+                "path_thumbnail": "https://cdn.akamai.steamstatic.com/steam/apps/730/ss_1_600x338.jpg",
+                "path_full": "https://cdn.akamai.steamstatic.com/steam/apps/730/ss_1_1920x1080.jpg"
+            }
+        ]
+        
+        sample_movies = [
+            {
+                "id": 256658880,
+                "name": "Counter-Strike: Global Offensive",
+                "thumbnail": "https://cdn.akamai.steamstatic.com/steam/apps/256658880/movie_600x337.jpg",
+                "webm": {
+                    "480": "https://cdn.akamai.steamstatic.com/steam/apps/256658880/movie480.webm",
+                    "max": "https://cdn.akamai.steamstatic.com/steam/apps/256658880/movie_max.webm"
+                },
+                "mp4": {
+                    "480": "https://cdn.akamai.steamstatic.com/steam/apps/256658880/movie480.mp4",
+                    "max": "https://cdn.akamai.steamstatic.com/steam/apps/256658880/movie_max.mp4"
+                },
+                "highlight": True
+            }
+        ]
+        
+        raw_data = {
+            "steam_appid": 730,
+            "name": "Counter-Strike: Global Offensive",
+            "short_description": "Popular FPS game",
+            "screenshots": sample_screenshots,
+            "movies": sample_movies
+        }
+        
+        result = collector.parse_steam_store_data(730, raw_data)
+        
+        assert result.app_id == 730
+        assert result.short_description == "Popular FPS game"
+        assert result.screenshots == sample_screenshots
+        assert result.movies == sample_movies
+        assert len(result.screenshots) == 2
+        assert len(result.movies) == 1
+        assert result.movies[0]['name'] == "Counter-Strike: Global Offensive"
+        assert result.movies[0]['highlight'] is True
+        assert result.fetch_status == FetchStatus.SUCCESS.value

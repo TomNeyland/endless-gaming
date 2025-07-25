@@ -34,7 +34,7 @@ class SimpleRateLimiter:
         self.limiters = {
             APIEndpoint.STEAM_WEB_API: AsyncLimiter(100000, 86400),  # 100k/day
             APIEndpoint.STEAM_STORE_API: AsyncLimiter(200, 300),     # 200/5min
-            APIEndpoint.STEAM_STORE_APPDETAILS_API: AsyncLimiter(1, 1),  # 1/second
+            APIEndpoint.STEAM_STORE_APPDETAILS_API: AsyncLimiter(40, 60),  # 40/minute
             APIEndpoint.STEAMSPY_API: AsyncLimiter(60, 60),          # 60/minute
             APIEndpoint.STEAMSPY_ALL_API: AsyncLimiter(1, 60),       # 1/minute
         }
@@ -58,7 +58,7 @@ class SimpleRateLimiter:
         elif endpoint == APIEndpoint.STEAM_STORE_API:
             return "200/5minutes"
         elif endpoint == APIEndpoint.STEAM_STORE_APPDETAILS_API:
-            return "1/second"
+            return "40/minute"
         elif endpoint == APIEndpoint.STEAMSPY_API:
             return "60/minute"
         else:  # STEAMSPY_ALL_API

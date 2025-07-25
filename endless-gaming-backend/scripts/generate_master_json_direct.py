@@ -207,6 +207,8 @@ class DirectGameDataCollector:
             "supportedLanguages": storefront_data.get('supported_languages') if storefront_data else None,
             "priceData": storefront_data.get('price_overview') if storefront_data else None,
             "pcRequirements": storefront_data.get('pc_requirements') if storefront_data else None,
+            "screenshots": storefront_data.get('screenshots') if storefront_data else None,
+            "movies": storefront_data.get('movies') if storefront_data else None,
             # SteamSpy fields (preserved)
             "price": price,
             "developer": data_source.get('developer'),  # Keep for backwards compatibility

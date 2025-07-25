@@ -6,6 +6,33 @@
  */
 
 /**
+ * Screenshot data from Steam Store API.
+ */
+export interface Screenshot {
+  id: number;
+  path_thumbnail: string;  // 600x338 thumbnail URL
+  path_full: string;       // 1920x1080 full resolution URL
+}
+
+/**
+ * Movie/video data from Steam Store API.
+ */
+export interface Movie {
+  id: number;
+  name: string;
+  thumbnail: string;       // Video thumbnail URL
+  webm: {                  // WebM video formats
+    480: string;           // 480p WebM URL
+    max: string;           // Max quality WebM URL
+  };
+  mp4: {                   // MP4 video formats
+    480: string;           // 480p MP4 URL
+    max: string;           // Max quality MP4 URL
+  };
+  highlight: boolean;      // Whether this is a featured video
+}
+
+/**
  * Game record from the backend API (/discovery/games/master.json).
  * Field names are in camelCase to match backend response format.
  */
@@ -20,6 +47,23 @@ export interface GameRecord {
   genres: string[];
   reviewPos: number | null;  // Positive review count
   reviewNeg: number | null;  // Negative review count
+  
+  // Steam Store API fields (rich content)
+  shortDescription?: string | null;
+  detailedDescription?: string | null;
+  isFree?: boolean | null;
+  requiredAge?: number | null;
+  website?: string | null;
+  releaseDate?: string | null;      // "Aug 21, 2012" format
+  developers?: string[] | null;     // Array from Steam Store (vs single from SteamSpy)
+  publishers?: string[] | null;     // Array from Steam Store (vs single from SteamSpy)
+  storeGenres?: Array<{id: string; description: string}> | null;
+  categories?: Array<{id: number; description: string}> | null;
+  supportedLanguages?: string | null;
+  priceData?: any | null;           // Price overview object
+  pcRequirements?: any | null;      // System requirements object
+  screenshots?: Screenshot[] | null; // Array of screenshot objects
+  movies?: Movie[] | null;          // Array of video objects
 }
 
 

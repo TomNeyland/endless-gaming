@@ -1,0 +1,279 @@
+<div class="game-details-modal" (keydown)="onKeyDown($event)" tabindex="-1">
+  
+  <!-- Modal Header -->
+  <div class="modal-header">
+    <div class="header-content">
+      <div class="game-cover">
+        <img 
+          [src]="game.coverUrl" 
+          [alt]="game.name + ' cover'"
+          class="cover-image"
+          loading="eager">
+      </div>
+      
+      <div class="header-info">
+        <h1 class="game-title">{{ game.name }}</h1>
+        
+        <div class="game-meta">
+          <div class="meta-row">
+            <span class="price">{{ getFormattedPrice() }}</span>
+            @if (getAgeBadgeText()) {
+              <span class="age-badge">{{ getAgeBadgeText() }}</span>
+            }
+          </div>
+          
+          <div class="meta-row">
+            <span class="developers">{{ getDevelopersText() }}</span>
+          </div>
+          
+          @if (game.releaseDate) {
+            <div class="meta-row">
+              <span class="release-info">{{ getFormattedAge() }}</span>
+            </div>
+          }
+          
+          @if (getReviewPercentage() !== null) {
+            <div class="meta-row">
+              <span class="review-info">{{ getReviewText() }}</span>
+            </div>
+          }
+        </div>
+        
+        <!-- Top Tags -->
+        @if (getTopTags(6).length > 0) {
+          <div class="quick-tags">
+            @for (tagInfo of getTopTags(6); track tagInfo.tag) {
+              <span class="tag-chip">{{ tagInfo.tag }}</span>
+            }
+          </div>
+        }
+        
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button 
+            mat-raised-button 
+            color="primary"
+            (click)="openSteamStore()"
+            class="steam-button">
+            <mat-icon>open_in_new</mat-icon>
+            View on Steam
+          </button>
+          
+          @if (game.website) {
+            <button 
+              mat-stroked-button
+              (click)="openWebsite()"
+              class="website-button">
+              <mat-icon>language</mat-icon>
+              Website
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+    
+    <!-- Close Button -->
+    <button 
+      mat-icon-button 
+      (click)="close()"
+      class="close-button"
+      matTooltip="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Tabbed Content -->
+  <div class="modal-content">
+    <mat-tab-group class="details-tabs" dynamicHeight>
+      
+      <!-- Overview Tab -->
+      <mat-tab label="Overview">
+        <div class="tab-content overview-content">
+          
+          <!-- Description -->
+          @if (game.shortDescription || game.detailedDescription) {
+            <div class="description-section">
+              <h3>Description</h3>
+              @if (game.shortDescription) {
+                <div class="short-description">
+                  {{ game.shortDescription }}
+                </div>
+              }
+              @if (game.detailedDescription) {
+                <div class="detailed-description" [innerHTML]="sanitizeHtml(game.detailedDescription)">
+                </div>
+              }
+            </div>
+          }
+          
+          <!-- Game Details -->
+          <div class="details-section">
+            <h3>Details</h3>
+            <div class="details-grid">
+              
+              @if (getDevelopersText() !== 'Unknown') {
+                <div class="detail-item">
+                  <label>Developer:</label>
+                  <span>{{ getDevelopersText() }}</span>
+                </div>
+              }
+              
+              @if (getPublishersText() !== 'Unknown') {
+                <div class="detail-item">
+                  <label>Publisher:</label>
+                  <span>{{ getPublishersText() }}</span>
+                </div>
+              }
+              
+              @if (game.releaseDate) {
+                <div class="detail-item">
+                  <label>Release Date:</label>
+                  <span>{{ game.releaseDate }}</span>
+                </div>
+              }
+              
+              @if (getStoreGenres().length > 0) {
+                <div class="detail-item">
+                  <label>Genres:</label>
+                  <span>{{ getStoreGenres().join(', ') }}</span>
+                </div>
+              }
+              
+              @if (getCategories().length > 0) {
+                <div class="detail-item">
+                  <label>Features:</label>
+                  <span>{{ getCategories().join(', ') }}</span>
+                </div>
+              }
+              
+              @if (game.requiredAge) {
+                <div class="detail-item">
+                  <label>Age Rating:</label>
+                  <span>{{ game.requiredAge }}+</span>
+                </div>
+              }
+              
+            </div>
+          </div>
+          
+          <!-- System Requirements -->
+          @if (hasSystemRequirements()) {
+            <div class="requirements-section">
+              <h3>System Requirements</h3>
+              <div class="requirements-grid">
+                
+                @if (game.pcRequirements?.minimum) {
+                  <div class="requirement-block">
+                    <h4>Minimum</h4>
+                    <div class="requirement-content" [innerHTML]="getMinimumRequirements()">
+                    </div>
+                  </div>
+                }
+                
+                @if (game.pcRequirements?.recommended) {
+                  <div class="requirement-block">
+                    <h4>Recommended</h4>
+                    <div class="requirement-content" [innerHTML]="getRecommendedRequirements()">
+                    </div>
+                  </div>
+                }
+                
+              </div>
+            </div>
+          }
+          
+        </div>
+      </mat-tab>
+      
+      <!-- Screenshots Tab -->
+      @if (hasScreenshots()) {
+        <mat-tab>
+          <ng-template mat-tab-label>
+            Screenshots ({{ getScreenshotCount() }})
+          </ng-template>
+          
+          <div class="tab-content screenshots-content">
+            <div class="screenshot-grid">
+              @for (screenshot of game.screenshots; track screenshot.id) {
+                <div class="screenshot-item" (click)="openScreenshotLightbox(screenshot)">
+                  <img 
+                    [src]="screenshot.path_thumbnail"
+                    [alt]="'Screenshot ' + screenshot.id"
+                    class="screenshot-thumb"
+                    loading="lazy">
+                  <div class="screenshot-overlay">
+                    <mat-icon>zoom_in</mat-icon>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </mat-tab>
+      }
+      
+      <!-- Videos Tab -->
+      @if (hasVideos()) {
+        <mat-tab>
+          <ng-template mat-tab-label>
+            Videos ({{ getVideoCount() }})
+          </ng-template>
+          
+          <div class="tab-content videos-content">
+            
+            <!-- Video Player -->
+            @if (selectedVideo) {
+              <div class="video-player-section">
+                <div class="video-player">
+                  <video 
+                    [poster]="getVideoPoster(selectedVideo)"
+                    controls
+                    preload="metadata"
+                    class="main-video">
+                    <source [src]="selectedVideo.webm.max" type="video/webm">
+                    <source [src]="selectedVideo.mp4.max" type="video/mp4">
+                    <source [src]="selectedVideo.webm['480']" type="video/webm">
+                    <source [src]="selectedVideo.mp4['480']" type="video/mp4">
+                    Your browser does not support video playback.
+                  </video>
+                </div>
+                <h4 class="video-title">{{ selectedVideo.name }}</h4>
+              </div>
+            }
+            
+            <!-- Video List -->
+            @if (game.movies && game.movies.length > 1) {
+              <div class="video-list-section">
+                <h4>All Videos</h4>
+                <div class="video-list">
+                  @for (movie of game.movies; track movie.id) {
+                    <div 
+                      class="video-list-item"
+                      [class.selected]="selectedVideo?.id === movie.id"
+                      (click)="selectVideo(movie)">
+                      <img 
+                        [src]="movie.thumbnail"
+                        [alt]="movie.name"
+                        class="video-thumb">
+                      <div class="video-info">
+                        <span class="video-name">{{ movie.name }}</span>
+                        @if (movie.highlight) {
+                          <span class="highlight-badge">Featured</span>
+                        }
+                      </div>
+                      <div class="play-overlay">
+                        <mat-icon>play_arrow</mat-icon>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+            
+          </div>
+        </mat-tab>
+      }
+      
+    </mat-tab-group>
+  </div>
+  
+</div>

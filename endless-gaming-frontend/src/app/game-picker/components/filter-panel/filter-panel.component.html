@@ -76,6 +76,69 @@
       </div>
     </div>
 
+    <!-- Age -->
+    <div class="filter-section">
+      <h4 class="section-title">
+        <mat-icon>schedule</mat-icon>
+        Age
+      </h4>
+      
+      <div class="age-controls">
+        <!-- Age Categories -->
+        <div class="age-categories">
+          <label class="control-label">Game era:</label>
+          <div class="category-chips">
+            <mat-chip-listbox 
+              [(ngModel)]="ageCategories"
+              (ngModelChange)="onAgeCategoriesChange($event)"
+              multiple>
+              <mat-chip-option value="new">New</mat-chip-option>
+              <mat-chip-option value="recent">Recent</mat-chip-option>
+              <mat-chip-option value="established">Established</mat-chip-option>
+              <mat-chip-option value="classic">Classic</mat-chip-option>
+            </mat-chip-listbox>
+          </div>
+        </div>
+        
+        <!-- Release Year Range -->
+        @if (ageCategories.length === 0) {
+          <div class="year-range">
+            <label>Release Year: {{ releaseYearRange.min }} - {{ releaseYearRange.max }}</label>
+            <mat-slider [min]="1970" [max]="getCurrentYear()" [step]="1">
+              <input 
+                matSliderStartThumb 
+                [(ngModel)]="releaseYearRange.min"
+                (ngModelChange)="onReleaseYearRangeChange({ min: $event, max: releaseYearRange.max })">
+              <input 
+                matSliderEndThumb 
+                [(ngModel)]="releaseYearRange.max"
+                (ngModelChange)="onReleaseYearRangeChange({ min: releaseYearRange.min, max: $event })">
+            </mat-slider>
+          </div>
+        }
+        
+        <!-- Max Age -->
+        <div class="max-age">
+          <label>Max Age: @if (maxGameAge !== null) { {{ maxGameAge }} years } @else { No limit }</label>
+          <mat-slider [min]="0" [max]="30" [step]="1">
+            <input 
+              matSliderThumb 
+              [(ngModel)]="maxGameAge"
+              (ngModelChange)="onMaxAgeChange($event)">
+          </mat-slider>
+          @if (maxGameAge !== null && maxGameAge > 0) {
+            <button 
+              mat-icon-button 
+              (click)="onMaxAgeChange(null)"
+              matTooltip="Remove age limit"
+              class="clear-age-button">
+              <mat-icon>clear</mat-icon>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
     <!-- Tags -->
     <div class="filter-section">
       <h4 class="section-title">

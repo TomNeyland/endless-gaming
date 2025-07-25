@@ -122,6 +122,8 @@ class SteamStoreCollector:
             supported_languages=raw_data.get('supported_languages'),
             price_overview=raw_data.get('price_overview'),
             pc_requirements=raw_data.get('pc_requirements'),
+            screenshots=raw_data.get('screenshots'),  # Array of screenshot objects
+            movies=raw_data.get('movies'),  # Array of movie/video objects
             fetch_status=FetchStatus.SUCCESS.value,
             fetch_attempts=1
         )

@@ -28,6 +28,8 @@ class StorefrontData(Base):
     supported_languages = Column(Text)  # HTML formatted language support info
     price_overview = Column(JSON)  # Price information: currency, initial, final, discount_percent
     pc_requirements = Column(JSON)  # PC system requirements: minimum, recommended
+    screenshots = Column(JSON)  # Array of screenshot objects: {id, path_thumbnail, path_full}
+    movies = Column(JSON)  # Array of movie/video objects: {id, name, thumbnail, webm, mp4, highlight}
     last_updated = Column(DateTime, default=datetime.utcnow, nullable=False)
     fetch_attempts = Column(Integer, default=0, nullable=False, server_default="0")
     fetch_status = Column(String, default=FetchStatus.PENDING.value, nullable=False, server_default="pending")
