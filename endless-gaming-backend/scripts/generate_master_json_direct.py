@@ -170,37 +170,6 @@ class DirectGameDataCollector:
         
         return record
     
-    def filter_for_million_plus_owners(self, games_data: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """
-        Filter games to only include those with 1M+ owners.
-        
-        Args:
-            games_data: Raw games data from SteamSpy /all
-            
-        Returns:
-            List of games with 1M+ owners
-        """
-        million_plus_ranges = [
-            "1,000,000 .. 2,000,000",
-            "2,000,000 .. 5,000,000", 
-            "5,000,000 .. 10,000,000",
-            "10,000,000 .. 20,000,000",
-            "20,000,000 .. 50,000,000",
-            "50,000,000 .. 100,000,000",
-            "100,000,000 .. 200,000,000"
-        ]
-        
-        filtered_games = []
-        
-        for app_id_str, game_data in games_data.items():
-            if not isinstance(game_data, dict):
-                continue
-                
-            owners = game_data.get('owners')
-            if owners in million_plus_ranges:
-                filtered_games.append(game_data)
-        
-        return filtered_games
     
     async def collect_game_data(
         self, 
@@ -241,11 +210,11 @@ class DirectGameDataCollector:
                     self.logger.info(f"No more data at page {page}, stopping collection")
                     break
                 
-                # Filter for 1M+ owners
-                million_plus_games = self.filter_for_million_plus_owners(games_data)
-                self.logger.info(f"Page {page}: {len(million_plus_games)} games with 1M+ owners")
+                # Convert to list and take all games from this page
+                page_games = list(games_data.values())
+                self.logger.info(f"Page {page}: {len(page_games)} games fetched")
                 
-                all_games.extend(million_plus_games)
+                all_games.extend(page_games)
                 page += 1
                 
                 # Stop if we have enough games
