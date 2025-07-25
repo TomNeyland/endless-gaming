@@ -13,6 +13,8 @@ import { PairService } from '../../services/pair.service';
 import { AnimationService } from '../../services/animation.service';
 import { VotingDrawerService } from '../../services/voting-drawer.service';
 import { GameFilterService } from '../../services/game-filter.service';
+import { GameDetailsService } from '../../services/game-details.service';
+import { getAgeBadge } from '../../../utils/game-age.utils';
 import { Subscription } from 'rxjs';
 
 /**
@@ -42,6 +44,7 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   private pairService = inject(PairService);
   private animationService = inject(AnimationService);
   private votingDrawerService = inject(VotingDrawerService);
+  private gameDetailsService = inject(GameDetailsService);
   private preferenceSummarySubscription?: Subscription;
   private filterSubscription?: Subscription;
   
@@ -357,9 +360,22 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Handle recommendation item click - open Steam store page.
+   * Handle recommendation item click - open game details modal.
    */
   onRecommendationClick(recommendation: GameRecommendation): void {
+    if (recommendation.game) {
+      this.gameDetailsService.openGameDetails(recommendation.game);
+    }
+  }
+
+  /**
+   * Open Steam store page for a game.
+   */
+  openSteamStore(recommendation: GameRecommendation, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    
     if (recommendation.game?.appId) {
       const steamUrl = `https://store.steampowered.com/app/${recommendation.game.appId}`;
       window.open(steamUrl, '_blank');
@@ -474,5 +490,53 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
     if (total === 0) return 0;
     
     return Math.round((positive / total) * 100);
+  }
+
+  /**
+   * Get age badge text for display.
+   */
+  getAgeBadgeText(game: GameRecord): string {
+    return getAgeBadge(game?.releaseDate);
+  }
+
+  /**
+   * Check if game has screenshots.
+   */
+  hasScreenshots(game: GameRecord): boolean {
+    return !!(game?.screenshots && game.screenshots.length > 0);
+  }
+
+  /**
+   * Check if game has videos.
+   */
+  hasVideos(game: GameRecord): boolean {
+    return !!(game?.movies && game.movies.length > 0);
+  }
+
+  /**
+   * Check if game has rich content (screenshots or videos).
+   */
+  hasRichContent(game: GameRecord): boolean {
+    return this.hasScreenshots(game) || this.hasVideos(game);
+  }
+
+  /**
+   * Get truncated description for display.
+   */
+  getTruncatedDescription(game: GameRecord, maxLength: number = 100): string {
+    if (!game?.shortDescription) return '';
+    
+    if (game.shortDescription.length <= maxLength) {
+      return game.shortDescription;
+    }
+    
+    const truncated = game.shortDescription.substring(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(' ');
+    
+    if (lastSpace > maxLength * 0.8) {
+      return truncated.substring(0, lastSpace) + '...';
+    }
+    
+    return truncated + '...';
   }
 }

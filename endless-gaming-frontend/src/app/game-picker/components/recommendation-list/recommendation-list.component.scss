@@ -194,6 +194,62 @@
             }
           }
           
+          // Content indicators for premium cards
+          .content-indicators {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            
+            .age-badge {
+              background: rgba(255, 152, 0, 0.2);
+              color: var(--gaming-accent);
+              padding: 4px 8px;
+              border-radius: 12px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              border: 1px solid rgba(255, 152, 0, 0.4);
+              
+              &[data-age="New"] {
+                background: rgba(76, 175, 80, 0.2);
+                color: #4CAF50;
+                border-color: rgba(76, 175, 80, 0.4);
+              }
+              
+              &[data-age="Classic"] {
+                background: rgba(156, 39, 176, 0.2);
+                color: #9C27B0;
+                border-color: rgba(156, 39, 176, 0.4);
+              }
+            }
+            
+            .content-icon {
+              color: var(--gaming-text-secondary);
+              font-size: 16px;
+              width: 16px;
+              height: 16px;
+              cursor: help;
+              
+              &:hover {
+                color: var(--gaming-accent);
+              }
+            }
+          }
+
+          // Description preview for premium cards
+          .description-preview {
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: var(--gaming-text-secondary);
+            font-style: italic;
+            opacity: 0.8;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+
           mat-chip-set {
             display: flex;
             flex-wrap: wrap;
@@ -203,6 +259,40 @@
               font-size: 0.75rem;
               padding: 4px 8px;
               border: none;
+            }
+          }
+        }
+
+        // Action buttons for premium cards
+        mat-card-actions {
+          padding: 12px 20px !important;
+          display: flex;
+          justify-content: center;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          background: rgba(0, 0, 0, 0.05);
+
+          .steam-link-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-color: rgba(255, 255, 255, 0.3);
+            color: var(--gaming-text-secondary);
+            
+            mat-icon {
+              font-size: 16px;
+              width: 16px;
+              height: 16px;
+            }
+            
+            &:hover:not(:disabled) {
+              background: rgba(255, 255, 255, 0.1);
+              border-color: rgba(255, 255, 255, 0.5);
+              color: var(--gaming-text-primary);
+              transform: translateY(-1px);
             }
           }
         }
@@ -244,7 +334,7 @@
         
         .game-card-content {
           display: grid;
-          grid-template-columns: 230px 1fr;
+          grid-template-columns: 230px 1fr auto;
           gap: 20px;
           padding: 20px;
           align-items: start;
@@ -321,6 +411,50 @@
                 }
               }
             }
+
+            // Content indicators for compact items
+            .content-indicators-compact {
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              margin-bottom: 10px;
+              
+              .age-badge {
+                background: rgba(255, 152, 0, 0.15);
+                color: var(--gaming-accent);
+                padding: 3px 6px;
+                border-radius: 8px;
+                font-size: 0.7rem;
+                font-weight: 600;
+                border: 1px solid rgba(255, 152, 0, 0.3);
+                
+                &[data-age="New"] {
+                  background: rgba(76, 175, 80, 0.15);
+                  color: #4CAF50;
+                  border-color: rgba(76, 175, 80, 0.3);
+                }
+                
+                &[data-age="Classic"] {
+                  background: rgba(156, 39, 176, 0.15);
+                  color: #9C27B0;
+                  border-color: rgba(156, 39, 176, 0.3);
+                }
+              }
+              
+              .content-icon {
+                color: var(--gaming-text-secondary);
+                font-size: 14px;
+                width: 14px;
+                height: 14px;
+                cursor: help;
+                opacity: 0.7;
+                
+                &:hover {
+                  color: var(--gaming-accent);
+                  opacity: 1;
+                }
+              }
+            }
             
             .game-rating {
               margin-bottom: 16px;
@@ -377,6 +511,33 @@
                 font-size: 0.75rem;
                 font-weight: 500;
                 border: 1px dashed rgba(255, 255, 255, 0.3);
+              }
+            }
+          }
+
+          // Action button for compact items
+          .compact-actions {
+            display: flex;
+            align-items: flex-start;
+            padding-top: 4px;
+            
+            .steam-icon-button {
+              background: rgba(255, 255, 255, 0.1);
+              color: var(--gaming-text-secondary);
+              border: 1px solid rgba(255, 255, 255, 0.2);
+              transition: all 0.2s ease;
+              
+              mat-icon {
+                font-size: 18px;
+                width: 18px;
+                height: 18px;
+              }
+              
+              &:hover:not(:disabled) {
+                background: rgba(255, 255, 255, 0.2);
+                color: var(--gaming-text-primary);
+                border-color: rgba(255, 255, 255, 0.4);
+                transform: translateY(-1px);
               }
             }
           }

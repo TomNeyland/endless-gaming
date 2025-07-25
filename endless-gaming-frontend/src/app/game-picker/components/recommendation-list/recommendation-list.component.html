@@ -57,6 +57,28 @@
                   </span>
                 </div>
 
+                <!-- Content Indicators -->
+                <div class="content-indicators">
+                  <span class="age-badge" [attr.data-age]="getAgeBadgeText(recommendation.game)">
+                    {{ getAgeBadgeText(recommendation.game) }}
+                  </span>
+                  
+                  @if (hasScreenshots(recommendation.game)) {
+                    <mat-icon class="content-icon" matTooltip="Has Screenshots">photo_library</mat-icon>
+                  }
+                  
+                  @if (hasVideos(recommendation.game)) {
+                    <mat-icon class="content-icon" matTooltip="Has Videos">play_circle</mat-icon>
+                  }
+                </div>
+
+                <!-- Description Preview -->
+                @if (recommendation.game?.shortDescription) {
+                  <div class="description-preview" [matTooltip]="getTruncatedDescription(recommendation.game, 200)">
+                    {{ getTruncatedDescription(recommendation.game, 60) }}
+                  </div>
+                }
+
                 <div class="game-tags">
                   <mat-chip-set>
                     @for (tagData of getTopTags(recommendation.game, 3); track tagData.tag) {
@@ -66,6 +88,17 @@
                 </div>
 
               </mat-card-content>
+
+              <!-- Action Buttons -->
+              <mat-card-actions>
+                <button 
+                  mat-stroked-button 
+                  (click)="openSteamStore(recommendation, $event)"
+                  class="steam-link-button">
+                  <mat-icon>open_in_new</mat-icon>
+                  Steam Store
+                </button>
+              </mat-card-actions>
             </mat-card>
           }
         </div>
@@ -111,6 +144,21 @@
                     </div>
                   </div>
 
+                  <!-- Content Indicators -->
+                  <div class="content-indicators-compact">
+                    <span class="age-badge" [attr.data-age]="getAgeBadgeText(recommendation.game)">
+                      {{ getAgeBadgeText(recommendation.game) }}
+                    </span>
+                    
+                    @if (hasScreenshots(recommendation.game)) {
+                      <mat-icon class="content-icon" matTooltip="Has Screenshots">photo_library</mat-icon>
+                    }
+                    
+                    @if (hasVideos(recommendation.game)) {
+                      <mat-icon class="content-icon" matTooltip="Has Videos">play_circle</mat-icon>
+                    }
+                  </div>
+
                   <div class="game-rating" *ngIf="recommendation.game.reviewPos || recommendation.game.reviewNeg">
                     <div class="rating-bar">
                       <div class="rating-fill" [style.width]="getRatingPercentage(recommendation.game) + '%'"></div>
@@ -126,6 +174,17 @@
                       <span class="more-tags">+{{ getTopTags(recommendation.game).length - 4 }}</span>
                     }
                   </div>
+                </div>
+
+                <!-- Action Button for Compact Items -->
+                <div class="compact-actions">
+                  <button 
+                    mat-icon-button 
+                    (click)="openSteamStore(recommendation, $event)"
+                    matTooltip="Open in Steam Store"
+                    class="steam-icon-button">
+                    <mat-icon>open_in_new</mat-icon>
+                  </button>
                 </div>
 
               </div>
