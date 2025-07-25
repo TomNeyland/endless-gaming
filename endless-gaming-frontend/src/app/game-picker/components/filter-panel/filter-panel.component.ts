@@ -1,11 +1,8 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
-import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatChipsModule } from '@angular/material/chips';
@@ -13,25 +10,15 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { Subscription } from 'rxjs';
 
-import { GameFilterService, GameFilters, FilterStats, FilterPreset } from '../../services/game-filter.service';
+import { GameFilterService, FilterStats } from '../../services/game-filter.service';
 import { GameRecord } from '../../../types/game.types';
 
 /**
- * Main filter panel component that provides comprehensive game filtering UI.
- * 
- * Features:
- * - Collapsible side panel (desktop) and bottom sheet (mobile)
- * - Organized filter sections with expansion panels
- * - Real-time filter application with live results counter
- * - Quick preset buttons for common filtering scenarios
- * - Active filter chips with easy removal
- * - Search functionality
+ * Clean, simple filter panel with instant filtering (no apply button needed).
+ * Removed all accordion complexity for better UX.
  */
 @Component({
   selector: 'app-filter-panel',
@@ -39,12 +26,8 @@ import { GameRecord } from '../../../types/game.types';
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule,
-    MatSidenavModule,
     MatButtonModule,
     MatIconModule,
-    MatCardModule,
-    MatExpansionModule,
     MatSliderModule,
     MatSlideToggleModule,
     MatChipsModule,
@@ -52,10 +35,7 @@ import { GameRecord } from '../../../types/game.types';
     MatInputModule,
     MatSelectModule,
     MatAutocompleteModule,
-    MatBadgeModule,
-    MatTooltipModule,
-    MatDividerModule,
-    MatBottomSheetModule
+    MatTooltipModule
   ],
   templateUrl: './filter-panel.component.html',
   styleUrl: './filter-panel.component.scss'
@@ -65,50 +45,27 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   
   @Input() games: GameRecord[] = [];
-  @Input() isOpen = false;
-  @Output() openChange = new EventEmitter<boolean>();
-  @Output() filtersApplied = new EventEmitter<GameFilters>();
   
   // Reactive state
   public readonly filters = this.gameFilterService.filters;
   public readonly isFiltering = this.gameFilterService.isFiltering;
   public readonly activeFilterCount = this.gameFilterService.activeFilterCount;
   
-  // Panel expansion state
-  public readonly expandedPanels = signal(new Set<string>(['search', 'price'])); // Start with basic panels open
-  
   // UI state
-  public readonly isMobile = signal(false);
   public readonly filterStats = signal<FilterStats>({ totalGames: 0, filteredGames: 0, filterCount: 0 });
   
   // Available options for autocompletes
   public availableTags: string[] = [];
-  public availableDevelopers: string[] = [];
-  public availablePublishers: string[] = [];
-  public filterPresets: FilterPreset[] = [];
   
-  // Form models for two-way binding
+  // Form models for two-way binding - all changes are instantly applied
   public searchText = '';
   public isFreeOnly = false;
-  public selectedPriceTiers: string[] = [];
   public priceRange = { min: 0, max: 100 };
   public requiredTags: string[] = [];
   public excludedTags: string[] = [];
   public minReviewScore = 0;
   public minReviewCount = 0;
-  public scoreRange = { min: -10, max: 10 };
-  public includedDevelopers: string[] = [];
-  public excludedPublishers: string[] = [];
   public topNOnly: number | null = null;
-  
-  // Price tier options
-  public readonly priceTierOptions = [
-    { value: 'free', label: 'Free', icon: 'money_off' },
-    { value: 'under5', label: 'Under $5', icon: 'attach_money' },
-    { value: '5to15', label: '$5 - $15', icon: 'attach_money' },
-    { value: '15to30', label: '$15 - $30', icon: 'attach_money' },
-    { value: 'over30', label: '$30+', icon: 'attach_money' }
-  ];
   
   // Top N options
   public readonly topNOptions = [
@@ -122,7 +79,6 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.initializeComponent();
     this.subscribeToFilterChanges();
-    this.checkMobileStatus();
   }
   
   ngOnDestroy(): void {
@@ -140,9 +96,6 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
     
     // Load available options
     this.availableTags = this.gameFilterService.getAvailableTags();
-    this.availableDevelopers = this.gameFilterService.getAvailableDevelopers();
-    this.availablePublishers = this.gameFilterService.getAvailablePublishers();
-    this.filterPresets = this.gameFilterService.getPresets();
     
     // Sync local form models with service state
     this.syncFormModelsWithFilters();
@@ -152,9 +105,8 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
    * Subscribe to filter changes and update local state
    */
   private subscribeToFilterChanges(): void {
-    const filterSub = this.gameFilterService.getFilters().subscribe(filters => {
+    const filterSub = this.gameFilterService.getFilters().subscribe(() => {
       this.syncFormModelsWithFilters();
-      this.filtersApplied.emit(filters);
     });
     
     this.subscriptions.push(filterSub);
@@ -168,207 +120,26 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
     
     this.searchText = filters.searchText;
     this.isFreeOnly = filters.isFreeOnly;
-    this.selectedPriceTiers = [...filters.priceTiers];
     this.priceRange = { ...filters.priceRange };
     this.requiredTags = [...filters.requiredTags];
     this.excludedTags = [...filters.excludedTags];
     this.minReviewScore = filters.minReviewScore;
     this.minReviewCount = filters.minReviewCount;
-    this.scoreRange = { ...filters.scoreRange };
-    this.includedDevelopers = [...filters.includedDevelopers];
-    this.excludedPublishers = [...filters.excludedPublishers];
     this.topNOnly = filters.topNOnly;
   }
   
   /**
-   * Check if we're on mobile for responsive behavior
+   * Get current filter statistics
    */
-  private checkMobileStatus(): void {
-    const checkMobile = () => {
-      this.isMobile.set(window.innerWidth < 768);
+  public getFilterStats(): FilterStats {
+    // For now return basic stats, this will be updated as filters are applied
+    const currentFilters = this.filters();
+    const hasAnyFilters = this.isFiltering();
+    return {
+      totalGames: this.games.length,
+      filteredGames: this.games.length, // This would be calculated by the service
+      filterCount: hasAnyFilters ? 1 : 0
     };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-  }
-  
-  /**
-   * Toggle panel open/closed state
-   */
-  public togglePanel(): void {
-    this.isOpen = !this.isOpen;
-    this.openChange.emit(this.isOpen);
-  }
-  
-  /**
-   * Close the filter panel
-   */
-  public closePanel(): void {
-    this.isOpen = false;
-    this.openChange.emit(false);
-  }
-  
-  /**
-   * Toggle expansion panel state
-   */
-  public toggleExpansionPanel(panelId: string): void {
-    const expanded = this.expandedPanels();
-    if (expanded.has(panelId)) {
-      expanded.delete(panelId);
-    } else {
-      expanded.add(panelId);
-    }
-    this.expandedPanels.set(new Set(expanded));
-  }
-  
-  /**
-   * Check if expansion panel is open
-   */
-  public isPanelExpanded(panelId: string): boolean {
-    return this.expandedPanels().has(panelId);
-  }
-  
-  /**
-   * Apply search filter
-   */
-  public onSearchChange(searchText: string): void {
-    this.gameFilterService.updateFilters({ searchText });
-  }
-  
-  /**
-   * Toggle free-only filter
-   */
-  public onFreeOnlyChange(isFreeOnly: boolean): void {
-    this.gameFilterService.updateFilters({ 
-      isFreeOnly,
-      // Clear price tiers when toggling free only
-      priceTiers: isFreeOnly ? [] : this.selectedPriceTiers
-    });
-  }
-  
-  /**
-   * Update price tier selection
-   */
-  public onPriceTierChange(tiers: string[]): void {
-    this.gameFilterService.updateFilters({ 
-      priceTiers: tiers,
-      // Clear free only when selecting price tiers
-      isFreeOnly: tiers.includes('free') ? true : this.isFreeOnly
-    });
-  }
-  
-  /**
-   * Update price range
-   */
-  public onPriceRangeChange(priceRange: { min: number, max: number }): void {
-    this.gameFilterService.updateFilters({ priceRange });
-  }
-  
-  /**
-   * Add required tag
-   */
-  public addRequiredTag(tag: string): void {
-    if (tag && !this.requiredTags.includes(tag)) {
-      const updatedTags = [...this.requiredTags, tag];
-      this.gameFilterService.updateFilters({ requiredTags: updatedTags });
-    }
-  }
-  
-  /**
-   * Remove required tag
-   */
-  public removeRequiredTag(tag: string): void {
-    const updatedTags = this.requiredTags.filter(t => t !== tag);
-    this.gameFilterService.updateFilters({ requiredTags: updatedTags });
-  }
-  
-  /**
-   * Add excluded tag
-   */
-  public addExcludedTag(tag: string): void {
-    if (tag && !this.excludedTags.includes(tag)) {
-      const updatedTags = [...this.excludedTags, tag];
-      this.gameFilterService.updateFilters({ excludedTags: updatedTags });
-    }
-  }
-  
-  /**
-   * Remove excluded tag
-   */
-  public removeExcludedTag(tag: string): void {
-    const updatedTags = this.excludedTags.filter(t => t !== tag);
-    this.gameFilterService.updateFilters({ excludedTags: updatedTags });
-  }
-  
-  /**
-   * Update review score filter
-   */
-  public onReviewScoreChange(minReviewScore: number): void {
-    this.gameFilterService.updateFilters({ minReviewScore });
-  }
-  
-  /**
-   * Update review count filter
-   */
-  public onReviewCountChange(minReviewCount: number): void {
-    this.gameFilterService.updateFilters({ minReviewCount });
-  }
-  
-  /**
-   * Update ML score range filter
-   */
-  public onScoreRangeChange(scoreRange: { min: number, max: number }): void {
-    this.gameFilterService.updateFilters({ scoreRange });
-  }
-  
-  /**
-   * Update top N limit
-   */
-  public onTopNChange(topNOnly: number | null): void {
-    this.gameFilterService.updateFilters({ topNOnly });
-  }
-  
-  /**
-   * Add included developer
-   */
-  public addIncludedDeveloper(developer: string): void {
-    if (developer && !this.includedDevelopers.includes(developer)) {
-      const updated = [...this.includedDevelopers, developer];
-      this.gameFilterService.updateFilters({ includedDevelopers: updated });
-    }
-  }
-  
-  /**
-   * Remove included developer
-   */
-  public removeIncludedDeveloper(developer: string): void {
-    const updated = this.includedDevelopers.filter(d => d !== developer);
-    this.gameFilterService.updateFilters({ includedDevelopers: updated });
-  }
-  
-  /**
-   * Add excluded publisher
-   */
-  public addExcludedPublisher(publisher: string): void {
-    if (publisher && !this.excludedPublishers.includes(publisher)) {
-      const updated = [...this.excludedPublishers, publisher];
-      this.gameFilterService.updateFilters({ excludedPublishers: updated });
-    }
-  }
-  
-  /**
-   * Remove excluded publisher
-   */
-  public removeExcludedPublisher(publisher: string): void {
-    const updated = this.excludedPublishers.filter(p => p !== publisher);
-    this.gameFilterService.updateFilters({ excludedPublishers: updated });
-  }
-  
-  /**
-   * Apply preset filters
-   */
-  public applyPreset(presetId: string): void {
-    this.gameFilterService.applyPreset(presetId);
   }
   
   /**
@@ -378,112 +149,122 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
     this.gameFilterService.resetFilters();
   }
   
+  // Instant filter change handlers - no apply button needed
+  
   /**
-   * Get active filters summary for chip bar
+   * Handle search text changes (instant)
    */
-  public getActiveFiltersSummary(): Array<{label: string, value: string, type: string}> {
-    return this.gameFilterService.getActiveFiltersSummary();
+  public onSearchChange(value: string): void {
+    this.searchText = value;
+    this.gameFilterService.updateFilters({ searchText: value });
   }
   
   /**
-   * Remove specific filter
+   * Handle free only toggle changes (instant)
    */
-  public removeFilter(type: string, value?: string): void {
-    this.gameFilterService.removeFilter(type, value);
+  public onFreeOnlyChange(value: boolean): void {
+    this.isFreeOnly = value;
+    this.gameFilterService.updateFilters({ isFreeOnly: value });
   }
   
   /**
-   * Get current filter statistics
+   * Handle price range changes (instant)
    */
-  public getFilterStats(): FilterStats {
-    return this.gameFilterService.getFilterStats();
+  public onPriceRangeChange(range: { min: number, max: number }): void {
+    this.priceRange = range;
+    this.gameFilterService.updateFilters({ priceRange: range });
   }
+  
+  /**
+   * Handle review score changes (instant)
+   */
+  public onReviewScoreChange(score: number): void {
+    this.minReviewScore = score;
+    this.gameFilterService.updateFilters({ minReviewScore: score });
+  }
+  
+  /**
+   * Handle review count changes (instant)
+   */
+  public onReviewCountChange(count: number): void {
+    this.minReviewCount = count;
+    this.gameFilterService.updateFilters({ minReviewCount: count });
+  }
+  
+  /**
+   * Handle top N changes (instant)
+   */
+  public onTopNChange(value: number | null): void {
+    this.topNOnly = value;
+    this.gameFilterService.updateFilters({ topNOnly: value });
+  }
+  
+  // Tag management methods
+  
+  /**
+   * Add required tag (instant)
+   */
+  public addRequiredTag(tag: string): void {
+    if (tag && !this.requiredTags.includes(tag)) {
+      this.requiredTags.push(tag);
+      this.gameFilterService.updateFilters({ requiredTags: [...this.requiredTags] });
+    }
+  }
+  
+  /**
+   * Remove required tag (instant)
+   */
+  public removeRequiredTag(tag: string): void {
+    this.requiredTags = this.requiredTags.filter(t => t !== tag);
+    this.gameFilterService.updateFilters({ requiredTags: [...this.requiredTags] });
+  }
+  
+  /**
+   * Add excluded tag (instant)
+   */
+  public addExcludedTag(tag: string): void {
+    if (tag && !this.excludedTags.includes(tag)) {
+      this.excludedTags.push(tag);
+      this.gameFilterService.updateFilters({ excludedTags: [...this.excludedTags] });
+    }
+  }
+  
+  /**
+   * Remove excluded tag (instant)
+   */
+  public removeExcludedTag(tag: string): void {
+    this.excludedTags = this.excludedTags.filter(t => t !== tag);
+    this.gameFilterService.updateFilters({ excludedTags: [...this.excludedTags] });
+  }
+  
+  /**
+   * Get filtered tags for autocomplete
+   */
+  public getFilteredTags(searchTerm: string): string[] {
+    if (!searchTerm) {
+      return this.availableTags.slice(0, 10); // Show top 10 by default
+    }
+    
+    return this.availableTags
+      .filter(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      .slice(0, 10);
+  }
+  
+  // Utility methods
   
   /**
    * Format price for display
    */
   public formatPrice(price: number): string {
-    return price === 0 ? 'Free' : `$${price}`;
+    if (price === 0) return 'Free';
+    if (price >= 100) return '$100+';
+    return `$${price}`;
   }
   
   /**
    * Format percentage for display
    */
   public formatPercentage(value: number): string {
-    return `${Math.round(value)}%`;
-  }
-  
-  /**
-   * Get filter section icon
-   */
-  public getSectionIcon(section: string): string {
-    const icons: { [key: string]: string } = {
-      search: 'search',
-      price: 'attach_money',
-      tags: 'local_offer',
-      reviews: 'star_rate',
-      advanced: 'tune',
-      developers: 'business'
-    };
-    return icons[section] || 'settings';
-  }
-  
-  /**
-   * Check if price tier is selected
-   */
-  public isPriceTierSelected(tier: string): boolean {
-    return this.selectedPriceTiers.includes(tier);
-  }
-  
-  /**
-   * Toggle price tier selection
-   */
-  public togglePriceTier(tier: string): void {
-    const currentTiers = [...this.selectedPriceTiers];
-    const index = currentTiers.indexOf(tier);
-    
-    if (index > -1) {
-      currentTiers.splice(index, 1);
-    } else {
-      currentTiers.push(tier);
-    }
-    
-    this.onPriceTierChange(currentTiers);
-  }
-  
-  /**
-   * Get available tags filtered by current search
-   */
-  public getFilteredTags(searchText: string): string[] {
-    if (!searchText) return this.availableTags.slice(0, 20); // Limit for performance
-    
-    const search = searchText.toLowerCase();
-    return this.availableTags
-      .filter(tag => tag.toLowerCase().includes(search))
-      .slice(0, 10); // Limit autocomplete results
-  }
-  
-  /**
-   * Get available developers filtered by current search
-   */
-  public getFilteredDevelopers(searchText: string): string[] {
-    if (!searchText) return this.availableDevelopers.slice(0, 20);
-    
-    const search = searchText.toLowerCase();
-    return this.availableDevelopers
-      .filter(dev => dev.toLowerCase().includes(search))
-      .slice(0, 10);
-  }
-  
-  /**
-   * Get available publishers filtered by current search
-   */
-  public getFilteredPublishers(searchText: string): string[] {
-    if (!searchText) return this.availablePublishers.slice(0, 20);
-    
-    const search = searchText.toLowerCase();
-    return this.availablePublishers
-      .filter(pub => pub.toLowerCase().includes(search))
-      .slice(0, 10);
+    return `${value}%`;
   }
 }

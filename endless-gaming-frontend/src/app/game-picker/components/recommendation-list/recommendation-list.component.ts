@@ -3,20 +3,16 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSidenavModule } from '@angular/material/sidenav';
 import { GameRecommendation, GameRecord } from '../../../types/game.types';
 import { PreferenceService } from '../../services/preference.service';
 import { PairService } from '../../services/pair.service';
 import { AnimationService } from '../../services/animation.service';
 import { VotingDrawerService } from '../../services/voting-drawer.service';
 import { GameFilterService } from '../../services/game-filter.service';
-import { FilterPanelComponent } from '../filter-panel/filter-panel.component';
-import { FilterChipBarComponent } from '../filter-chip-bar/filter-chip-bar.component';
 import { Subscription } from 'rxjs';
 
 /**
@@ -33,14 +29,10 @@ import { Subscription } from 'rxjs';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatListModule,
     MatChipsModule,
     MatBadgeModule,
     MatTooltipModule,
-    MatProgressSpinnerModule,
-    MatSidenavModule,
-    FilterPanelComponent,
-    FilterChipBarComponent
+    MatProgressSpinnerModule
   ],
   templateUrl: './recommendation-list.component.html',
   styleUrl: './recommendation-list.component.scss'
@@ -50,9 +42,11 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   private pairService = inject(PairService);
   private animationService = inject(AnimationService);
   private votingDrawerService = inject(VotingDrawerService);
-  private gameFilterService = inject(GameFilterService);
   private preferenceSummarySubscription?: Subscription;
   private filterSubscription?: Subscription;
+  
+  // Make gameFilterService public for template access
+  public gameFilterService = inject(GameFilterService);
   
   @Input() games: GameRecord[] = [];
   @Input() maxRecommendations: number = 100;
@@ -64,8 +58,7 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   public readonly isRefreshing = signal(false);
   public readonly lastUpdateTime = signal<Date | null>(null);
   
-  // Filter panel state
-  public readonly isFilterPanelOpen = signal(false);
+  // Filter state
   public readonly isFiltering = this.gameFilterService.isFiltering;
   
   // Track which games have expanded tags
@@ -402,26 +395,6 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
     return Math.round((this.filteredRecommendations.length / this.games.length) * 100);
   }
 
-  /**
-   * Open the filter panel
-   */
-  public openFilterPanel(): void {
-    this.isFilterPanelOpen.set(true);
-  }
-
-  /**
-   * Close the filter panel
-   */
-  public closeFilterPanel(): void {
-    this.isFilterPanelOpen.set(false);
-  }
-
-  /**
-   * Handle filter panel open/close events
-   */
-  public onFilterPanelOpenChange(isOpen: boolean): void {
-    this.isFilterPanelOpen.set(isOpen);
-  }
 
   /**
    * Encode URI component for safe URL usage in templates.
@@ -493,5 +466,20 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
     } else {
       this.expandedTags.add(appId);
     }
+  }
+
+  /**
+   * Calculate rating percentage from positive/negative reviews.
+   */
+  getRatingPercentage(game: GameRecord): number {
+    if (!game.reviewPos && !game.reviewNeg) return 0;
+    
+    const positive = game.reviewPos || 0;
+    const negative = game.reviewNeg || 0;
+    const total = positive + negative;
+    
+    if (total === 0) return 0;
+    
+    return Math.round((positive / total) * 100);
   }
 }

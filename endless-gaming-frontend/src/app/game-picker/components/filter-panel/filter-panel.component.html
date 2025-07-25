@@ -1,502 +1,207 @@
-<div class="filter-panel" [class.mobile]="isMobile()">
+<div class="filter-panel">
   
   <!-- Filter Panel Header -->
   <div class="filter-header">
     <div class="header-content">
-      <div class="title-section">
-        <mat-icon>tune</mat-icon>
-        <h2 class="mat-headline-6">Filter Games</h2>
-        @if (activeFilterCount() > 0) {
-          <mat-icon class="filter-badge" [matBadge]="activeFilterCount()" matBadgeColor="accent">
-            filter_list
-          </mat-icon>
-        }
-      </div>
-      
-      <div class="header-actions">
-        @if (isFiltering()) {
-          <button 
-            mat-icon-button 
-            (click)="resetAllFilters()"
-            matTooltip="Reset all filters"
-            color="warn">
-            <mat-icon>clear_all</mat-icon>
-          </button>
-        }
-        
-        <button 
-          mat-icon-button 
-          (click)="closePanel()"
-          matTooltip="Close filters">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
-    </div>
-    
-    <!-- Filter Stats -->
-    <div class="filter-stats">
-      <p class="mat-body-2">
-        {{ getFilterStats().filteredGames }} of {{ getFilterStats().totalGames }} games
-        @if (isFiltering()) {
-          <span class="filtered-indicator">• Filtered</span>
-        }
-      </p>
-    </div>
-  </div>
-
-  <!-- Active Filter Chips -->
-  @if (isFiltering()) {
-    <div class="active-filters-section">
-      <mat-chip-set class="active-filter-chips">
-        @for (filter of getActiveFiltersSummary(); track filter.label + filter.value) {
-          <mat-chip 
-            [class]="'filter-chip-' + filter.type"
-            (removed)="removeFilter(filter.type, filter.value)">
-            <span class="filter-label">{{ filter.label }}:</span>
-            <span class="filter-value">{{ filter.value }}</span>
-            <mat-icon matChipRemove>cancel</mat-icon>
-          </mat-chip>
-        }
-      </mat-chip-set>
-    </div>
-    <mat-divider></mat-divider>
-  }
-
-  <!-- Quick Presets -->
-  <div class="quick-presets-section">
-    <h4 class="mat-subtitle-2 section-title">
-      <mat-icon>flash_on</mat-icon>
-      Quick Filters
-    </h4>
-    <div class="preset-buttons">
-      @for (preset of filterPresets; track preset.id) {
-        <button 
-          mat-raised-button 
-          color="primary"
-          class="preset-button"
-          (click)="applyPreset(preset.id)"
-          [matTooltip]="preset.description">
-          {{ preset.name }}
-        </button>
+      <mat-icon>filter_list</mat-icon>
+      <h3>Filters</h3>
+      @if (activeFilterCount() > 0) {
+        <span class="filter-count">({{ activeFilterCount() }})</span>
       }
     </div>
+    @if (isFiltering()) {
+      <button 
+        mat-icon-button 
+        (click)="resetAllFilters()"
+        matTooltip="Reset all filters"
+        class="reset-button">
+        <mat-icon>clear</mat-icon>
+      </button>
+    }
   </div>
 
-  <mat-divider></mat-divider>
-
-  <!-- Filter Sections -->
-  <div class="filter-sections">
+  <!-- Filter Content -->
+  <div class="filter-content">
     
-    <!-- Search Section -->
-    <mat-expansion-panel 
-      class="filter-section"
-      [expanded]="isPanelExpanded('search')"
-      (expandedChange)="toggleExpansionPanel('search')">
-      
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <mat-icon>{{ getSectionIcon('search') }}</mat-icon>
-          Search
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-      
-      <div class="section-content">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Search game names</mat-label>
-          <input 
-            matInput 
-            [(ngModel)]="searchText"
-            (ngModelChange)="onSearchChange($event)"
-            placeholder="Type to search..."
-            autocomplete="off">
-          <mat-icon matSuffix>search</mat-icon>
-          @if (searchText) {
-            <button 
-              matSuffix 
-              mat-icon-button 
-              (click)="onSearchChange('')"
-              matTooltip="Clear search">
-              <mat-icon>clear</mat-icon>
-            </button>
-          }
-        </mat-form-field>
-      </div>
-    </mat-expansion-panel>
+    <!-- Search -->
+    <div class="filter-section">
+      <h4 class="section-title">
+        <mat-icon>search</mat-icon>
+        Search
+      </h4>
+      <mat-form-field appearance="outline" class="search-field">
+        <input 
+          matInput 
+          [(ngModel)]="searchText"
+          (ngModelChange)="onSearchChange($event)"
+          placeholder="Search games..."
+          autocomplete="off">
+        @if (searchText) {
+          <button 
+            matSuffix 
+            mat-icon-button 
+            (click)="onSearchChange('')">
+            <mat-icon>clear</mat-icon>
+          </button>
+        }
+      </mat-form-field>
+    </div>
 
-    <!-- Price Section -->
-    <mat-expansion-panel 
-      class="filter-section"
-      [expanded]="isPanelExpanded('price')"
-      (expandedChange)="toggleExpansionPanel('price')">
+    <!-- Price -->
+    <div class="filter-section">
+      <h4 class="section-title">
+        <mat-icon>attach_money</mat-icon>
+        Price
+      </h4>
       
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <mat-icon>{{ getSectionIcon('price') }}</mat-icon>
-          Price
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-      
-      <div class="section-content">
-        <!-- Free Only Toggle -->
-        <div class="control-group">
-          <mat-slide-toggle 
-            [(ngModel)]="isFreeOnly"
-            (ngModelChange)="onFreeOnlyChange($event)"
-            color="primary">
-            Free games only
-          </mat-slide-toggle>
-        </div>
+      <div class="price-controls">
+        <mat-slide-toggle 
+          [(ngModel)]="isFreeOnly"
+          (ngModelChange)="onFreeOnlyChange($event)"
+          class="free-toggle">
+          Free games only
+        </mat-slide-toggle>
         
-        <!-- Price Range Slider -->
         @if (!isFreeOnly) {
-          <div class="control-group">
-            <label class="control-label mat-body-2">Price Range</label>
-            <mat-slider 
-              class="price-range-slider"
-              [min]="0" 
-              [max]="100" 
-              [step]="1"
-              [showTickMarks]="false">
+          <div class="price-range">
+            <label>Max Price: {{ formatPrice(priceRange.max) }}</label>
+            <mat-slider [min]="0" [max]="100" [step]="5">
               <input 
-                matSliderStartThumb 
-                [(ngModel)]="priceRange.min"
-                (ngModelChange)="onPriceRangeChange({ min: $event, max: priceRange.max })">
-              <input 
-                matSliderEndThumb 
+                matSliderThumb 
                 [(ngModel)]="priceRange.max"
-                (ngModelChange)="onPriceRangeChange({ min: priceRange.min, max: $event })">
+                (ngModelChange)="onPriceRangeChange({ min: 0, max: $event })">
             </mat-slider>
-            <div class="range-labels">
-              <span>{{ formatPrice(priceRange.min) }}</span>
-              <span>{{ formatPrice(priceRange.max) }}</span>
-            </div>
           </div>
         }
+      </div>
+    </div>
+
+    <!-- Tags -->
+    <div class="filter-section">
+      <h4 class="section-title">
+        <mat-icon>label</mat-icon>
+        Tags
+      </h4>
+      
+      <!-- Must Include Tags -->
+      <div class="tag-group">
+        <label class="tag-label">Must include:</label>
+        <mat-form-field appearance="outline" class="tag-input">
+          <input 
+            matInput 
+            #requiredTagInput
+            [matAutocomplete]="requiredTagAutocomplete"
+            placeholder="Add required tag..."
+            (keyup.enter)="addRequiredTag(requiredTagInput.value); requiredTagInput.value = ''">
+          <mat-autocomplete 
+            #requiredTagAutocomplete="matAutocomplete"
+            (optionSelected)="addRequiredTag($event.option.value); requiredTagInput.value = ''">
+            @for (tag of getFilteredTags(requiredTagInput.value); track tag) {
+              <mat-option [value]="tag">{{ tag }}</mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
         
-        <!-- Price Tiers -->
-        <div class="control-group">
-          <label class="control-label mat-body-2">Price Categories</label>
-          <mat-chip-set class="price-tier-chips">
-            @for (tier of priceTierOptions; track tier.value) {
-              <mat-chip 
-                [class.selected]="isPriceTierSelected(tier.value)"
-                (click)="togglePriceTier(tier.value)"
-                class="selectable-chip">
-                <mat-icon>{{ tier.icon }}</mat-icon>
-                {{ tier.label }}
+        @if (requiredTags.length > 0) {
+          <div class="tag-chips">
+            @for (tag of requiredTags; track tag) {
+              <mat-chip class="required-chip" (removed)="removeRequiredTag(tag)">
+                {{ tag }}
+                <mat-icon matChipRemove>close</mat-icon>
               </mat-chip>
             }
-          </mat-chip-set>
-        </div>
+          </div>
+        }
       </div>
-    </mat-expansion-panel>
 
-    <!-- Tags Section -->
-    <mat-expansion-panel 
-      class="filter-section"
-      [expanded]="isPanelExpanded('tags')"
-      (expandedChange)="toggleExpansionPanel('tags')">
-      
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <mat-icon>{{ getSectionIcon('tags') }}</mat-icon>
-          Tags
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-      
-      <div class="section-content">
-        <!-- Required Tags -->
-        <div class="control-group">
-          <label class="control-label mat-body-2">Must Include Tags</label>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Add required tags</mat-label>
-            <input 
-              matInput 
-              #requiredTagInput
-              [matAutocomplete]="requiredTagAutocomplete"
-              (keyup.enter)="addRequiredTag(requiredTagInput.value); requiredTagInput.value = ''"
-              placeholder="Type tag name...">
-            <mat-autocomplete 
-              #requiredTagAutocomplete="matAutocomplete"
-              (optionSelected)="addRequiredTag($event.option.value); requiredTagInput.value = ''">
-              @for (tag of getFilteredTags(requiredTagInput.value); track tag) {
-                <mat-option [value]="tag">{{ tag }}</mat-option>
-              }
-            </mat-autocomplete>
-          </mat-form-field>
-          
-          @if (requiredTags.length > 0) {
-            <mat-chip-set class="selected-tags">
-              @for (tag of requiredTags; track tag) {
-                <mat-chip 
-                  class="required-tag-chip"
-                  (removed)="removeRequiredTag(tag)">
-                  <mat-icon>add_circle</mat-icon>
-                  {{ tag }}
-                  <mat-icon matChipRemove>cancel</mat-icon>
-                </mat-chip>
-              }
-            </mat-chip-set>
-          }
-        </div>
+      <!-- Exclude Tags -->
+      <div class="tag-group">
+        <label class="tag-label">Exclude:</label>
+        <mat-form-field appearance="outline" class="tag-input">
+          <input 
+            matInput 
+            #excludedTagInput
+            [matAutocomplete]="excludedTagAutocomplete"
+            placeholder="Add excluded tag..."
+            (keyup.enter)="addExcludedTag(excludedTagInput.value); excludedTagInput.value = ''">
+          <mat-autocomplete 
+            #excludedTagAutocomplete="matAutocomplete"
+            (optionSelected)="addExcludedTag($event.option.value); excludedTagInput.value = ''">
+            @for (tag of getFilteredTags(excludedTagInput.value); track tag) {
+              <mat-option [value]="tag">{{ tag }}</mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
         
-        <!-- Excluded Tags -->
-        <div class="control-group">
-          <label class="control-label mat-body-2">Exclude Tags</label>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Add excluded tags</mat-label>
-            <input 
-              matInput 
-              #excludedTagInput
-              [matAutocomplete]="excludedTagAutocomplete"
-              (keyup.enter)="addExcludedTag(excludedTagInput.value); excludedTagInput.value = ''"
-              placeholder="Type tag name...">
-            <mat-autocomplete 
-              #excludedTagAutocomplete="matAutocomplete"
-              (optionSelected)="addExcludedTag($event.option.value); excludedTagInput.value = ''">
-              @for (tag of getFilteredTags(excludedTagInput.value); track tag) {
-                <mat-option [value]="tag">{{ tag }}</mat-option>
-              }
-            </mat-autocomplete>
-          </mat-form-field>
-          
-          @if (excludedTags.length > 0) {
-            <mat-chip-set class="selected-tags">
-              @for (tag of excludedTags; track tag) {
-                <mat-chip 
-                  class="excluded-tag-chip"
-                  (removed)="removeExcludedTag(tag)">
-                  <mat-icon>remove_circle</mat-icon>
-                  {{ tag }}
-                  <mat-icon matChipRemove>cancel</mat-icon>
-                </mat-chip>
-              }
-            </mat-chip-set>
-          }
-        </div>
+        @if (excludedTags.length > 0) {
+          <div class="tag-chips">
+            @for (tag of excludedTags; track tag) {
+              <mat-chip class="excluded-chip" (removed)="removeExcludedTag(tag)">
+                {{ tag }}
+                <mat-icon matChipRemove>close</mat-icon>
+              </mat-chip>
+            }
+          </div>
+        }
       </div>
-    </mat-expansion-panel>
+    </div>
 
-    <!-- Reviews Section -->
-    <mat-expansion-panel 
-      class="filter-section"
-      [expanded]="isPanelExpanded('reviews')"
-      (expandedChange)="toggleExpansionPanel('reviews')">
+    <!-- Reviews -->
+    <div class="filter-section">
+      <h4 class="section-title">
+        <mat-icon>star</mat-icon>
+        Reviews
+      </h4>
       
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <mat-icon>{{ getSectionIcon('reviews') }}</mat-icon>
-          Reviews & Ratings
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-      
-      <div class="section-content">
-        <!-- Review Score -->
-        <div class="control-group">
-          <label class="control-label mat-body-2">
-            Minimum Rating: {{ formatPercentage(minReviewScore) }}
-          </label>
-          <mat-slider 
-            class="review-slider"
-            [min]="0" 
-            [max]="100" 
-            [step]="5"
-            [showTickMarks]="true">
+      <div class="review-controls">
+        <div class="review-score">
+          <label>Min Rating: {{ formatPercentage(minReviewScore) }}</label>
+          <mat-slider [min]="0" [max]="100" [step]="10">
             <input 
               matSliderThumb 
               [(ngModel)]="minReviewScore"
               (ngModelChange)="onReviewScoreChange($event)">
           </mat-slider>
-          <div class="slider-help">
-            <span class="mat-caption">Games with at least this positive review percentage</span>
-          </div>
         </div>
         
-        <!-- Review Count -->
-        <div class="control-group">
-          <label class="control-label mat-body-2">
-            Minimum Reviews: {{ minReviewCount }}
-          </label>
-          <mat-slider 
-            class="review-slider"
-            [min]="0" 
-            [max]="10000" 
-            [step]="100"
-            [showTickMarks]="false">
+        <div class="review-count">
+          <label>Min Reviews: {{ minReviewCount }}</label>
+          <mat-slider [min]="0" [max]="5000" [step]="100">
             <input 
               matSliderThumb 
               [(ngModel)]="minReviewCount"
               (ngModelChange)="onReviewCountChange($event)">
           </mat-slider>
-          <div class="slider-help">
-            <span class="mat-caption">Games with at least this many total reviews</span>
-          </div>
         </div>
       </div>
-    </mat-expansion-panel>
+    </div>
 
-    <!-- Advanced Section -->
-    <mat-expansion-panel 
-      class="filter-section"
-      [expanded]="isPanelExpanded('advanced')"
-      (expandedChange)="toggleExpansionPanel('advanced')">
+    <!-- Results Limit -->
+    <div class="filter-section">
+      <h4 class="section-title">
+        <mat-icon>format_list_numbered</mat-icon>
+        Results
+      </h4>
       
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <mat-icon>{{ getSectionIcon('advanced') }}</mat-icon>
-          Advanced
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-      
-      <div class="section-content">
-        <!-- Top N Limit -->
-        <div class="control-group">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Result Limit</mat-label>
-            <mat-select 
-              [(ngModel)]="topNOnly"
-              (ngModelChange)="onTopNChange($event)">
-              @for (option of topNOptions; track option.value) {
-                <mat-option [value]="option.value">{{ option.label }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
-        
-        <!-- ML Score Range -->
-        <div class="control-group">
-          <label class="control-label mat-body-2">Preference Score Range</label>
-          <mat-slider 
-            class="score-range-slider"
-            [min]="-10" 
-            [max]="10" 
-            [step]="0.1"
-            [showTickMarks]="false">
-            <input 
-              matSliderStartThumb 
-              [(ngModel)]="scoreRange.min"
-              (ngModelChange)="onScoreRangeChange({ min: $event, max: scoreRange.max })">
-            <input 
-              matSliderEndThumb 
-              [(ngModel)]="scoreRange.max"
-              (ngModelChange)="onScoreRangeChange({ min: scoreRange.min, max: $event })">
-          </mat-slider>
-          <div class="range-labels">
-            <span>{{ scoreRange.min.toFixed(1) }}</span>
-            <span>{{ scoreRange.max.toFixed(1) }}</span>
-          </div>
-          <div class="slider-help">
-            <span class="mat-caption">Filter by ML preference score range</span>
-          </div>
-        </div>
-      </div>
-    </mat-expansion-panel>
-
-    <!-- Developers Section -->
-    <mat-expansion-panel 
-      class="filter-section"
-      [expanded]="isPanelExpanded('developers')"
-      (expandedChange)="toggleExpansionPanel('developers')">
-      
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <mat-icon>{{ getSectionIcon('developers') }}</mat-icon>
-          Developers & Publishers
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-      
-      <div class="section-content">
-        <!-- Include Developers -->
-        <div class="control-group">
-          <label class="control-label mat-body-2">Include Developers</label>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Add developers</mat-label>
-            <input 
-              matInput 
-              #developerInput
-              [matAutocomplete]="developerAutocomplete"
-              (keyup.enter)="addIncludedDeveloper(developerInput.value); developerInput.value = ''"
-              placeholder="Type developer name...">
-            <mat-autocomplete 
-              #developerAutocomplete="matAutocomplete"
-              (optionSelected)="addIncludedDeveloper($event.option.value); developerInput.value = ''">
-              @for (dev of getFilteredDevelopers(developerInput.value); track dev) {
-                <mat-option [value]="dev">{{ dev }}</mat-option>
-              }
-            </mat-autocomplete>
-          </mat-form-field>
-          
-          @if (includedDevelopers.length > 0) {
-            <mat-chip-set class="selected-items">
-              @for (dev of includedDevelopers; track dev) {
-                <mat-chip (removed)="removeIncludedDeveloper(dev)">
-                  {{ dev }}
-                  <mat-icon matChipRemove>cancel</mat-icon>
-                </mat-chip>
-              }
-            </mat-chip-set>
+      <mat-form-field appearance="outline" class="limit-select">
+        <mat-label>Show top</mat-label>
+        <mat-select 
+          [(ngModel)]="topNOnly"
+          (ngModelChange)="onTopNChange($event)">
+          @for (option of topNOptions; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
           }
-        </div>
-        
-        <!-- Exclude Publishers -->
-        <div class="control-group">
-          <label class="control-label mat-body-2">Exclude Publishers</label>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Add publishers to exclude</mat-label>
-            <input 
-              matInput 
-              #publisherInput
-              [matAutocomplete]="publisherAutocomplete"
-              (keyup.enter)="addExcludedPublisher(publisherInput.value); publisherInput.value = ''"
-              placeholder="Type publisher name...">
-            <mat-autocomplete 
-              #publisherAutocomplete="matAutocomplete"
-              (optionSelected)="addExcludedPublisher($event.option.value); publisherInput.value = ''">
-              @for (pub of getFilteredPublishers(publisherInput.value); track pub) {
-                <mat-option [value]="pub">{{ pub }}</mat-option>
-              }
-            </mat-autocomplete>
-          </mat-form-field>
-          
-          @if (excludedPublishers.length > 0) {
-            <mat-chip-set class="selected-items">
-              @for (pub of excludedPublishers; track pub) {
-                <mat-chip (removed)="removeExcludedPublisher(pub)">
-                  {{ pub }}
-                  <mat-icon matChipRemove>cancel</mat-icon>
-                </mat-chip>
-              }
-            </mat-chip-set>
-          }
-        </div>
-      </div>
-    </mat-expansion-panel>
+        </mat-select>
+      </mat-form-field>
+    </div>
 
   </div>
 
-  <!-- Panel Footer -->
-  <div class="filter-footer">
-    <div class="footer-stats">
-      <span class="mat-caption">
-        {{ getFilterStats().filteredGames }} games match your filters
-      </span>
-    </div>
-    
-    <div class="footer-actions">
-      <button 
-        mat-stroked-button 
-        (click)="resetAllFilters()"
-        [disabled]="!isFiltering()">
-        Reset All
-      </button>
-      
-      <button 
-        mat-raised-button 
-        color="primary"
-        (click)="closePanel()">
-        Apply Filters
-      </button>
-    </div>
+  <!-- Filter Stats Footer -->
+  <div class="filter-stats">
+    <span class="stats-text">
+      {{ getFilterStats().filteredGames }} of {{ getFilterStats().totalGames }} games
+    </span>
   </div>
 
 </div>

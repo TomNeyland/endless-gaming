@@ -1,5 +1,6 @@
 <app-voting-drawer 
   [isOpen]="isDrawerOpen()" 
+  [games]="getGames()"
   (voteCast)="onVoteCast($event)"
   (drawerClosed)="onDrawerClosed()">
 

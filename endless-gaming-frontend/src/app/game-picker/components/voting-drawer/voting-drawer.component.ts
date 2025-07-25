@@ -7,10 +7,13 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTabsModule } from '@angular/material/tabs';
 import { PreferenceSummaryComponent } from '../preference-summary/preference-summary.component';
+import { FilterPanelComponent } from '../filter-panel/filter-panel.component';
 import { GameRecord, GamePair } from '../../../types/game.types';
 import { PairService } from '../../services/pair.service';
 import { AnimationService } from '../../services/animation.service';
+import { GameFilterService } from '../../services/game-filter.service';
 
 /**
  * Slide-out drawer component for continuous voting with live recommendation updates.
@@ -30,7 +33,9 @@ import { AnimationService } from '../../services/animation.service';
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatToolbarModule,
-    PreferenceSummaryComponent
+    MatTabsModule,
+    PreferenceSummaryComponent,
+    FilterPanelComponent
   ],
   templateUrl: './voting-drawer.component.html',
   styleUrl: './voting-drawer.component.scss'
@@ -38,8 +43,13 @@ import { AnimationService } from '../../services/animation.service';
 export class VotingDrawerComponent implements OnInit, OnChanges {
   private pairService = inject(PairService);
   private animationService = inject(AnimationService);
+  public gameFilterService = inject(GameFilterService);
   
   @Input() isOpen = false;
+  @Input() games: GameRecord[] = [];
+  
+  // Tab management
+  public readonly activeTabIndex = signal(0);
   
   @Output() voteCast = new EventEmitter<{
     leftGame: GameRecord;
@@ -75,6 +85,20 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
       console.log('🗳️ VotingDrawer: Drawer opened, reloading pairs');
       this.loadNextPair();
       this.updateVotingStats();
+      this.initializeFilters();
+    }
+    
+    if (changes['games'] && changes['games'].currentValue) {
+      this.initializeFilters();
+    }
+  }
+  
+  /**
+   * Initialize filter service with game data
+   */
+  private initializeFilters(): void {
+    if (this.games.length > 0) {
+      this.gameFilterService.initializeOptions(this.games);
     }
   }
 

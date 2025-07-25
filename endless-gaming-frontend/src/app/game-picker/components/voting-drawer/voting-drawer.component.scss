@@ -1,4 +1,4 @@
-// Voting drawer with vertical stacked layout and live updates
+// Compact voting drawer with tabs
 .voting-drawer-container {
   width: 100%;
   height: 100%;
@@ -8,7 +8,6 @@
     background: var(--gaming-surface);
     border-left: 1px solid rgba(255, 255, 255, 0.1);
     
-    // Drawer header
     .drawer-header {
       background: var(--gaming-background);
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -38,65 +37,109 @@
       }
     }
     
-    // Drawer content
     .drawer-content {
-      padding: 24px 16px;
+      padding: 0;
       height: calc(100vh - 64px);
-      overflow-y: auto;
-      position: relative;
+      overflow: hidden;
       
-      // Progress section
+      .discovery-tabs {
+        height: 100%;
+        
+        ::ng-deep .mat-mdc-tab-group {
+          height: 100%;
+          
+          .mat-mdc-tab-header {
+            background: var(--gaming-card-bg);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            
+            .mat-mdc-tab {
+              color: var(--gaming-text-secondary);
+              min-width: 120px;
+              
+              &.mdc-tab--active {
+                color: var(--gaming-accent);
+              }
+              
+              .mdc-tab__content {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                
+                mat-icon {
+                  font-size: 20px;
+                  width: 20px;
+                  height: 20px;
+                }
+                
+                .tab-label {
+                  font-size: 14px;
+                  font-weight: 500;
+                }
+              }
+            }
+          }
+          
+          .mat-mdc-tab-body-wrapper {
+            height: calc(100% - 48px);
+            
+            .mat-mdc-tab-body-content {
+              height: 100%;
+              overflow-y: auto;
+              padding: 24px 16px;
+            }
+          }
+        }
+      }
+      
+      .tab-content.filters-tab-content {
+        padding: 0 !important;
+        
+        app-filter-panel {
+          display: block;
+          height: 100%;
+        }
+      }
+      
+      // Voting content styles
       .progress-section {
         margin-bottom: 24px;
-        text-align: center;
         
         .progress-text {
           color: var(--gaming-text-primary);
-          margin: 0 0 4px 0;
           font-weight: 500;
         }
         
         .help-text {
           color: var(--gaming-text-secondary);
-          margin: 0;
+          margin-top: 8px;
         }
       }
       
-      // Game comparison section
       .comparison-section {
         display: flex;
         flex-direction: column;
-        gap: 16px;
-        margin-bottom: 24px;
+        gap: 24px;
+        margin-bottom: 32px;
         
         .game-option {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          
           .game-card {
-            background: var(--gaming-background) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            transition: all 0.3s ease;
+            background: var(--gaming-card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
             cursor: pointer;
             
             &:hover {
-              border-color: rgba(255, 255, 255, 0.2) !important;
+              border-color: var(--gaming-accent);
               transform: translateY(-2px);
-              box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
             }
             
             .game-image-container {
               position: relative;
               width: 100%;
-              padding-top: 56.25%; // 16:9 aspect ratio
+              height: 150px;
               overflow: hidden;
-              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
               
               .game-image {
-                position: absolute;
-                top: 0;
-                left: 0;
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
@@ -109,50 +152,33 @@
             }
             
             mat-card-content {
-              padding: 16px !important;
+              padding: 16px;
               
               .game-title {
-                margin: 0 0 8px 0;
                 color: var(--gaming-text-primary);
                 font-size: 1.1rem;
-                font-weight: 500;
+                font-weight: 600;
+                margin-bottom: 8px;
                 line-height: 1.3;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
               }
               
-              .game-meta {
-                margin: 0 0 8px 0;
-                
-                .price {
-                  color: var(--gaming-accent);
-                  font-weight: 600;
-                  font-size: 0.875rem;
-                }
+              .game-meta .price {
+                color: var(--gaming-success);
+                font-weight: 500;
               }
               
               .game-tags {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 4px;
-                margin: 0;
+                gap: 6px;
+                margin-top: 12px;
                 
                 .tag-chip {
-                  background: rgba(255, 152, 0, 0.2);
-                  color: var(--gaming-accent);
-                  border: 1px solid rgba(255, 152, 0, 0.4);
-                  padding: 2px 8px;
+                  background: var(--gaming-tag-bg);
+                  color: var(--gaming-tag-text);
+                  padding: 4px 8px;
                   border-radius: 12px;
-                  font-size: 0.7rem;
-                  font-weight: 500;
-                  white-space: nowrap;
-                  
-                  &:hover {
-                    background: rgba(255, 152, 0, 0.3);
-                    border-color: rgba(255, 152, 0, 0.6);
-                  }
+                  font-size: 0.75rem;
                 }
               }
             }
@@ -160,292 +186,127 @@
           
           .vote-button {
             width: 100%;
-            height: 48px;
-            border-radius: 24px !important;
-            font-weight: 600 !important;
-            transition: all 0.3s ease;
+            margin-top: 16px;
+            background: var(--gaming-accent);
+            color: white;
+            
+            &:hover {
+              background: #7c8af0;
+            }
             
             mat-icon {
               margin-right: 8px;
-              font-size: 20px;
-              width: 20px;
-              height: 20px;
-            }
-            
-            &:hover {
-              transform: translateY(-2px);
-              box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
-            }
-            
-            &:active {
-              transform: translateY(0);
-            }
-            
-            &:disabled {
-              opacity: 0.6;
-              transform: none;
             }
           }
         }
+      }
+      
+      .vs-divider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        height: 40px;
         
-        // VS divider
-        .vs-divider {
+        .vs-badge {
+          background: var(--gaming-accent);
+          color: white;
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          position: relative;
-          margin: 8px 0;
-          
-          .divider-line {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.1);
-            z-index: 1;
-          }
-          
-          .vs-badge {
-            background: var(--gaming-accent);
-            color: var(--gaming-background);
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.875rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            z-index: 2;
-            position: relative;
-            
-            .vs-text {
-              font-family: 'Roboto', sans-serif;
-              letter-spacing: 1px;
-            }
-          }
+          font-weight: 700;
+          font-size: 1.1rem;
+          z-index: 2;
+        }
+        
+        .divider-line {
+          position: absolute;
+          width: 100%;
+          height: 2px;
+          background: rgba(255, 255, 255, 0.1);
+          z-index: 1;
         }
       }
       
-      // Skip section
       .skip-section {
-        text-align: center;
-        margin-bottom: 24px;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 32px;
         
         .skip-button {
-          width: 100%;
-          height: 40px;
-          border-radius: 20px !important;
-          color: var(--gaming-text-secondary) !important;
-          border-color: rgba(255, 255, 255, 0.2) !important;
-          transition: all 0.3s ease;
-          
-          mat-icon {
-            margin-right: 8px;
-            font-size: 18px;
-            width: 18px;
-            height: 18px;
-          }
+          color: var(--gaming-text-secondary);
+          border-color: rgba(255, 255, 255, 0.3);
           
           &:hover {
-            background: rgba(255, 255, 255, 0.05) !important;
-            border-color: rgba(255, 255, 255, 0.3) !important;
-            color: var(--gaming-text-primary) !important;
-          }
-        }
-      }
-
-      // Preferences section
-      .preferences-section {
-        margin-bottom: 24px;
-        padding-top: 16px;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        
-        .compact-preferences {
-          display: block !important;
-          width: 100% !important;
-          min-height: 60px !important;
-          
-          // Override preference summary styles for drawer context
-          ::ng-deep .preference-summary {
-            background: rgba(255, 255, 255, 0.05) !important;
-            border: 1px solid rgba(255, 152, 0, 0.3) !important; // Orange border for visibility
-            margin: 0 !important;
-            box-shadow: none !important;
-            display: block !important;
-            min-height: 60px !important;
-            
-            .mat-mdc-card-header {
-              padding: 12px 16px !important;
-              
-              .mat-mdc-card-title {
-                font-size: 0.9rem !important;
-                margin-bottom: 4px !important;
-              }
-              
-              .mat-mdc-card-subtitle {
-                font-size: 0.75rem !important;
-                opacity: 0.7;
-              }
-            }
-            
-            .mat-mdc-card-content {
-              padding: 8px 16px 16px !important;
-              
-              .preferences-grid {
-                gap: 12px !important;
-                
-                .preference-section {
-                  .section-header {
-                    margin-bottom: 6px !important;
-                    
-                    .section-title {
-                      font-size: 0.8rem !important;
-                    }
-                    
-                    .tag-count {
-                      font-size: 0.7rem !important;
-                    }
-                  }
-                  
-                  .tag-list .tag-item {
-                    margin-bottom: 6px !important;
-                    
-                    .tag-header {
-                      .tag-name {
-                        font-size: 0.75rem !important;
-                      }
-                      
-                      .tag-weight {
-                        font-size: 0.7rem !important;
-                      }
-                    }
-                    
-                    mat-progress-bar {
-                      height: 4px !important;
-                    }
-                  }
-                }
-              }
-            }
+            color: var(--gaming-text-primary);
+            border-color: var(--gaming-accent);
           }
         }
       }
       
-      // Subtle loading indicator
+      .preferences-section {
+        .compact-preferences {
+          background: var(--gaming-card-bg);
+          border-radius: 8px;
+          padding: 16px;
+        }
+      }
+      
       .subtle-loading {
         position: fixed;
-        top: 24px;
-        right: 24px;
-        z-index: 50;
-        padding: 8px;
-        background: rgba(0, 0, 0, 0.7);
-        border-radius: 50%;
-        backdrop-filter: blur(4px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.8);
+        border-radius: 8px;
+        padding: 16px;
         
         mat-spinner {
           --mat-progress-spinner-color: var(--gaming-accent);
         }
       }
       
-      // No pairs section
       .no-pairs-section {
-        text-align: center;
-        padding: 48px 16px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 50%;
         
         .no-pairs-content {
+          text-align: center;
+          
           .success-icon {
-            font-size: 64px;
-            width: 64px;
-            height: 64px;
-            color: var(--gaming-accent);
-            margin-bottom: 24px;
+            font-size: 48px;
+            width: 48px;
+            height: 48px;
+            color: var(--gaming-success);
+            margin-bottom: 16px;
           }
           
           h3 {
             color: var(--gaming-text-primary);
-            margin: 0 0 16px 0;
+            margin-bottom: 16px;
           }
           
           p {
             color: var(--gaming-text-secondary);
-            margin: 0 0 32px 0;
+            max-width: 300px;
             line-height: 1.5;
+            margin-bottom: 24px;
           }
           
           .done-button {
-            mat-icon {
-              margin-right: 8px;
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-// Responsive design
-@media (max-width: 768px) {
-  .voting-drawer-container .voting-drawer {
-    width: 100vw;
-    max-width: 400px;
-    
-    .drawer-content {
-      padding: 16px 12px;
-      
-      .comparison-section .game-option {
-        .game-card {
-          mat-card-content {
-            padding: 12px !important;
+            background: var(--gaming-accent);
+            color: white;
             
-            .game-title {
-              font-size: 1rem;
-              -webkit-line-clamp: 1;
-            }
-            
-            .game-tags .tag-chip {
-              font-size: 0.65rem;
-              padding: 1px 6px;
+            &:hover {
+              background: #7c8af0;
             }
           }
-        }
-        
-        .vote-button {
-          height: 44px;
-          font-size: 0.875rem !important;
-          
-          mat-icon {
-            font-size: 18px;
-            width: 18px;
-            height: 18px;
-          }
-        }
-      }
-      
-      .vs-divider .vs-badge {
-        width: 40px;
-        height: 40px;
-        font-size: 0.75rem;
-      }
-    }
-  }
-}
-
-@media (max-width: 480px) {
-  .voting-drawer-container .voting-drawer {
-    width: 100vw;
-    
-    .drawer-content {
-      .comparison-section .game-option .vote-button {
-        span:not(.mat-icon) {
-          display: none; // Hide text on very small screens
-        }
-        
-        mat-icon {
-          margin-right: 0;
         }
       }
     }

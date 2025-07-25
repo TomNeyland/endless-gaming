@@ -17,7 +17,7 @@
     <mat-toolbar class="drawer-header">
       <span class="header-title">
         <mat-icon>tune</mat-icon>
-        Refine Preferences
+        Game Discovery
       </span>
       <button 
         mat-icon-button 
@@ -27,139 +27,167 @@
       </button>
     </mat-toolbar>
 
-    <!-- Drawer Content -->
+    <!-- Drawer Content with Tabs -->
     <div class="drawer-content">
-      @if (hasValidPair()) {
-        <!-- Progress Info -->
-        <div class="progress-section">
-          <p class="mat-body-2 progress-text">{{ getVotingProgress() }}</p>
-          <p class="mat-caption help-text">Choose your preferred game or skip if unsure</p>
-        </div>
-
-        <!-- Game Comparison - Vertical Stack -->
-        <div class="comparison-section">
-          <!-- Game Option 1 -->
-          <div class="game-option">
-            <mat-card class="game-card" appearance="outlined">
-              <div class="game-image-container">
-                <img 
-                  [src]="getGameThumbnail(getLeftGame()!)"
-                  [alt]="getLeftGame()!.name"
-                  class="game-image"
-                  (error)="$event.target.src='https://via.placeholder.com/300x169/667eea/ffffff?text=Game'">
+      <mat-tab-group 
+        class="discovery-tabs"
+        [selectedIndex]="activeTabIndex()"
+        (selectedTabChange)="activeTabIndex.set($event.index)"
+        animationDuration="200ms">
+        
+        <!-- Voting Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>compare</mat-icon>
+            <span class="tab-label">Compare</span>
+          </ng-template>
+          <div class="tab-content voting-tab-content">
+            @if (hasValidPair()) {
+              <!-- Progress Info -->
+              <div class="progress-section">
+                <p class="mat-body-2 progress-text">{{ getVotingProgress() }}</p>
+                <p class="mat-caption help-text">Choose your preferred game or skip if unsure</p>
               </div>
-              
-              <mat-card-content>
-                <h3 class="game-title">{{ getLeftGame()!.name }}</h3>
-                <div class="game-meta">
-                  <span class="price">{{ getGamePrice(getLeftGame()!) }}</span>
-                </div>
-                <div class="game-tags">
-                  @for (tag of leftGameTags(); track tag) {
-                    <span class="tag-chip">{{ tag }}</span>
-                  }
-                </div>
-              </mat-card-content>
-            </mat-card>
-            
-            <button 
-              mat-raised-button 
-              color="primary"
-              class="vote-button vote-left-btn"
-              [disabled]="isVoting()"
-              (click)="voteLeft()">
-              <mat-icon>thumb_up</mat-icon>
-              I Prefer This
-            </button>
-          </div>
 
-          <!-- VS Divider -->
-          <div class="vs-divider">
-            <div class="vs-badge">
-              <span class="vs-text">VS</span>
-            </div>
-            <div class="divider-line"></div>
-          </div>
+              <!-- Game Comparison - Vertical Stack -->
+              <div class="comparison-section">
+                <!-- Game Option 1 -->
+                <div class="game-option">
+                  <mat-card class="game-card" appearance="outlined">
+                    <div class="game-image-container">
+                      <img 
+                        [src]="getGameThumbnail(getLeftGame()!)"
+                        [alt]="getLeftGame()!.name"
+                        class="game-image"
+                        (error)="$event.target.src='https://via.placeholder.com/300x169/667eea/ffffff?text=Game'">
+                    </div>
+                    
+                    <mat-card-content>
+                      <h3 class="game-title">{{ getLeftGame()!.name }}</h3>
+                      <div class="game-meta">
+                        <span class="price">{{ getGamePrice(getLeftGame()!) }}</span>
+                      </div>
+                      <div class="game-tags">
+                        @for (tag of leftGameTags(); track tag) {
+                          <span class="tag-chip">{{ tag }}</span>
+                        }
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+                  
+                  <button 
+                    mat-raised-button 
+                    color="primary"
+                    class="vote-button vote-left-btn"
+                    [disabled]="isVoting()"
+                    (click)="voteLeft()">
+                    <mat-icon>thumb_up</mat-icon>
+                    I Prefer This
+                  </button>
+                </div>
 
-          <!-- Game Option 2 -->
-          <div class="game-option">
-            <mat-card class="game-card" appearance="outlined">
-              <div class="game-image-container">
-                <img 
-                  [src]="getGameThumbnail(getRightGame()!)"
-                  [alt]="getRightGame()!.name"
-                  class="game-image"
-                  (error)="$event.target.src='https://via.placeholder.com/300x169/667eea/ffffff?text=Game'">
+                <!-- VS Divider -->
+                <div class="vs-divider">
+                  <div class="vs-badge">
+                    <span class="vs-text">VS</span>
+                  </div>
+                  <div class="divider-line"></div>
+                </div>
+
+                <!-- Game Option 2 -->
+                <div class="game-option">
+                  <mat-card class="game-card" appearance="outlined">
+                    <div class="game-image-container">
+                      <img 
+                        [src]="getGameThumbnail(getRightGame()!)"
+                        [alt]="getRightGame()!.name"
+                        class="game-image"
+                        (error)="$event.target.src='https://via.placeholder.com/300x169/667eea/ffffff?text=Game'">
+                    </div>
+                    
+                    <mat-card-content>
+                      <h3 class="game-title">{{ getRightGame()!.name }}</h3>
+                      <div class="game-meta">
+                        <span class="price">{{ getGamePrice(getRightGame()!) }}</span>
+                      </div>
+                      <div class="game-tags">
+                        @for (tag of rightGameTags(); track tag) {
+                          <span class="tag-chip">{{ tag }}</span>
+                        }
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+                  
+                  <button 
+                    mat-raised-button 
+                    color="primary"
+                    class="vote-button vote-right-btn"
+                    [disabled]="isVoting()"
+                    (click)="voteRight()">
+                    <mat-icon>thumb_up</mat-icon>
+                    I Prefer This
+                  </button>
+                </div>
               </div>
-              
-              <mat-card-content>
-                <h3 class="game-title">{{ getRightGame()!.name }}</h3>
-                <div class="game-meta">
-                  <span class="price">{{ getGamePrice(getRightGame()!) }}</span>
+
+              <!-- Skip Option -->
+              <div class="skip-section">
+                <button 
+                  mat-stroked-button 
+                  class="skip-button vote-skip-btn"
+                  [disabled]="isVoting()"
+                  (click)="skip()">
+                  <mat-icon>skip_next</mat-icon>
+                  Skip This Comparison
+                </button>
+              </div>
+
+              <!-- Preference Summary -->
+              <div class="preferences-section">
+                <app-preference-summary class="compact-preferences"></app-preference-summary>
+              </div>
+
+              <!-- Subtle Loading State -->
+              @if (isVoting()) {
+                <div class="subtle-loading">
+                  <mat-spinner diameter="20" strokeWidth="3"></mat-spinner>
                 </div>
-                <div class="game-tags">
-                  @for (tag of rightGameTags(); track tag) {
-                    <span class="tag-chip">{{ tag }}</span>
-                  }
+              }
+
+            } @else {
+              <!-- No More Pairs State -->
+              <div class="no-pairs-section">
+                <div class="no-pairs-content">
+                  <mat-icon class="success-icon">check_circle</mat-icon>
+                  <h3 class="mat-headline-6">Great Progress!</h3>
+                  <p class="mat-body-1">Your preferences have been updated. Keep the drawer open to see recommendations change as you continue voting, or close it when you're satisfied.</p>
+                  
+                  <button 
+                    mat-button 
+                    color="primary"
+                    (click)="drawer.close()"
+                    class="done-button">
+                    <mat-icon>check</mat-icon>
+                    Done for Now
+                  </button>
                 </div>
-              </mat-card-content>
-            </mat-card>
-            
-            <button 
-              mat-raised-button 
-              color="primary"
-              class="vote-button vote-right-btn"
-              [disabled]="isVoting()"
-              (click)="voteRight()">
-              <mat-icon>thumb_up</mat-icon>
-              I Prefer This
-            </button>
+              </div>
+            }
           </div>
-        </div>
+        </mat-tab>
 
-        <!-- Skip Option -->
-        <div class="skip-section">
-          <button 
-            mat-stroked-button 
-            class="skip-button vote-skip-btn"
-            [disabled]="isVoting()"
-            (click)="skip()">
-            <mat-icon>skip_next</mat-icon>
-            Skip This Comparison
-          </button>
-        </div>
-
-        <!-- Preference Summary -->
-        <div class="preferences-section">
-          <app-preference-summary class="compact-preferences"></app-preference-summary>
-        </div>
-
-        <!-- Subtle Loading State -->
-        @if (isVoting()) {
-          <div class="subtle-loading">
-            <mat-spinner diameter="20" strokeWidth="3"></mat-spinner>
+        <!-- Filters Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>filter_list</mat-icon>
+            <span class="tab-label">Filters</span>
+          </ng-template>
+          <div class="tab-content filters-tab-content">
+            <app-filter-panel [games]="games"></app-filter-panel>
           </div>
-        }
+        </mat-tab>
 
-      } @else {
-        <!-- No More Pairs State -->
-        <div class="no-pairs-section">
-          <div class="no-pairs-content">
-            <mat-icon class="success-icon">check_circle</mat-icon>
-            <h3 class="mat-headline-6">Great Progress!</h3>
-            <p class="mat-body-1">Your preferences have been updated. Keep the drawer open to see recommendations change as you continue voting, or close it when you're satisfied.</p>
-            
-            <button 
-              mat-button 
-              color="primary"
-              (click)="drawer.close()"
-              class="done-button">
-              <mat-icon>check</mat-icon>
-              Done for Now
-            </button>
-          </div>
-        </div>
-      }
+      </mat-tab-group>
     </div>
   </mat-sidenav>
 </mat-sidenav-container>

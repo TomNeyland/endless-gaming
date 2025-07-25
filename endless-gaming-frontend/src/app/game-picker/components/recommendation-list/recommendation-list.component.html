@@ -1,46 +1,12 @@
-<div class="recommendation-list-container">
-  
-  <!-- Filter System -->
-  <div class="filter-section">
-    <!-- Filter Chip Bar -->
-    <app-filter-chip-bar
-      [showFilterButton]="true"
-      (filterButtonClick)="openFilterPanel()"
-      (clearAllClick)="closeFilterPanel()">
-    </app-filter-chip-bar>
-  </div>
+<div class="recommendation-list">
 
-  <!-- Main Content with Sidebar Layout -->
-  <mat-sidenav-container class="main-container">
-    
-    <!-- Filter Panel Sidebar -->
-    <mat-sidenav 
-      #filterSidenav
-      mode="side"
-      position="end"
-      [opened]="isFilterPanelOpen()"
-      (openedChange)="onFilterPanelOpenChange($event)"
-      class="filter-sidebar">
-      
-      <app-filter-panel
-        [games]="games"
-        [isOpen]="isFilterPanelOpen()"
-        (openChange)="onFilterPanelOpenChange($event)"
-        (filtersApplied)="closeFilterPanel()">
-      </app-filter-panel>
-      
-    </mat-sidenav>
-
-    <!-- Main Recommendations Content -->
-    <mat-sidenav-content class="recommendations-content">
-      <div class="recommendation-list">
-        <!-- Subtle Loading Indicator -->
-        @if (isRefreshing()) {
-          <div class="subtle-refresh-indicator">
-            <mat-spinner diameter="16" strokeWidth="2"></mat-spinner>
-            <span>Updating...</span>
-          </div>
-        }
+    <!-- Subtle Loading Indicator -->
+    @if (isRefreshing()) {
+      <div class="subtle-refresh-indicator">
+        <mat-spinner diameter="16" strokeWidth="2"></mat-spinner>
+        <span>Updating...</span>
+      </div>
+    }
     
     @if (hasRecommendations()) {
     <!-- Top 3 Premium Recommendations -->
@@ -114,55 +80,58 @@
           More Recommendations
         </h3>
 
-        <mat-list class="compact-list">
+        <div class="compact-list">
           @for (recommendation of getCompactRecommendations(); track trackByAppId($index + 3, recommendation)) {
-            <mat-list-item 
+            <div 
               class="compact-item"
               [attr.data-app-id]="recommendation.game.appId"
               (click)="onRecommendationClick(recommendation)">
               
-              <div class="compact-content">
-                <!-- Rank and Thumbnail -->
-                <div class="compact-rank">
-                  <span class="rank-number">{{ recommendation.rank }}</span>
+              <div class="game-card-content">
+                <!-- Rank Badge -->
+                <div class="rank-badge">
+                  <span class="rank-number">#{{ recommendation.rank }}</span>
                 </div>
 
-                <div class="compact-thumbnail">
+                <!-- Game Image -->
+                <div class="game-image-container">
                   <img 
                     [src]="recommendation.game.coverUrl || 'https://cdn.akamai.steamstatic.com/steam/apps/' + recommendation.game.appId + '/header.jpg'"
                     [alt]="recommendation.game.name"
-                    class="thumbnail-image"
-                    (error)="$event.target.src='https://via.placeholder.com/120x67/667eea/ffffff?text=Game'">
+                    class="game-image"
+                    (error)="$event.target.src='https://via.placeholder.com/230x107/1a1a1a/667eea?text=' + encodeURIComponent(recommendation.game.name.substring(0,10))">
                 </div>
 
-                <!-- Game Info -->
-                <div class="compact-info">
-                  <h4 class="compact-title">{{ recommendation.game.name }}</h4>
-                  <div class="compact-meta">
-                    <span class="compact-price">{{ recommendation.game.price || 'Free' }}</span>
-                    <span class="compact-score">Score: {{ formatScore(recommendation.score) }}</span>
+                <!-- Game Details -->
+                <div class="game-details">
+                  <div class="game-header">
+                    <h3 class="game-title">{{ recommendation.game.name }}</h3>
+                    <div class="game-price" [class.free]="!recommendation.game.price || recommendation.game.price === 'Free'">
+                      {{ recommendation.game.price || 'FREE' }}
+                    </div>
                   </div>
-                  <div class="compact-tags">
-                    @for (tagData of getTopTags(recommendation.game, 5); track tagData.tag) {
-                      <span class="compact-tag">{{ tagData.tag }}</span>
+
+                  <div class="game-rating" *ngIf="recommendation.game.reviewPos || recommendation.game.reviewNeg">
+                    <div class="rating-bar">
+                      <div class="rating-fill" [style.width]="getRatingPercentage(recommendation.game) + '%'"></div>
+                    </div>
+                    <span class="rating-text">{{ getRatingPercentage(recommendation.game) }}% positive</span>
+                  </div>
+
+                  <div class="game-tags-row">
+                    @for (tagData of getTopTags(recommendation.game, 4); track tagData.tag) {
+                      <span class="game-tag">{{ tagData.tag }}</span>
                     }
-                    @if (getTopTags(recommendation.game).length > 5 && !expandedTags.has(recommendation.game.appId)) {
-                      <span class="more-tags-btn" (click)="toggleTagExpansion(recommendation.game.appId, $event)">
-                        +{{ getTopTags(recommendation.game).length - 5 }} more...
-                      </span>
-                    }
-                    @if (expandedTags.has(recommendation.game.appId)) {
-                      <span class="more-tags-btn" (click)="toggleTagExpansion(recommendation.game.appId, $event)">
-                        show less
-                      </span>
+                    @if (getTopTags(recommendation.game).length > 4) {
+                      <span class="more-tags">+{{ getTopTags(recommendation.game).length - 4 }}</span>
                     }
                   </div>
                 </div>
 
               </div>
-            </mat-list-item>
+            </div>
           }
-        </mat-list>
+        </div>
       </div>
     }
 
@@ -189,25 +158,20 @@
       </button>
 
     } @else {
-        <mat-card class="no-recommendations">
-          <mat-card-content>
-            <div class="no-recommendations-content">
-              <mat-icon class="large-icon">sentiment_very_dissatisfied</mat-icon>
-              <h2 class="mat-headline-5">No Recommendations Available</h2>
-              <p class="mat-body-1">
-                @if (isFiltering()) {
-                  No games match your current filters. Try adjusting your filter criteria.
-                } @else {
-                  Complete some game comparisons to get personalized recommendations!
-                }
-              </p>
-            </div>
-          </mat-card-content>
-        </mat-card>
-        }
-      </div>
-    </mat-sidenav-content>
-    
-  </mat-sidenav-container>
-  
+    <mat-card class="no-recommendations">
+      <mat-card-content>
+        <div class="no-recommendations-content">
+          <mat-icon class="large-icon">sentiment_very_dissatisfied</mat-icon>
+          <h2 class="mat-headline-5">No Recommendations Available</h2>
+          <p class="mat-body-1">
+            @if (isFiltering()) {
+              No games match your current filters. Try adjusting your filter criteria.
+            } @else {
+              Complete some game comparisons to get personalized recommendations!
+            }
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    }
 </div>
