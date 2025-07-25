@@ -4,10 +4,11 @@ region: nyc1
 # Clean Docker-based JSON export service
 services:
   - name: json-export-service
-    image:
-      registry_type: DOCR  # DigitalOcean Container Registry
-      repository: endless-gaming
-      tag: latest
+    dockerfile_path: Dockerfile
+    source_dir: /
+    github:
+      repo: tomneyland/endless-gaming
+      branch: master
     
     http_port: 8080
     instance_count: 1
