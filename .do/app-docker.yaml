@@ -9,6 +9,7 @@ services:
     github:
       repo: tomneyland/endless-gaming
       branch: master
+      deploy_on_push: true
     
     http_port: 8080
     instance_count: 1
