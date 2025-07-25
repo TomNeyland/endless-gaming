@@ -2,6 +2,8 @@
   class="game-card" 
   [class.highlight-hover]="highlightOnHover"
   [class.has-score]="showScore"
+  [class.clickable]="hasValidGame()"
+  (click)="openGameDetails()"
   appearance="outlined">
   
   @if (hasValidGame()) {
@@ -102,20 +104,12 @@
     <!-- Action Buttons -->
     <mat-card-actions>
       <button 
-        mat-button 
-        color="primary" 
-        (click)="openGameDetails($event)"
-        [disabled]="!hasValidGame()">
-        <mat-icon>info</mat-icon>
-        View Details
-      </button>
-      
-      <button 
         mat-stroked-button 
         (click)="openSteamStore($event)"
-        [disabled]="!hasValidGame()">
+        [disabled]="!hasValidGame()"
+        class="steam-link-button">
         <mat-icon>open_in_new</mat-icon>
-        Steam Store
+        Open in Steam
       </button>
     </mat-card-actions>
   } @else {

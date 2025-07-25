@@ -314,46 +314,34 @@
 
   // Action buttons section
   mat-card-actions {
-    padding: 16px 20px !important;
+    padding: 12px 20px !important;
     display: flex;
-    gap: 12px;
+    justify-content: center;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.05);
 
-    button {
-      flex: 1;
+    .steam-link-button {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 500;
+      padding: 8px 16px;
+      border-color: rgba(255, 255, 255, 0.3);
+      color: var(--gaming-text-secondary);
       
       mat-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
       }
       
-      &[color="primary"] {
-        background: var(--gaming-accent);
-        color: var(--gaming-background);
-        
-        &:hover:not(:disabled) {
-          background: rgba(255, 152, 0, 0.8);
-          transform: translateY(-1px);
-        }
-      }
-      
-      &[mat-stroked-button] {
-        border-color: rgba(255, 255, 255, 0.3);
+      &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
         color: var(--gaming-text-primary);
-        
-        &:hover:not(:disabled) {
-          background: rgba(255, 255, 255, 0.1);
-          border-color: rgba(255, 255, 255, 0.5);
-          transform: translateY(-1px);
-        }
+        transform: translateY(-1px);
       }
       
       &:disabled {
