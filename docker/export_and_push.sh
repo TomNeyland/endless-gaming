@@ -4,7 +4,7 @@ set -e
 echo "$(date): Starting JSON export"
 
 # Generate master.json
-python scripts/generate_master_json_direct.py /tmp/master.json --max-pages 15 --max-games 1500
+python scripts/generate_master_json_direct.py /tmp/master.json --max-games 1500
 
 # Push to GitHub if credentials available
 if [ -n "$GITHUB_TOKEN" ] && [ -n "$GITHUB_REPO" ]; then
