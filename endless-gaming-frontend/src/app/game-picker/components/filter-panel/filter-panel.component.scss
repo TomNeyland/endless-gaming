@@ -305,6 +305,20 @@
       &.mat-mdc-option-selected {
         background: rgba(102, 126, 234, 0.2);
       }
+
+      // Tag frequency styling
+      .tag-name {
+        display: inline-block;
+        font-weight: 500;
+      }
+
+      .tag-frequency {
+        display: inline-block;
+        margin-left: 8px;
+        color: var(--gaming-text-secondary);
+        font-size: 0.85em;
+        opacity: 0.8;
+      }
     }
   }
 }

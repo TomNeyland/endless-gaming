@@ -95,9 +95,13 @@
             (keyup.enter)="addRequiredTag(requiredTagInput.value); requiredTagInput.value = ''">
           <mat-autocomplete 
             #requiredTagAutocomplete="matAutocomplete"
-            (optionSelected)="addRequiredTag($event.option.value); requiredTagInput.value = ''">
-            @for (tag of getFilteredTags(requiredTagInput.value); track tag) {
-              <mat-option [value]="tag">{{ tag }}</mat-option>
+            (optionSelected)="addRequiredTag($event.option.value); requiredTagInput.value = ''"
+            [displayWith]="null">
+            @for (tagInfo of getFilteredTags(requiredTagInput.value); track tagInfo.tag) {
+              <mat-option [value]="tagInfo.tag">
+                <span class="tag-name">{{ tagInfo.tag }}</span>
+                <span class="tag-frequency">{{ formatTagFrequency(tagInfo.count) }}</span>
+              </mat-option>
             }
           </mat-autocomplete>
         </mat-form-field>
@@ -126,9 +130,13 @@
             (keyup.enter)="addExcludedTag(excludedTagInput.value); excludedTagInput.value = ''">
           <mat-autocomplete 
             #excludedTagAutocomplete="matAutocomplete"
-            (optionSelected)="addExcludedTag($event.option.value); excludedTagInput.value = ''">
-            @for (tag of getFilteredTags(excludedTagInput.value); track tag) {
-              <mat-option [value]="tag">{{ tag }}</mat-option>
+            (optionSelected)="addExcludedTag($event.option.value); excludedTagInput.value = ''"
+            [displayWith]="null">
+            @for (tagInfo of getFilteredTags(excludedTagInput.value); track tagInfo.tag) {
+              <mat-option [value]="tagInfo.tag">
+                <span class="tag-name">{{ tagInfo.tag }}</span>
+                <span class="tag-frequency">{{ formatTagFrequency(tagInfo.count) }}</span>
+              </mat-option>
             }
           </mat-autocomplete>
         </mat-form-field>

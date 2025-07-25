@@ -151,6 +151,8 @@ export class GameFilterService {
   
   // Available options for autocompletes (computed from available games)
   private availableTags = signal<string[]>([]);
+  private availableTagsWithFrequency = signal<Array<{tag: string, count: number}>>([]);
+  private tagCaseMap = signal<Map<string, string>>(new Map()); // lowercase -> correct case
   private availableDevelopers = signal<string[]>([]);
   private availablePublishers = signal<string[]>([]);
   
@@ -235,19 +237,39 @@ export class GameFilterService {
    * Initialize available options from game data
    */
   initializeOptions(games: GameRecord[]): void {
-    // Extract unique tags sorted by popularity
+    // Extract unique tags with counts and case mapping
     const tagCounts = new Map<string, number>();
+    const caseMap = new Map<string, string>(); // lowercase -> correct case
+    
     games.forEach(game => {
       Object.entries(game.tags || {}).forEach(([tag, votes]) => {
-        tagCounts.set(tag, (tagCounts.get(tag) || 0) + votes);
+        const lowerTag = tag.toLowerCase();
+        
+        // Accumulate votes for case-insensitive tag
+        tagCounts.set(lowerTag, (tagCounts.get(lowerTag) || 0) + votes);
+        
+        // Keep the most common case variant (or first one encountered)
+        if (!caseMap.has(lowerTag) || votes > (tagCounts.get(lowerTag) || 0)) {
+          caseMap.set(lowerTag, tag);
+        }
       });
     });
     
-    const sortedTags = Array.from(tagCounts.entries())
-      .sort(([, a], [, b]) => b - a)
-      .map(([tag]) => tag);
+    // Build sorted arrays with frequency data
+    const sortedTagsWithFrequency = Array.from(tagCounts.entries())
+      .map(([lowerTag, count]) => ({
+        tag: caseMap.get(lowerTag) || lowerTag,
+        count
+      }))
+      .sort((a, b) => b.count - a.count);
+    
+    const sortedTags = sortedTagsWithFrequency.map(item => item.tag);
     
     this.availableTags.set(sortedTags);
+    this.availableTagsWithFrequency.set(sortedTagsWithFrequency);
+    this.tagCaseMap.set(caseMap);
+    
+    console.log('🏷️ GameFilterService: Initialized', sortedTags.length, 'unique tags with case mapping');
     
     // Extract unique developers and publishers
     const developers = new Set<string>();
@@ -270,6 +292,36 @@ export class GameFilterService {
    */
   getAvailableTags(): string[] {
     return this.availableTags();
+  }
+
+  /**
+   * Get available tags with frequency information
+   */
+  getAvailableTagsWithFrequency(): Array<{tag: string, count: number}> {
+    return this.availableTagsWithFrequency();
+  }
+
+  /**
+   * Normalize tag to correct case (case-insensitive lookup)
+   */
+  normalizeTag(inputTag: string): string | null {
+    const lowerInput = inputTag.toLowerCase().trim();
+    const correctCase = this.tagCaseMap().get(lowerInput);
+    return correctCase || null;
+  }
+
+  /**
+   * Search tags with case-insensitive matching and frequency info
+   */
+  searchTags(searchTerm: string, limit: number = 10): Array<{tag: string, count: number}> {
+    if (!searchTerm.trim()) {
+      return this.availableTagsWithFrequency().slice(0, limit);
+    }
+    
+    const lowerSearch = searchTerm.toLowerCase();
+    return this.availableTagsWithFrequency()
+      .filter(item => item.tag.toLowerCase().includes(lowerSearch))
+      .slice(0, limit);
   }
   
   /**

@@ -56,6 +56,7 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
   
   // Available options for autocompletes
   public availableTags: string[] = [];
+  public availableTagsWithFrequency: Array<{tag: string, count: number}> = [];
   
   // Form models for two-way binding - all changes are instantly applied
   public searchText = '';
@@ -96,6 +97,7 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
     
     // Load available options
     this.availableTags = this.gameFilterService.getAvailableTags();
+    this.availableTagsWithFrequency = this.gameFilterService.getAvailableTagsWithFrequency();
     
     // Sync local form models with service state
     this.syncFormModelsWithFilters();
@@ -205,9 +207,16 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
    * Add required tag (instant)
    */
   public addRequiredTag(tag: string): void {
-    if (tag && !this.requiredTags.includes(tag)) {
-      this.requiredTags.push(tag);
+    if (!tag?.trim()) return;
+    
+    // Normalize tag to correct case
+    const normalizedTag = this.gameFilterService.normalizeTag(tag);
+    if (normalizedTag && !this.requiredTags.includes(normalizedTag)) {
+      this.requiredTags.push(normalizedTag);
       this.gameFilterService.updateFilters({ requiredTags: [...this.requiredTags] });
+      console.log('🏷️ Added required tag:', normalizedTag);
+    } else if (!normalizedTag) {
+      console.warn('🏷️ Tag not found in dataset:', tag);
     }
   }
   
@@ -223,9 +232,16 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
    * Add excluded tag (instant)
    */
   public addExcludedTag(tag: string): void {
-    if (tag && !this.excludedTags.includes(tag)) {
-      this.excludedTags.push(tag);
+    if (!tag?.trim()) return;
+    
+    // Normalize tag to correct case
+    const normalizedTag = this.gameFilterService.normalizeTag(tag);
+    if (normalizedTag && !this.excludedTags.includes(normalizedTag)) {
+      this.excludedTags.push(normalizedTag);
       this.gameFilterService.updateFilters({ excludedTags: [...this.excludedTags] });
+      console.log('🏷️ Added excluded tag:', normalizedTag);
+    } else if (!normalizedTag) {
+      console.warn('🏷️ Tag not found in dataset:', tag);
     }
   }
   
@@ -238,16 +254,42 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
   }
   
   /**
-   * Get filtered tags for autocomplete
+   * Get filtered tags for autocomplete with frequency information
    */
-  public getFilteredTags(searchTerm: string): string[] {
-    if (!searchTerm) {
-      return this.availableTags.slice(0, 10); // Show top 10 by default
-    }
+  public getFilteredTags(searchTerm: string): Array<{tag: string, count: number, displayText: string}> {
+    const tagsWithFreq = this.gameFilterService.searchTags(searchTerm, 15);
     
-    return this.availableTags
-      .filter(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-      .slice(0, 10);
+    return tagsWithFreq.map(item => ({
+      tag: item.tag,
+      count: item.count,
+      displayText: this.formatTagWithFrequency(item.tag, item.count)
+    }));
+  }
+
+  /**
+   * Format tag with frequency for display
+   */
+  private formatTagWithFrequency(tag: string, count: number): string {
+    if (count >= 1000000) {
+      return `${tag} (${Math.round(count / 1000000)}M votes)`;
+    } else if (count >= 1000) {
+      return `${tag} (${Math.round(count / 1000)}k votes)`;
+    } else {
+      return `${tag} (${count} votes)`;
+    }
+  }
+
+  /**
+   * Format tag frequency for template display
+   */
+  public formatTagFrequency(count: number): string {
+    if (count >= 1000000) {
+      return `${Math.round(count / 1000000)}M votes`;
+    } else if (count >= 1000) {
+      return `${Math.round(count / 1000)}k votes`;
+    } else {
+      return `${count} votes`;
+    }
   }
   
   // Utility methods
