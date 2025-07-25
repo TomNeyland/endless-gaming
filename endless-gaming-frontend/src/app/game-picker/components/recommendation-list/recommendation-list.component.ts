@@ -52,7 +52,6 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   @Input() maxRecommendations: number = 100;
   
   recommendations: GameRecommendation[] = [];
-  filteredRecommendations: GameRecommendation[] = [];
   
   // Reactive state for live updates
   public readonly isRefreshing = signal(false);
@@ -104,29 +103,31 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Subscribe to filter changes to update displayed recommendations
+   * Subscribe to filter changes to regenerate recommendations
    */
   private subscribeToFilterUpdates(): void {
     this.filterSubscription = this.gameFilterService.getFilters().subscribe(() => {
-      this.applyFiltersToRecommendations();
+      // Regenerate recommendations when filters change
+      this.generateRecommendations();
     });
   }
 
   /**
    * Generate recommendations from input games using ML model.
+   * NEW: Filter games BEFORE ranking to ensure full N recommendations that match criteria.
    */
   private generateRecommendations(): void {
     if (this.games.length === 0) {
       this.recommendations = [];
-      this.filteredRecommendations = [];
       return;
     }
 
-    this.recommendations = this.preferenceService.rankGames(this.games)
-      .slice(0, this.maxRecommendations);
+    // STEP 1: Apply filters to the full game dataset first
+    const filteredGames = this.gameFilterService.applyFilters(this.games);
     
-    // Apply filters to the generated recommendations
-    this.applyFiltersToRecommendations();
+    // STEP 2: Generate recommendations from the filtered games
+    this.recommendations = this.preferenceService.rankGames(filteredGames)
+      .slice(0, this.maxRecommendations);
   }
 
   /**
@@ -144,12 +145,10 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
     const previousRecommendations = [...this.recommendations];
     const containerElement = document.querySelector('.recommendation-list') as HTMLElement;
     
-    // Generate new recommendations immediately
-    this.recommendations = this.preferenceService.rankGames(this.games)
+    // Generate new recommendations from filtered games
+    const filteredGames = this.gameFilterService.applyFilters(this.games);
+    this.recommendations = this.preferenceService.rankGames(filteredGames)
       .slice(0, this.maxRecommendations);
-    
-    // Apply filters to the new recommendations
-    this.applyFiltersToRecommendations();
     
     // Update timestamps
     this.lastUpdateTime.set(new Date());
@@ -180,12 +179,6 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
     this.onRecommendationsUpdated(previousRecommendations, this.recommendations);
   }
 
-  /**
-   * Apply current filters to recommendations
-   */
-  private applyFiltersToRecommendations(): void {
-    this.filteredRecommendations = this.gameFilterService.applyFiltersToRecommendations(this.recommendations);
-  }
 
   /**
    * Highlight cards that changed position.
@@ -266,28 +259,28 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
    * Check if recommendations are available.
    */
   hasRecommendations(): boolean {
-    return this.filteredRecommendations.length > 0;
+    return this.recommendations.length > 0;
   }
 
   /**
-   * Get recommendations for display (filtered).
+   * Get recommendations for display.
    */
   getDisplayRecommendations(): GameRecommendation[] {
-    return this.filteredRecommendations;
+    return this.recommendations;
   }
 
   /**
    * Get top 3 premium recommendations for featured display.
    */
   getTopRecommendations(): GameRecommendation[] {
-    return this.filteredRecommendations.slice(0, 3);
+    return this.recommendations.slice(0, 3);
   }
 
   /**
    * Get remaining recommendations for compact list display.
    */
   getCompactRecommendations(): GameRecommendation[] {
-    return this.filteredRecommendations.slice(3);
+    return this.recommendations.slice(3);
   }
 
   /**
@@ -392,7 +385,7 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
    */
   getRecommendationPercentage(): number {
     if (this.games.length === 0) return 0;
-    return Math.round((this.filteredRecommendations.length / this.games.length) * 100);
+    return Math.round((this.recommendations.length / this.games.length) * 100);
   }
 
 
@@ -407,11 +400,11 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
    * Get score range for display.
    */
   getScoreRange(): { min: number, max: number } {
-    if (this.filteredRecommendations.length === 0) {
+    if (this.recommendations.length === 0) {
       return { min: 0, max: 0 };
     }
 
-    const scores = this.filteredRecommendations.map(r => r.score);
+    const scores = this.recommendations.map(r => r.score);
     return {
       min: Math.min(...scores),
       max: Math.max(...scores)
