@@ -91,6 +91,11 @@
         }
       }
       
+      // Override for voting tab to ensure proper padding
+      .tab-content.voting-tab-content {
+        padding: 24px 16px !important;
+      }
+      
       .tab-content.filters-tab-content {
         padding: 0 !important;
         
