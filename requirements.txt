@@ -1,0 +1,2 @@
+# Dummy requirements file to trigger Python buildpack detection
+# Actual dependencies are managed by Poetry in endless-gaming-backend/pyproject.toml

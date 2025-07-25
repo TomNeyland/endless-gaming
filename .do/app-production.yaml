@@ -1,164 +1,79 @@
-name: endless-gaming-production
+name: endless-gaming
 region: nyc1
 
-# Full-stack production deployment with Flask API and Angular frontend
-
-# Production services configuration
+# Database-free JSON generation service with internal cron
 services:
-  # Flask API backend (production)
-  - name: backend-api
-    source_dir: /endless-gaming-backend
+  - name: json-export-service
+    source_dir: /
     github:
-      repo: YOUR_GITHUB_USERNAME/endless-gaming
-      branch: main
+      repo: tomneyland/endless-gaming
+      branch: master
     environment_slug: python
     
     build_command: |
+      cd endless-gaming-backend
       pip install poetry
       poetry config virtualenvs.create false
       poetry install --only=main
-      pip install gunicorn
+      # Install GitHub CLI and cron
+      curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list
+      apt update
+      apt install -y gh cron jq
     
     run_command: |
-      gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 'app:create_app()'
-    
-    envs:
-      - key: DATABASE_URL
-        scope: RUN_TIME
-        value: ${endless-gaming-production-db.DATABASE_URL}
-      - key: PYTHONPATH
-        scope: RUN_AND_BUILD_TIME
-        value: /app
-      - key: FLASK_ENV
-        scope: RUN_TIME
-        value: production
-      - key: CORS_ORIGINS
-        scope: RUN_TIME
-        value: "https://YOUR_PRODUCTION_DOMAIN.com"
-      - key: SECRET_KEY
-        scope: RUN_TIME
-        value: ${SECRET_KEY}
-    
-    health_check:
-      http_path: /health
-      initial_delay_seconds: 60
-      period_seconds: 10
-      timeout_seconds: 10
-      failure_threshold: 3
-      success_threshold: 1
+      # Navigate to backend directory
+      cd endless-gaming-backend
       
-    http_port: 80
-    instance_count: 1
-    instance_size_slug: basic-s
-    
-    routes:
-      - path: /api
-        preserve_path_prefix: false
-
-# Static site configuration for Angular frontend (production)
-static_sites:
-  - name: frontend-app
-    source_dir: /endless-gaming-frontend
-    github:
-      repo: YOUR_GITHUB_USERNAME/endless-gaming
-      branch: main
-    environment_slug: node-js
-    
-    build_command: |
-      chmod +x /app/endless-gaming-frontend/.do/build.sh
-      /app/endless-gaming-frontend/.do/build.sh
-    
-    output_dir: /dist
-    index_document: index.html
-    error_document: index.html
-    catchall_document: index.html
-    
-    routes:
-      - path: /
-
-# Production database configuration
-databases:
-  - engine: PG
-    name: endless-gaming-production-db
-    num_nodes: 1
-    size: db-s-1vcpu-1gb
-    version: "15"
-
-# Jobs for database management and scheduled collection
-jobs:
-  - name: database-setup
-    kind: PRE_DEPLOY
-    source_dir: /endless-gaming-backend
-    environment_slug: python
-    
-    build_command: |
-      pip install poetry
-      poetry config virtualenvs.create false
-      poetry install --only=main
-    
-    run_command: |
-      python scripts/setup_db.py
+      # Create the cron script
+      cat > /app/run-export.sh << 'EOF'
+      #!/bin/bash
+      set -e
+      export PYTHONPATH=/app/endless-gaming-backend
+      cd /app/endless-gaming-backend
+      echo "$(date): Starting JSON export"
+      python scripts/generate_master_json_direct.py /tmp/master.json --max-pages 15 --max-games 1000
+      
+      if [ -n "$GITHUB_TOKEN" ] && [ -n "$GITHUB_REPO" ]; then
+        CURRENT_SHA=$(gh api repos/$GITHUB_REPO/contents/master.json --jq '.sha' 2>/dev/null || echo "")
+        CONTENT=$(base64 -i /tmp/master.json | tr -d '\n')
+        
+        if [ -n "$CURRENT_SHA" ]; then
+          gh api repos/$GITHUB_REPO/contents/master.json --method PUT --field message="🎮 Daily update - $(date '+%Y-%m-%d')" --field content="$CONTENT" --field sha="$CURRENT_SHA"
+        else
+          gh api repos/$GITHUB_REPO/contents/master.json --method PUT --field message="🎮 Initial data - $(date '+%Y-%m-%d')" --field content="$CONTENT"
+        fi
+        echo "✅ Updated repository"
+      fi
+      echo "$(date): Export completed"
+      EOF
+      
+      chmod +x /app/run-export.sh
+      
+      # Set up cron job
+      echo "0 4 * * * /app/run-export.sh >> /tmp/cron.log 2>&1" | crontab -
+      
+      # Start cron and keep service alive
+      cron
+      echo "JSON export service started - daily runs at 4 AM UTC"
+      
+      # Run initial export
+      /app/run-export.sh
+      
+      # Keep service alive by tailing logs
+      touch /tmp/cron.log
+      tail -f /tmp/cron.log
     
     envs:
-      - key: DATABASE_URL
-        scope: RUN_TIME
-        value: ${endless-gaming-production-db.DATABASE_URL}
       - key: PYTHONPATH
         scope: RUN_AND_BUILD_TIME
         value: /app
-    
-    instance_count: 1
-    instance_size_slug: basic-xxs
-
-  - name: daily-full-collection
-    kind: CRON
-    schedule: "0 2 * * *"  # Run daily at 2 AM UTC
-    source_dir: /endless-gaming-backend
-    environment_slug: python
-    
-    build_command: |
-      pip install poetry
-      poetry config virtualenvs.create false
-      poetry install --only=main
-    
-    run_command: |
-      python scripts/collect_games.py collect --max-pages 30
-    
-    envs:
-      - key: DATABASE_URL
+      - key: GITHUB_TOKEN
         scope: RUN_TIME
-        value: ${endless-gaming-production-db.DATABASE_URL}
-      - key: PYTHONPATH
-        scope: RUN_AND_BUILD_TIME
-        value: /app
-      - key: MAX_WORKERS
+        value: ${GITHUB_TOKEN}
+      - key: GITHUB_REPO
         scope: RUN_TIME
-        value: "5"
+        value: "tomneyland/endless-gaming"
     
     instance_count: 1
     instance_size_slug: basic-s
-    
-  - name: weekly-maintenance
-    kind: CRON
-    schedule: "0 1 * * 0"  # Run weekly on Sunday at 1 AM UTC
-    source_dir: /endless-gaming-backend
-    environment_slug: python
-    
-    build_command: |
-      pip install poetry
-      poetry config virtualenvs.create false
-      poetry install --only=main
-    
-    run_command: |
-      python scripts/collect_games.py status
-    
-    envs:
-      - key: DATABASE_URL
-        scope: RUN_TIME
-        value: ${endless-gaming-production-db.DATABASE_URL}
-      - key: PYTHONPATH
-        scope: RUN_AND_BUILD_TIME
-        value: /app
-    
-    instance_count: 1
-    instance_size_slug: basic-xxs
