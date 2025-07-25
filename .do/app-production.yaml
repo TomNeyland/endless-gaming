@@ -15,20 +15,23 @@ services:
       pip install poetry
       poetry config virtualenvs.create false
       poetry install --only=main
-      # Download and install GitHub CLI binary directly (no apt required)
-      curl -L https://github.com/cli/cli/releases/latest/download/gh_linux_amd64.tar.gz -o gh.tar.gz
-      tar -xzf gh.tar.gz
-      cp gh_*/bin/gh ./gh
-      chmod +x ./gh
-      rm -rf gh*
-      
-      # Download and install jq binary directly
-      curl -L https://github.com/jqlang/jq/releases/latest/download/jq-linux-amd64 -o ./jq
-      chmod +x ./jq
+      # Just install dependencies, download binaries in run step
+      echo "Build completed - binaries will be downloaded at runtime"
     
     run_command: |
       # Navigate to backend directory
       cd endless-gaming-backend
+      
+      # Download GitHub CLI at runtime if not exists
+      if [ ! -f ./gh ]; then
+        echo "Downloading GitHub CLI..."
+        curl -L https://github.com/cli/cli/releases/latest/download/gh_linux_amd64.tar.gz -o gh.tar.gz
+        tar -xzf gh.tar.gz
+        cp gh_*/bin/gh ./gh
+        chmod +x ./gh
+        rm -rf gh*
+        echo "GitHub CLI downloaded successfully"
+      fi
       
       # Create the cron script
       cat > /app/run-export.sh << 'EOF'
@@ -40,6 +43,16 @@ services:
       python scripts/generate_master_json_direct.py /tmp/master.json --max-pages 15 --max-games 100
       
       if [ -n "$GITHUB_TOKEN" ] && [ -n "$GITHUB_REPO" ]; then
+        # Ensure GitHub CLI is available
+        if [ ! -f ./gh ]; then
+          echo "Downloading GitHub CLI..."
+          curl -L https://github.com/cli/cli/releases/latest/download/gh_linux_amd64.tar.gz -o gh.tar.gz
+          tar -xzf gh.tar.gz
+          cp gh_*/bin/gh ./gh
+          chmod +x ./gh
+          rm -rf gh*
+        fi
+        
         CURRENT_SHA=$(./gh api repos/$GITHUB_REPO/contents/master.json --jq '.sha' 2>/dev/null || echo "")
         CONTENT=$(base64 -i /tmp/master.json | tr -d '\n')
         
