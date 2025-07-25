@@ -20,3 +20,6 @@ class Game(Base):
     
     # Relationship to metadata
     game_metadata = relationship("GameMetadata", back_populates="game", uselist=False)
+    
+    # Relationship to storefront data
+    storefront_data = relationship("StorefrontData", back_populates="game", uselist=False)

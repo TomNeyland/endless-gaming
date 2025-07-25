@@ -80,7 +80,10 @@ def get_master_json():
                 .filter(GameMetadata.tags_json != '')       # Not empty string
                 .order_by(GameMetadata.score_rank)
                 .limit(1000)
-                .options(joinedload(Game.game_metadata))
+                .options(
+                    joinedload(Game.game_metadata),
+                    joinedload(Game.storefront_data)
+                )
                 .all()
             )
             

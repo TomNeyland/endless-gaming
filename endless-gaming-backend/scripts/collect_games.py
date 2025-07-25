@@ -27,6 +27,7 @@ from models import Base
 from models.game import Game
 from collectors.steamspy_all_collector import SteamSpyAllCollector
 from collectors.steamspy_collector import SteamSpyMetadataCollector
+from collectors.steam_store_collector import SteamStoreCollector
 from workers.parallel_fetcher import ParallelMetadataFetcher
 
 app = typer.Typer(
@@ -159,20 +160,22 @@ async def collect_metadata_parallel(session, batch_size: int, max_concurrent: in
     return total_processed
 
 
-async def collect_interleaved(session, max_pages=None, batch_size=1000, max_concurrent=3):
+async def collect_interleaved(session, max_pages=None, batch_size=1000, max_concurrent=3, skip_storefront=False):
     """
-    Collect games and metadata in interleaved fashion: page -> metadata -> page -> metadata.
+    Collect games and metadata in interleaved fashion: page -> metadata -> storefront -> page -> metadata -> storefront.
     
     This approach processes each page of games immediately after fetching it,
     rather than fetching all pages first then processing metadata.
     """
-    console.print("🔄 Starting interleaved collection (page -> metadata -> page -> metadata)")
+    console.print("🔄 Starting interleaved collection (page -> metadata -> storefront -> page)")
     
     collector = SteamSpyAllCollector()
     steamspy_metadata_collector = SteamSpyMetadataCollector()
+    steam_store_collector = SteamStoreCollector()
     
     total_games_processed = 0
     total_metadata_processed = 0
+    total_storefront_processed = 0
     
     page = 0
     while True:
@@ -250,6 +253,44 @@ async def collect_interleaved(session, max_pages=None, batch_size=1000, max_conc
                 border_style="green"
             ))
             
+            # Collect Steam Store data if not skipped
+            if not skip_storefront:
+                console.print(f"🏪 Collecting Steam Store data for {games_this_page} games from page {page}...")
+                console.print("⏰ Note: Steam Store API is rate limited to 1 request per second")
+                
+                # Create progress callback for storefront data
+                with Progress(
+                    SpinnerColumn(),
+                    TextColumn("[progress.description]{task.description}"),
+                    BarColumn(),
+                    TaskProgressColumn(),
+                    console=console
+                ) as progress:
+                    task = progress.add_task("Fetching storefront data...", total=games_this_page)
+                    
+                    def storefront_progress_callback(current, total, game_name, status):
+                        progress.update(task, completed=current)
+                        
+                        # Show progress for each game immediately
+                        status_emoji = "✅" if status == "success" else "❌" if status == "failed" else "⚠️"
+                        progress.console.print(f"{status_emoji} {game_name} (storefront)")
+                    
+                    # Collect storefront data for games from this page
+                    storefront_result = await steam_store_collector.collect_storefront_data_for_games(
+                        games, session, batch_size=10, progress_callback=storefront_progress_callback
+                    )
+                    
+                    total_storefront_processed += storefront_result['total_games_processed']
+                
+                console.print(Panel(
+                    f"Storefront data processed: {storefront_result['total_games_processed']}\n"
+                    f"Success: {storefront_result['successful_fetches']}, Failed: {storefront_result['failed_fetches']}, Not found: {storefront_result['not_found']}",
+                    title=f"Page {page} Storefront Results",
+                    border_style="cyan"
+                ))
+            else:
+                console.print("⏭️  Skipping Steam Store data collection (--skip-storefront enabled)")
+            
             page += 1
             
         except Exception as e:
@@ -260,7 +301,7 @@ async def collect_interleaved(session, max_pages=None, batch_size=1000, max_conc
             ))
             break
     
-    return total_games_processed, total_metadata_processed
+    return total_games_processed, total_metadata_processed, total_storefront_processed
 
 
 @app.command()
@@ -294,6 +335,11 @@ def collect(
         False,
         "--skip-validation",
         help="Skip environment validation (for testing)"
+    ),
+    skip_storefront: bool = typer.Option(
+        False,
+        "--skip-storefront",
+        help="Skip Steam Store data collection (faster collection)"
     )
 ):
     """
@@ -316,6 +362,7 @@ def collect(
             f"Batch size: {_batch_size}\n"
             f"Max concurrent: {_max_concurrent}\n"
             f"Max pages: {max_pages or 'unlimited'}\n"
+            f"Skip storefront: {'Yes' if skip_storefront else 'No'}\n"
             f"Database: {settings.database_url}",
             title="Collection Configuration",
             border_style="blue"
@@ -325,6 +372,7 @@ def collect(
         try:
             total_games = 0
             total_metadata = 0
+            total_storefront = 0
             
             if update_metadata:
                 # Metadata-only mode: update existing games
@@ -332,15 +380,16 @@ def collect(
                     session, _batch_size, _max_concurrent
                 )
             else:
-                # Interleaved mode: page -> metadata -> page -> metadata
-                total_games, total_metadata = await collect_interleaved(
-                    session, max_pages=max_pages, batch_size=_batch_size, max_concurrent=_max_concurrent
+                # Interleaved mode: page -> metadata -> storefront -> page -> metadata -> storefront
+                total_games, total_metadata, total_storefront = await collect_interleaved(
+                    session, max_pages=max_pages, batch_size=_batch_size, max_concurrent=_max_concurrent, skip_storefront=skip_storefront
                 )
             
             console.print(Panel(
                 f"🎉 Collection completed successfully!\n"
                 f"Games processed: {total_games}\n"
-                f"Metadata processed: {total_metadata}",
+                f"Metadata processed: {total_metadata}\n"
+                f"Storefront data processed: {total_storefront}",
                 title="Final Results",
                 border_style="green"
             ))
@@ -371,6 +420,8 @@ def status():
         
         # Get metadata status counts
         from models.game_metadata import GameMetadata, FetchStatus
+        from models.storefront_data import StorefrontData
+        
         total_metadata = session.query(GameMetadata).count()
         successful_metadata = session.query(GameMetadata).filter(
             GameMetadata.fetch_status == FetchStatus.SUCCESS.value
@@ -382,13 +433,29 @@ def status():
             GameMetadata.fetch_status == FetchStatus.FAILED.value
         ).count()
         
+        # Get storefront data status counts
+        total_storefront = session.query(StorefrontData).count()
+        successful_storefront = session.query(StorefrontData).filter(
+            StorefrontData.fetch_status == FetchStatus.SUCCESS.value
+        ).count()
+        pending_storefront = session.query(StorefrontData).filter(
+            StorefrontData.fetch_status == FetchStatus.PENDING.value
+        ).count()
+        failed_storefront = session.query(StorefrontData).filter(
+            StorefrontData.fetch_status == FetchStatus.FAILED.value
+        ).count()
+        
         console.print(Panel(
             f"Total games: {total_games}\n"
-            f"Active games: {active_games}\n"
+            f"Active games: {active_games}\n\n"
             f"Total metadata records: {total_metadata}\n"
             f"Successful metadata: {successful_metadata}\n"
             f"Pending metadata: {pending_metadata}\n"
-            f"Failed metadata: {failed_metadata}",
+            f"Failed metadata: {failed_metadata}\n\n"
+            f"Total storefront records: {total_storefront}\n"
+            f"Successful storefront: {successful_storefront}\n"
+            f"Pending storefront: {pending_storefront}\n"
+            f"Failed storefront: {failed_storefront}",
             title="Database Status",
             border_style="blue"
         ))

@@ -92,9 +92,11 @@ class TestMasterJsonEndpoint:
             app_id=440,
             developer="Valve",
             publisher="Valve",
+            owners_estimate="20,000,000 .. 50,000,000",  # 1M+ owners required
             price="Free",
             positive_reviews=750000,
             negative_reviews=75000,
+            tags_json={"Shooter": 71234, "FPS": 55123, "Team": 34567},  # Required tags
             fetch_status=FetchStatus.SUCCESS.value
         )
         

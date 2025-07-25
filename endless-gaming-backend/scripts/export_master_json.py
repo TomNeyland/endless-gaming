@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from models.game import Game
 from models.game_metadata import GameMetadata
+from models.storefront_data import StorefrontData
 from config import settings
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -33,16 +34,18 @@ def to_game_record(game):
     Convert a Game model instance to a game record dictionary.
     
     Converts snake_case field names to camelCase for frontend compatibility.
+    Includes ALL available data from GameMetadata and StorefrontData.
     
     Args:
-        game: Game model instance with optional metadata relationship
+        game: Game model instance with optional metadata and storefront_data relationships
         
     Returns:
         Dictionary containing game record data in camelCase format
     """
     metadata = game.game_metadata
+    storefront = game.storefront_data
     
-    # Convert price format
+    # Convert price format from SteamSpy metadata
     price = None
     if metadata and metadata.price:
         if metadata.price == "0":
@@ -61,21 +64,38 @@ def to_game_record(game):
             except (json.JSONDecodeError, TypeError):
                 tags = {}
     
-    # Handle genres - convert single genre string to list
+    # Handle genres - convert single genre string to list (SteamSpy genres)
     genres = []
     if metadata and metadata.genre:
         genres = [metadata.genre] if isinstance(metadata.genre, str) else metadata.genre
     
-    # Build camelCase record
+    # Build camelCase record with ALL available fields
     record = {
         "appId": game.app_id,
         "name": game.name,
-        "coverUrl": None,  # Not implemented yet - would need Steam store data
+        
+        # Steam Store API fields (primary source for these when available)
+        "coverUrl": storefront.header_image if storefront else None,
+        "shortDescription": storefront.short_description if storefront else None,
+        "detailedDescription": storefront.detailed_description if storefront else None,
+        "isFree": storefront.is_free if storefront else None,
+        "requiredAge": storefront.required_age if storefront else None,
+        "website": storefront.website if storefront else None,
+        "releaseDate": storefront.release_date if storefront else None,
+        "developers": storefront.developers if storefront else ([metadata.developer] if metadata and metadata.developer else None),
+        "publishers": storefront.publishers if storefront else ([metadata.publisher] if metadata and metadata.publisher else None),
+        "storeGenres": storefront.genres if storefront else None,
+        "categories": storefront.categories if storefront else None,
+        "supportedLanguages": storefront.supported_languages if storefront else None,
+        "priceData": storefront.price_overview if storefront else None,
+        "pcRequirements": storefront.pc_requirements if storefront else None,
+        
+        # SteamSpy fields (preserved for backwards compatibility and unique data)
         "price": price,
-        "developer": metadata.developer if metadata else None,
-        "publisher": metadata.publisher if metadata else None,
+        "developer": metadata.developer if metadata else None,  # Keep for backwards compatibility
+        "publisher": metadata.publisher if metadata else None,  # Keep for backwards compatibility
         "tags": tags,
-        "genres": genres,
+        "genres": genres,  # SteamSpy genres (different from Steam Store genres)
         "reviewPos": metadata.positive_reviews if metadata else None,
         "reviewNeg": metadata.negative_reviews if metadata else None,
     }
@@ -116,7 +136,10 @@ def get_master_json_data(session):
         .filter(GameMetadata.tags_json != '')       # Not empty string
         .order_by(GameMetadata.score_rank)
         .limit(1000)
-        .options(joinedload(Game.game_metadata))
+        .options(
+            joinedload(Game.game_metadata),
+            joinedload(Game.storefront_data)
+        )
         .all()
     )
     

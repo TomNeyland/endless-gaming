@@ -91,6 +91,34 @@ class DirectGameDataCollector:
             self.logger.warning(f"Failed to fetch metadata for app_id {app_id}: {e}")
             return None
     
+    async def fetch_storefront_data(self, app_id: int) -> Optional[Dict[str, Any]]:
+        """
+        Fetch storefront data for a single game from Steam Store API.
+        
+        Args:
+            app_id: Steam application ID
+            
+        Returns:
+            Game storefront data dict or None if not found/failed
+        """
+        url = f"https://store.steampowered.com/api/appdetails?appids={app_id}"
+        
+        try:
+            response_data = await self.rate_limiter.make_request(
+                APIEndpoint.STEAM_STORE_APPDETAILS_API, url
+            )
+            
+            # Steam Store API returns data in format: {"app_id": {"success": bool, "data": {...}}}
+            app_data = response_data.get(str(app_id))
+            if not app_data or not app_data.get('success'):
+                return None
+                
+            return app_data.get('data', {})
+            
+        except Exception as e:
+            self.logger.warning(f"Failed to fetch storefront data for app_id {app_id}: {e}")
+            return None
+    
     def convert_price(self, price_cents: Any) -> Optional[str]:
         """
         Convert price from cents to dollar string format.
@@ -115,13 +143,14 @@ class DirectGameDataCollector:
         except (ValueError, TypeError):
             return None
     
-    def to_game_record(self, basic_game_data: Dict[str, Any], metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    def to_game_record(self, basic_game_data: Dict[str, Any], metadata: Optional[Dict[str, Any]], storefront_data: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
         """
         Convert game data to master.json format.
         
         Args:
             basic_game_data: Basic game data from /all endpoint
             metadata: Detailed metadata from individual API call
+            storefront_data: Storefront data from Steam Store API
             
         Returns:
             Game record in master.json format or None if invalid
@@ -154,16 +183,36 @@ class DirectGameDataCollector:
             genre = data_source['genre']
             genres = [genre] if isinstance(genre, str) else genre
         
-        # Build camelCase record (matching frontend expectations)
+        # Extract release date from storefront data
+        release_date = None
+        if storefront_data and storefront_data.get('release_date') and storefront_data['release_date'].get('date'):
+            release_date = storefront_data['release_date']['date']
+        
+        # Build camelCase record (matching frontend expectations) with ALL available fields
         record = {
             "appId": int(app_id),
             "name": name,
-            "coverUrl": None,  # Not implemented yet - would need Steam store data
+            # Steam Store API fields
+            "coverUrl": storefront_data.get('header_image') if storefront_data else None,
+            "shortDescription": storefront_data.get('short_description') if storefront_data else None,
+            "detailedDescription": storefront_data.get('detailed_description') if storefront_data else None,
+            "isFree": storefront_data.get('is_free') if storefront_data else None,
+            "requiredAge": storefront_data.get('required_age') if storefront_data else None,
+            "website": storefront_data.get('website') if storefront_data else None,
+            "releaseDate": release_date,
+            "developers": storefront_data.get('developers') if storefront_data else [data_source.get('developer')] if data_source.get('developer') else None,
+            "publishers": storefront_data.get('publishers') if storefront_data else [data_source.get('publisher')] if data_source.get('publisher') else None,
+            "storeGenres": storefront_data.get('genres') if storefront_data else None,
+            "categories": storefront_data.get('categories') if storefront_data else None,
+            "supportedLanguages": storefront_data.get('supported_languages') if storefront_data else None,
+            "priceData": storefront_data.get('price_overview') if storefront_data else None,
+            "pcRequirements": storefront_data.get('pc_requirements') if storefront_data else None,
+            # SteamSpy fields (preserved)
             "price": price,
-            "developer": data_source.get('developer'),
-            "publisher": data_source.get('publisher'),
+            "developer": data_source.get('developer'),  # Keep for backwards compatibility
+            "publisher": data_source.get('publisher'),  # Keep for backwards compatibility
             "tags": tags,
-            "genres": genres,
+            "genres": genres,  # SteamSpy genres (different from Steam Store genres)
             "reviewPos": data_source.get('positive'),
             "reviewNeg": data_source.get('negative'),
         }
@@ -175,7 +224,8 @@ class DirectGameDataCollector:
         self, 
         max_pages: Optional[int] = None,
         batch_size: int = 50,
-        max_games: int = 1000
+        max_games: int = 1000,
+        skip_storefront: bool = False
     ) -> List[Dict[str, Any]]:
         """
         Collect complete game data directly from APIs.
@@ -184,6 +234,7 @@ class DirectGameDataCollector:
             max_pages: Maximum number of pages to fetch from /all endpoint
             batch_size: Number of concurrent metadata requests
             max_games: Maximum number of games to include in final output
+            skip_storefront: Skip Steam Store data collection (faster)
             
         Returns:
             List of complete game records ready for JSON export
@@ -229,8 +280,8 @@ class DirectGameDataCollector:
         
         self.logger.info(f"Collected {len(all_games)} games from {page} pages")
         
-        # Step 2: Fetch detailed metadata for each game
-        self.logger.info("Starting metadata collection...")
+        # Step 2: Fetch detailed metadata and storefront data for each game
+        self.logger.info("Starting metadata and storefront data collection...")
         complete_records = []
         
         for i in range(0, len(all_games), batch_size):
@@ -238,22 +289,42 @@ class DirectGameDataCollector:
             batch_start = i + 1
             batch_end = min(i + batch_size, len(all_games))
             
-            print(f"📊 Processing metadata batch {batch_start}-{batch_end} of {len(all_games)}")
+            print(f"📊 Processing batch {batch_start}-{batch_end} of {len(all_games)}")
             
-            # Create tasks for concurrent metadata fetching
-            tasks = []
+            # Create tasks for concurrent metadata and storefront data fetching
+            metadata_tasks = []
+            storefront_tasks = []
+            
             for game_data in batch:
                 app_id = game_data.get('appid')
                 if app_id:
-                    task = self.fetch_game_metadata(int(app_id))
-                    tasks.append((game_data, task))
+                    # Metadata task (SteamSpy)
+                    metadata_task = self.fetch_game_metadata(int(app_id))
+                    metadata_tasks.append((game_data, metadata_task))
+                    
+                    # Storefront data task (Steam Store API) - if not skipped
+                    if not skip_storefront:
+                        storefront_task = self.fetch_storefront_data(int(app_id))
+                        storefront_tasks.append((game_data, storefront_task))
+                    else:
+                        storefront_tasks.append((game_data, None))
             
-            # Execute batch concurrently
-            results = await asyncio.gather(*[task for _, task in tasks])
+            # Execute metadata batch concurrently
+            print(f"🔄 Fetching SteamSpy metadata for {len(metadata_tasks)} games...")
+            metadata_results = await asyncio.gather(*[task for _, task in metadata_tasks])
+            
+            # Execute storefront data batch concurrently (if not skipped)
+            storefront_results = []
+            if not skip_storefront:
+                print(f"🏪 Fetching Steam Store data for {len(storefront_tasks)} games...")
+                print("⏰ Note: Steam Store API is rate limited to 1 request per second")
+                storefront_results = await asyncio.gather(*[task for _, task in storefront_tasks if task is not None])
+            else:
+                storefront_results = [None] * len(metadata_results)
             
             # Process results and build complete records
-            for (basic_data, _), metadata in zip(tasks, results):
-                record = self.to_game_record(basic_data, metadata)
+            for (basic_data, _), metadata, storefront_data in zip(metadata_tasks, metadata_results, storefront_results):
+                record = self.to_game_record(basic_data, metadata, storefront_data)
                 
                 if record:
                     complete_records.append(record)
@@ -265,11 +336,12 @@ class DirectGameDataCollector:
                         top_tags = [tag[0] for tag in sorted_tags[:3]]
                     
                     tags_display = ", ".join(top_tags) if top_tags else "No tags"
-                    print(f"✅ {record['name']} ({tags_display})")
+                    storefront_status = " + storefront" if storefront_data else ""
+                    print(f"✅ {record['name']} ({tags_display}){storefront_status}")
                     
                     # Exit early if we've reached max_games limit
                     if len(complete_records) >= max_games:
-                        self.logger.info(f"Reached max_games limit ({max_games}), stopping metadata collection")
+                        self.logger.info(f"Reached max_games limit ({max_games}), stopping data collection")
                         break
             
             # Break out of outer batch loop if we've reached the limit
@@ -287,7 +359,8 @@ async def generate_master_json(
     output_path: str,
     max_pages: Optional[int] = None,
     batch_size: int = 50,
-    max_games: int = 1000
+    max_games: int = 1000,
+    skip_storefront: bool = False
 ):
     """
     Generate master.json file directly from APIs.
@@ -297,6 +370,7 @@ async def generate_master_json(
         max_pages: Maximum pages to fetch from SteamSpy /all
         batch_size: Concurrent requests for metadata
         max_games: Maximum games in output
+        skip_storefront: Skip Steam Store data collection (faster)
     """
     # Set up logging
     logging.basicConfig(
@@ -308,11 +382,13 @@ async def generate_master_json(
     
     try:
         # Collect game data
-        print(f"🎮 Starting direct collection (max_pages={max_pages}, max_games={max_games})")
+        storefront_msg = " (skip storefront)" if skip_storefront else " + storefront data"
+        print(f"🎮 Starting direct collection (max_pages={max_pages}, max_games={max_games}){storefront_msg}")
         game_records = await collector.collect_game_data(
             max_pages=max_pages,
             batch_size=batch_size,
-            max_games=max_games
+            max_games=max_games,
+            skip_storefront=skip_storefront
         )
         
         # Ensure output directory exists
@@ -377,6 +453,11 @@ Examples:
         default=1000,
         help='Maximum number of games in output (default: 1000)'
     )
+    parser.add_argument(
+        '--skip-storefront',
+        action='store_true',
+        help='Skip Steam Store data collection for faster processing'
+    )
     
     args = parser.parse_args()
     
@@ -385,7 +466,8 @@ Examples:
         args.output_path,
         args.max_pages,
         args.batch_size,
-        args.max_games
+        args.max_games,
+        args.skip_storefront
     ))
 
 

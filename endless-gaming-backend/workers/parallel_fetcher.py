@@ -10,6 +10,7 @@ from typing import List, Optional, Callable, Any
 from sqlalchemy.orm import Session
 
 from collectors.steamspy_collector import SteamSpyMetadataCollector
+from collectors.steam_store_collector import SteamStoreCollector
 from models.game import Game
 
 
@@ -27,6 +28,7 @@ class ParallelMetadataFetcher:
     def __init__(
         self, 
         steamspy_collector: SteamSpyMetadataCollector,
+        steam_store_collector: Optional[SteamStoreCollector] = None,
         batch_size: int = 50,
         max_concurrent: int = 10
     ):
@@ -35,10 +37,12 @@ class ParallelMetadataFetcher:
         
         Args:
             steamspy_collector: SteamSpy collector instance with rate limiter
+            steam_store_collector: Optional Steam Store collector instance
             batch_size: Number of games to process per batch (default: 50)
             max_concurrent: Maximum concurrent requests per batch (default: 10)
         """
         self.steamspy_collector = steamspy_collector
+        self.steam_store_collector = steam_store_collector
         self.batch_size = batch_size
         self.max_concurrent = max_concurrent
     
@@ -49,7 +53,7 @@ class ParallelMetadataFetcher:
         progress_callback: Optional[Callable] = None
     ) -> List[Game]:
         """
-        Process a single batch of games for metadata collection.
+        Process a single batch of games for metadata and optionally storefront data collection.
         
         Args:
             games: List of Game objects to process
@@ -62,11 +66,22 @@ class ParallelMetadataFetcher:
         if not games:
             return []
         
-        # Use the existing steamspy collector which already handles
-        # rate limiting, progress tracking, and database saves
+        # First, collect SteamSpy metadata
         await self.steamspy_collector.collect_metadata_for_games(
             games, session, progress_callback=progress_callback
         )
+        
+        # Then, collect Steam Store data if collector is provided
+        if self.steam_store_collector:
+            # Create a modified progress callback that shows storefront status
+            def storefront_progress_callback(current, total, game_name, status):
+                if progress_callback:
+                    # Call original callback but indicate it's storefront data
+                    progress_callback(current, total, f"{game_name} (storefront)", [], status)
+            
+            await self.steam_store_collector.collect_storefront_data_for_games(
+                games, session, progress_callback=storefront_progress_callback
+            )
         
         return games
     
