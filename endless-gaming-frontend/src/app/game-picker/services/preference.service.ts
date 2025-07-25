@@ -20,6 +20,7 @@ export class PreferenceService {
   private tagDict: TagDictionary | null = null;
   private comparisonCount = 0;
   private readonly learningRate = 0.1;
+  private readonly STORAGE_KEY = 'endless-gaming-preferences';
   
   // Sliding window preference history for adaptive weighting
   private preferenceHistory: Array<{
@@ -68,6 +69,9 @@ export class PreferenceService {
 
     this.comparisonCount++;
     this.updatePreferenceSummary();
+    
+    // Save to localStorage after each vote
+    this.saveToLocalStorage();
     
     // Debug logging to track preference summary health
     this.logPreferenceSummaryDebugInfo();
@@ -160,6 +164,7 @@ export class PreferenceService {
     }
     this.comparisonCount = 0;
     this.preferenceHistory = [];
+    this.clearLocalStorage();
     this.updatePreferenceSummary();
   }
 
@@ -172,6 +177,10 @@ export class PreferenceService {
     this.weightVector = new Float32Array(tagDict.size);
     this.comparisonCount = 0;
     this.preferenceHistory = [];
+    
+    // Try to load existing preferences from localStorage
+    this.loadFromLocalStorage();
+    
     this.updatePreferenceSummary();
   }
 
@@ -360,5 +369,74 @@ export class PreferenceService {
       likedTags: likedTags.map(tw => ({ tag: tw.tag, weight: tw.weight })),
       dislikedTags: dislikedTags.map(tw => ({ tag: tw.tag, weight: tw.weight }))
     });
+  }
+
+  /**
+   * Save current preferences to localStorage.
+   */
+  private saveToLocalStorage(): void {
+    try {
+      const state = this.getPreferenceState();
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
+    } catch (error) {
+      console.warn('Failed to save preferences to localStorage:', error);
+    }
+  }
+
+  /**
+   * Load preferences from localStorage.
+   */
+  private loadFromLocalStorage(): void {
+    try {
+      const storedData = localStorage.getItem(this.STORAGE_KEY);
+      console.log('🔄 Loading from localStorage:', storedData ? 'Data found' : 'No data found');
+      
+      if (storedData) {
+        const state: UserPreferenceState = JSON.parse(storedData);
+        console.log('🔄 Parsed state:', {
+          comparisonCount: state.comparisonCount,
+          weightVectorLength: state.weightVector?.length,
+          hasTagDict: !!state.tagDict
+        });
+        
+        // Only load if the tag dictionary matches current one
+        if (state.tagDict && this.tagDict && 
+            state.tagDict.size === this.tagDict.size &&
+            JSON.stringify(state.tagDict.tagToIndex) === JSON.stringify(this.tagDict.tagToIndex)) {
+          
+          this.weightVector = new Float32Array(state.weightVector);
+          this.comparisonCount = state.comparisonCount;
+          console.log(`🔄 Successfully loaded ${this.comparisonCount} votes from localStorage`);
+        } else {
+          console.log('🔄 Tag dictionary mismatch:');
+          console.log('  - Stored size:', state.tagDict?.size, 'Current size:', this.tagDict?.size);
+          console.log('  - Clearing old preferences');
+          this.clearLocalStorage();
+        }
+      } else {
+        console.log('🔄 No stored preferences found');
+      }
+    } catch (error) {
+      console.warn('Failed to load preferences from localStorage:', error);
+      this.clearLocalStorage();
+    }
+  }
+
+  /**
+   * Clear preferences from localStorage.
+   */
+  private clearLocalStorage(): void {
+    try {
+      localStorage.removeItem(this.STORAGE_KEY);
+    } catch (error) {
+      console.warn('Failed to clear localStorage:', error);
+    }
+  }
+
+  /**
+   * Check if user has sufficient votes for recommendations.
+   */
+  hasMinimumVotes(minVotes: number = 5): boolean {
+    return this.comparisonCount >= minVotes;
   }
 }

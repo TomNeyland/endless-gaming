@@ -1,5 +1,6 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,6 +12,7 @@ import { VectorService } from '../../services/vector.service';
 import { PreferenceService } from '../../services/preference.service';
 import { PairService } from '../../services/pair.service';
 import { VotingDrawerService } from '../../services/voting-drawer.service';
+import { GameFilterService } from '../../services/game-filter.service';
 import { GameComparisonComponent } from '../game-comparison/game-comparison.component';
 import { ProgressBarComponent } from '../progress-bar/progress-bar.component';
 import { PreferenceSummaryComponent } from '../preference-summary/preference-summary.component';
@@ -48,6 +50,9 @@ export class GamePickerPageComponent implements OnInit {
   private preferenceService = inject(PreferenceService);
   private pairService = inject(PairService);
   private votingDrawerService = inject(VotingDrawerService);
+  private gameFilterService = inject(GameFilterService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
   
   public readonly state = signal<GamePickerState>('loading');
   public readonly isDrawerOpen = signal(false);
@@ -126,6 +131,45 @@ export class GamePickerPageComponent implements OnInit {
     console.log('🎮 GamePickerPage: First pair from PairService:', firstPair ? `${firstPair.left.name} vs ${firstPair.right.name}` : 'null');
     
     console.log('🎮 GamePickerPage: Service initialization complete');
+    
+    // Use setTimeout to ensure localStorage has been fully processed
+    setTimeout(() => {
+      this.handleAutoNavigation();
+    }, 0);
+  }
+
+  /**
+   * Handle auto-navigation based on votes and current route.
+   */
+  private handleAutoNavigation(): void {
+    const currentUrl = this.router.url;
+    const comparisonCount = this.preferenceService.getComparisonCount();
+    const hasMinimumVotes = this.preferenceService.hasMinimumVotes(5);
+    
+    console.log('🎮 GamePickerPage: Auto-navigation check:');
+    console.log('  - Current URL:', currentUrl);
+    console.log('  - Comparison count:', comparisonCount);
+    console.log('  - Has minimum votes (5+):', hasMinimumVotes);
+    
+    if (currentUrl === '/game-picker' && hasMinimumVotes) {
+      // User accessed /game-picker but has enough votes, redirect to recommendations
+      console.log('🎮 GamePickerPage: Auto-navigating to recommendations due to existing votes');
+      this.router.navigate(['/recommendations']);
+      this.state.set('recommendations');
+    } else if (currentUrl === '/recommendations' && hasMinimumVotes) {
+      // User accessed /recommendations directly and has votes, show recommendations
+      console.log('🎮 GamePickerPage: Showing recommendations from direct navigation');
+      this.state.set('recommendations');
+    } else if (currentUrl === '/recommendations' && !hasMinimumVotes) {
+      // User accessed /recommendations but doesn't have enough votes, redirect to picker
+      console.log('🎮 GamePickerPage: Redirecting to game picker - insufficient votes');
+      this.router.navigate(['/game-picker']);
+      this.state.set('comparing');
+    } else {
+      // Default behavior: show comparison phase
+      console.log('🎮 GamePickerPage: Showing comparison phase');
+      this.state.set('comparing');
+    }
   }
 
   /**
@@ -140,6 +184,7 @@ export class GamePickerPageComponent implements OnInit {
    */
   onComparisonsComplete(): void {
     console.log('🎮 GamePickerPage: Comparisons completed - transitioning to recommendations');
+    this.router.navigate(['/recommendations']);
     this.state.set('recommendations');
   }
 
@@ -147,11 +192,23 @@ export class GamePickerPageComponent implements OnInit {
    * Reset and start over.
    */
   resetGamePicker(): void {
+    console.log('🔄 Resetting game picker - clearing all state');
+    
     // Close voting drawer if open
     this.votingDrawerService.closeDrawer();
     
+    // Clear localStorage
+    localStorage.removeItem('endless-gaming-preferences');
+    
+    // Reset all services to their default states
     this.pairService.resetProgress();
     this.preferenceService.resetPreferences();
+    this.gameFilterService.resetFilters();
+    
+    console.log('🔄 All services reset to defaults');
+    
+    // Navigate back to game picker
+    this.router.navigate(['/game-picker']);
     this.state.set('comparing');
   }
 

@@ -194,7 +194,24 @@ export class GameFilterService {
    * Reset all filters to default state
    */
   resetFilters(): void {
+    console.log('🔄 GameFilterService: Resetting filters to defaults');
     this.filtersSubject.next({ ...DEFAULT_FILTERS });
+    
+    // Also clear auto-saved filter state
+    this.clearAutoSavedState();
+  }
+
+  /**
+   * Clear auto-saved filter state from IndexedDB
+   */
+  private async clearAutoSavedState(): Promise<void> {
+    try {
+      const AUTO_SAVE_KEY = 'auto_save_current';
+      await this.db.filterStates.delete(AUTO_SAVE_KEY);
+      console.log('🔄 GameFilterService: Cleared auto-saved filter state');
+    } catch (error) {
+      console.warn('Failed to clear auto-saved filter state:', error);
+    }
   }
   
   /**
