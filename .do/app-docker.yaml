@@ -1,0 +1,33 @@
+name: endless-gaming
+region: nyc1
+
+# Clean Docker-based JSON export service
+services:
+  - name: json-export-service
+    image:
+      registry_type: DOCR  # DigitalOcean Container Registry
+      repository: endless-gaming
+      tag: latest
+    
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: basic-s
+    
+    envs:
+      - key: GITHUB_TOKEN
+        scope: RUN_TIME
+        value: ${GITHUB_TOKEN}
+      - key: GITHUB_REPO
+        scope: RUN_TIME
+        value: "tomneyland/endless-gaming"
+      - key: PORT
+        scope: RUN_TIME
+        value: "8080"
+    
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 60
+      period_seconds: 10
+      timeout_seconds: 5
+      failure_threshold: 3
+      success_threshold: 1

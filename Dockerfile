@@ -1,4 +1,4 @@
-# Multi-stage build for production-ready Steam game data collector
+# Multi-stage build for JSON export service
 FROM python:3.12-slim as builder
 
 # Set environment variables for Poetry
@@ -6,7 +6,7 @@ ENV POETRY_NO_INTERACTION=1 \
     POETRY_VENV_IN_PROJECT=1 \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
-# Install system dependencies
+# Install build dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
@@ -35,15 +35,20 @@ FROM python:3.12-slim as production
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PATH="/app/.venv/bin:$PATH"
+    PATH="/app/.venv/bin:$PATH" \
+    PYTHONPATH="/app"
 
-# Install runtime dependencies
+# Install runtime dependencies including cron and GitHub CLI
 RUN apt-get update && apt-get install -y \
-    libpq5 \
+    cron \
+    curl \
+    jq \
+    && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list \
+    && apt-get update \
+    && apt-get install -y gh \
     && rm -rf /var/lib/apt/lists/*
-
-# Create non-root user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
 
 # Set work directory
 WORKDIR /app
@@ -54,18 +59,30 @@ COPY --from=builder /app/.venv /app/.venv
 # Copy application code
 COPY endless-gaming-backend/ .
 
-# Create data directory for SQLite database
-RUN mkdir -p /app/data && chown -R appuser:appuser /app
+# Copy Docker support files
+COPY docker/export_and_push.sh /app/export_and_push.sh
+COPY docker/health_server.py /app/health_server.py
 
-# Switch to non-root user
-USER appuser
+# Make scripts executable
+RUN chmod +x /app/export_and_push.sh /app/health_server.py
 
-# Expose port (if needed for future web interface)
-EXPOSE 8000
+# Set up cron job (daily at 4 AM UTC)
+RUN echo "0 4 * * * /app/export_and_push.sh >> /var/log/cron.log 2>&1" > /etc/cron.d/json-export \
+    && chmod 0644 /etc/cron.d/json-export \
+    && crontab /etc/cron.d/json-export \
+    && touch /var/log/cron.log
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import sys; sys.exit(0)"
+# Expose port for health checks
+EXPOSE 8080
 
-# Default command - shows available commands
-CMD ["python", "scripts/collect_games.py", "--help"]
+# Health check for Docker/DigitalOcean
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Default environment variables
+ENV GITHUB_REPO="" \
+    GITHUB_TOKEN="" \
+    PORT="8080"
+
+# Start the service
+CMD ["python", "/app/health_server.py"]
