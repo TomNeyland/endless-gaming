@@ -5,6 +5,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatButtonModule } from '@angular/material/button';
 import { GameRecord } from '../../../types/game.types';
 import { GameDetailsService } from '../../services/game-details.service';
 import { getAgeBadge } from '../../../utils/game-age.utils';
@@ -18,7 +19,7 @@ import { getAgeBadge } from '../../../utils/game-age.utils';
 @Component({
   selector: 'app-game-card',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatChipsModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule],
+  imports: [CommonModule, MatCardModule, MatChipsModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule, MatButtonModule],
   templateUrl: './game-card.component.html',
   styleUrl: './game-card.component.scss'
 })

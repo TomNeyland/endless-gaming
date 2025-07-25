@@ -237,6 +237,59 @@
         height: 20px;
       }
     }
+
+    // Content indicators (age, screenshots, videos)
+    .content-indicators {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 8px 0;
+      
+      .age-badge {
+        background: rgba(255, 152, 0, 0.2);
+        color: var(--gaming-accent);
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border: 1px solid rgba(255, 152, 0, 0.4);
+        
+        &[data-age="New"] {
+          background: rgba(76, 175, 80, 0.2);
+          color: #4CAF50;
+          border-color: rgba(76, 175, 80, 0.4);
+        }
+        
+        &[data-age="Classic"] {
+          background: rgba(156, 39, 176, 0.2);
+          color: #9C27B0;
+          border-color: rgba(156, 39, 176, 0.4);
+        }
+      }
+      
+      .content-icon {
+        color: var(--gaming-text-secondary);
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        cursor: help;
+        
+        &:hover {
+          color: var(--gaming-accent);
+        }
+      }
+    }
+
+    // Description preview
+    .description-preview {
+      margin-bottom: 16px;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      color: var(--gaming-text-secondary);
+      font-style: italic;
+      opacity: 0.8;
+    }
     
     // Empty state
     .empty-card {
@@ -255,6 +308,57 @@
       p {
         margin: 0;
         font-style: italic;
+      }
+    }
+  }
+
+  // Action buttons section
+  mat-card-actions {
+    padding: 16px 20px !important;
+    display: flex;
+    gap: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
+
+    button {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+      
+      &[color="primary"] {
+        background: var(--gaming-accent);
+        color: var(--gaming-background);
+        
+        &:hover:not(:disabled) {
+          background: rgba(255, 152, 0, 0.8);
+          transform: translateY(-1px);
+        }
+      }
+      
+      &[mat-stroked-button] {
+        border-color: rgba(255, 255, 255, 0.3);
+        color: var(--gaming-text-primary);
+        
+        &:hover:not(:disabled) {
+          background: rgba(255, 255, 255, 0.1);
+          border-color: rgba(255, 255, 255, 0.5);
+          transform: translateY(-1px);
+        }
+      }
+      
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
     }
   }

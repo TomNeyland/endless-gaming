@@ -2,8 +2,6 @@
   class="game-card" 
   [class.highlight-hover]="highlightOnHover"
   [class.has-score]="showScore"
-  [class.clickable]="hasValidGame()"
-  (click)="openSteamStore()"
   appearance="outlined">
   
   @if (hasValidGame()) {
@@ -77,7 +75,49 @@
           Score: {{ getFormattedScore() }}
         </div>
       }
+
+      <!-- Age Badge and Content Indicators -->
+      <div class="content-indicators">
+        <span class="age-badge" [attr.data-age]="getAgeBadgeText()">
+          {{ getAgeBadgeText() }}
+        </span>
+        
+        @if (hasScreenshots()) {
+          <mat-icon class="content-icon" matTooltip="Has Screenshots">photo_library</mat-icon>
+        }
+        
+        @if (hasVideos()) {
+          <mat-icon class="content-icon" matTooltip="Has Videos">play_circle</mat-icon>
+        }
+      </div>
+
+      <!-- Short Description Preview -->
+      @if (game?.shortDescription) {
+        <div class="description-preview" [matTooltip]="getTruncatedDescription(200)">
+          {{ getTruncatedDescription(80) }}
+        </div>
+      }
     </mat-card-content>
+
+    <!-- Action Buttons -->
+    <mat-card-actions>
+      <button 
+        mat-button 
+        color="primary" 
+        (click)="openGameDetails($event)"
+        [disabled]="!hasValidGame()">
+        <mat-icon>info</mat-icon>
+        View Details
+      </button>
+      
+      <button 
+        mat-stroked-button 
+        (click)="openSteamStore($event)"
+        [disabled]="!hasValidGame()">
+        <mat-icon>open_in_new</mat-icon>
+        Steam Store
+      </button>
+    </mat-card-actions>
   } @else {
     <mat-card-content>
       <div class="empty-card mat-body-1">
