@@ -185,90 +185,27 @@
         </div>
       </mat-tab>
       
-      <!-- Screenshots Tab -->
-      @if (hasScreenshots()) {
+      <!-- Media Tab (Screenshots + Videos) -->
+      @if (hasMedia()) {
         <mat-tab>
           <ng-template mat-tab-label>
-            Screenshots ({{ getScreenshotCount() }})
+            <mat-icon>perm_media</mat-icon>
+            Media ({{ getMediaCount() }})
           </ng-template>
           
-          <div class="tab-content screenshots-content">
-            <div class="screenshot-grid">
-              @for (screenshot of game.screenshots; track screenshot.id) {
-                <div class="screenshot-item" (click)="openScreenshotLightbox(screenshot)">
-                  <img 
-                    [src]="screenshot.path_thumbnail"
-                    [alt]="'Screenshot ' + screenshot.id"
-                    class="screenshot-thumb"
-                    loading="lazy">
-                  <div class="screenshot-overlay">
-                    <mat-icon>zoom_in</mat-icon>
-                  </div>
-                </div>
-              }
-            </div>
-          </div>
-        </mat-tab>
-      }
-      
-      <!-- Videos Tab -->
-      @if (hasVideos()) {
-        <mat-tab>
-          <ng-template mat-tab-label>
-            Videos ({{ getVideoCount() }})
-          </ng-template>
-          
-          <div class="tab-content videos-content">
-            
-            <!-- Video Player -->
-            @if (selectedVideo) {
-              <div class="video-player-section">
-                <div class="video-player">
-                  <video 
-                    [poster]="getVideoPoster(selectedVideo)"
-                    controls
-                    preload="metadata"
-                    class="main-video">
-                    <source [src]="selectedVideo.webm.max" type="video/webm">
-                    <source [src]="selectedVideo.mp4.max" type="video/mp4">
-                    <source [src]="selectedVideo.webm['480']" type="video/webm">
-                    <source [src]="selectedVideo.mp4['480']" type="video/mp4">
-                    Your browser does not support video playback.
-                  </video>
-                </div>
-                <h4 class="video-title">{{ selectedVideo.name }}</h4>
-              </div>
-            }
-            
-            <!-- Video List -->
-            @if (game.movies && game.movies.length > 1) {
-              <div class="video-list-section">
-                <h4>All Videos</h4>
-                <div class="video-list">
-                  @for (movie of game.movies; track movie.id) {
-                    <div 
-                      class="video-list-item"
-                      [class.selected]="selectedVideo?.id === movie.id"
-                      (click)="selectVideo(movie)">
-                      <img 
-                        [src]="movie.thumbnail"
-                        [alt]="movie.name"
-                        class="video-thumb">
-                      <div class="video-info">
-                        <span class="video-name">{{ movie.name }}</span>
-                        @if (movie.highlight) {
-                          <span class="highlight-badge">Featured</span>
-                        }
-                      </div>
-                      <div class="play-overlay">
-                        <mat-icon>play_arrow</mat-icon>
-                      </div>
-                    </div>
-                  }
-                </div>
-              </div>
-            }
-            
+          <div class="tab-content media-content">
+            <app-media-carousel
+              [screenshots]="game.screenshots || []"
+              [videos]="game.movies || []"
+              [config]="{
+                showFullscreen: true,
+                autoPlayVideos: false,
+                showThumbnails: true,
+                enableKeyboard: true,
+                enableSwipe: true
+              }"
+              (carouselEvent)="onCarouselEvent($event)">
+            </app-media-carousel>
           </div>
         </mat-tab>
       }

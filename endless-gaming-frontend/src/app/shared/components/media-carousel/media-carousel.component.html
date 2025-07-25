@@ -1,0 +1,210 @@
+<div class="media-carousel" [class.fullscreen]="isFullscreen">
+  
+  @if (hasMediaItems()) {
+    
+    <!-- Main Display Area -->
+    <div class="main-display" #mainDisplay>
+      
+      <!-- Loading Spinner -->
+      @if (isLoading) {
+        <div class="loading-overlay">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      }
+      
+      <!-- Navigation Arrows -->
+      @if (mediaItems.length > 1) {
+        <button 
+          mat-icon-button 
+          class="nav-arrow nav-arrow-left"
+          (click)="goToPrevious()"
+          matTooltip="Previous (←)">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        
+        <button 
+          mat-icon-button 
+          class="nav-arrow nav-arrow-right"
+          (click)="goToNext()"
+          matTooltip="Next (→)">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      }
+      
+      <!-- Screenshot Display -->
+      @if (isCurrentItemScreenshot()) {
+        <div class="screenshot-display" [@slideTransition]="currentIndex" [@fadeIn]>
+          <img 
+            [src]="getCurrentScreenshot()?.path_full"
+            [alt]="getCurrentItem()?.title"
+            class="main-image"
+            (load)="onImageLoad()"
+            (error)="onImageError()">
+        </div>
+      }
+      
+      <!-- Video Display -->
+      @if (isCurrentItemVideo()) {
+        <div class="video-display" [@slideTransition]="currentIndex" [@fadeIn]>
+          <video 
+            [poster]="getCurrentVideo()?.thumbnail"
+            controls
+            preload="metadata"
+            class="main-video"
+            (loadedmetadata)="onVideoLoad()">
+            <source [src]="getCurrentVideo()?.webm.max" type="video/webm">
+            <source [src]="getCurrentVideo()?.mp4.max" type="video/mp4">
+            <source [src]="getCurrentVideo()?.webm['480']" type="video/webm">
+            <source [src]="getCurrentVideo()?.mp4['480']" type="video/mp4">
+            Your browser does not support video playback.
+          </video>
+        </div>
+      }
+      
+      <!-- Media Info Overlay -->
+      <div class="media-info-overlay">
+        <div class="media-title">{{ getCurrentItem()?.title }}</div>
+        <div class="media-counter">{{ currentIndex + 1 }} / {{ mediaItems.length }}</div>
+      </div>
+      
+      <!-- Control Buttons -->
+      <div class="control-buttons">
+        @if (config.showFullscreen) {
+          <button 
+            mat-icon-button 
+            class="control-button"
+            [@buttonPulse]
+            (click)="toggleFullscreen()"
+            [matTooltip]="isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'">
+            <mat-icon>{{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+          </button>
+        }
+        
+        @if (isCurrentItemVideo()) {
+          <button 
+            mat-icon-button 
+            class="control-button"
+            [@buttonPulse]
+            (click)="toggleVideoPlayback()"
+            matTooltip="Play/Pause (Space)">
+            <mat-icon>play_arrow</mat-icon>
+          </button>
+        }
+      </div>
+      
+    </div>
+    
+    <!-- Thumbnail Navigation Strip -->
+    @if (config.showThumbnails && mediaItems.length > 1) {
+      <div class="thumbnail-strip" #thumbnailStrip>
+        <div class="thumbnail-container">
+          @for (item of mediaItems; track item.id; let i = $index) {
+            <div 
+              class="thumbnail-item"
+              [class.active]="i === currentIndex"
+              [class.video]="item.type === 'video'"
+              [@thumbnailHighlight]="i === currentIndex ? 'active' : 'inactive'"
+              (click)="selectItem(i)">
+              
+              <img 
+                [src]="item.thumbnail"
+                [alt]="item.title"
+                class="thumbnail-image">
+              
+              <!-- Video Play Indicator -->
+              @if (item.type === 'video') {
+                <div class="video-indicator" [@fadeIn]>
+                  <mat-icon>play_circle</mat-icon>
+                </div>
+              }
+              
+              <!-- Active Indicator -->
+              @if (i === currentIndex) {
+                <div class="active-indicator" [@fadeIn]></div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+    
+    <!-- Dot Indicators -->
+    @if (mediaItems.length > 1 && !config.showThumbnails) {
+      <div class="dot-indicators">
+        @for (item of mediaItems; track item.id; let i = $index) {
+          <button 
+            class="dot-indicator"
+            [class.active]="i === currentIndex"
+            (click)="selectItem(i)"
+            [attr.aria-label]="'Go to ' + item.title">
+          </button>
+        }
+      </div>
+    }
+    
+  } @else {
+    <!-- Empty State -->
+    <div class="empty-state">
+      <mat-icon class="empty-icon">photo_library</mat-icon>
+      <p class="empty-message">No media available</p>
+    </div>
+  }
+  
+</div>
+
+<!-- Fullscreen Overlay -->
+@if (isFullscreen) {
+  <div class="fullscreen-overlay" (click)="toggleFullscreen()">
+    <div class="fullscreen-content" (click)="$event.stopPropagation()">
+      <!-- Fullscreen version of main display -->
+      <div class="fullscreen-display">
+        
+        @if (isCurrentItemScreenshot()) {
+          <img 
+            [src]="getCurrentScreenshot()?.path_full"
+            [alt]="getCurrentItem()?.title"
+            class="fullscreen-image">
+        }
+        
+        @if (isCurrentItemVideo()) {
+          <video 
+            [poster]="getCurrentVideo()?.thumbnail"
+            controls
+            preload="metadata"
+            class="fullscreen-video">
+            <source [src]="getCurrentVideo()?.webm.max" type="video/webm">
+            <source [src]="getCurrentVideo()?.mp4.max" type="video/mp4">
+            <source [src]="getCurrentVideo()?.webm['480']" type="video/webm">
+            <source [src]="getCurrentVideo()?.mp4['480']" type="video/mp4">
+          </video>
+        }
+        
+        <!-- Fullscreen Navigation -->
+        @if (mediaItems.length > 1) {
+          <button 
+            mat-icon-button 
+            class="fullscreen-nav fullscreen-nav-left"
+            (click)="goToPrevious()">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          
+          <button 
+            mat-icon-button 
+            class="fullscreen-nav fullscreen-nav-right"
+            (click)="goToNext()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        }
+        
+        <!-- Close Button -->
+        <button 
+          mat-icon-button 
+          class="fullscreen-close"
+          (click)="toggleFullscreen()">
+          <mat-icon>close</mat-icon>
+        </button>
+        
+      </div>
+    </div>
+  </div>
+}

@@ -156,6 +156,18 @@
     }
   }
 
+  // Media Tab Styles
+  .media-content {
+    padding: 0 !important; // Remove default padding for carousel
+    max-height: none; // Allow carousel to manage its own height
+    overflow: visible; // Let carousel handle overflow
+    
+    app-media-carousel {
+      width: 100%;
+      display: block;
+    }
+  }
+
   // Overview Tab Styles
   .overview-content {
     .description-section {

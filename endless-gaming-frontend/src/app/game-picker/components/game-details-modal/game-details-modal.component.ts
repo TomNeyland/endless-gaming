@@ -10,6 +10,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { GameRecord, Screenshot, Movie } from '../../../types/game.types';
 import { formatGameAge, getAgeBadge } from '../../../utils/game-age.utils';
+import { MediaCarouselComponent } from '../../../shared/components/media-carousel/media-carousel.component';
+import { MediaCarouselEvent } from '../../../shared/components/media-carousel/media-item.interface';
 
 export interface GameDetailsModalData {
   game: GameRecord;
@@ -33,7 +35,8 @@ export interface GameDetailsModalData {
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MediaCarouselComponent
   ],
   templateUrl: './game-details-modal.component.html',
   styleUrl: './game-details-modal.component.scss'
@@ -173,6 +176,30 @@ export class GameDetailsModalComponent implements OnInit {
    */
   public hasVideos(): boolean {
     return !!(this.game.movies && this.game.movies.length > 0);
+  }
+
+  /**
+   * Check if game has any media (screenshots or videos).
+   */
+  public hasMedia(): boolean {
+    return this.hasScreenshots() || this.hasVideos();
+  }
+
+  /**
+   * Get total media count for tab label.
+   */
+  public getMediaCount(): number {
+    const screenshotCount = this.game.screenshots?.length || 0;
+    const videoCount = this.game.movies?.length || 0;
+    return screenshotCount + videoCount;
+  }
+
+  /**
+   * Handle media carousel events.
+   */
+  public onCarouselEvent(event: MediaCarouselEvent): void {
+    console.log('Media carousel event:', event);
+    // Handle carousel events if needed (e.g., analytics, state management)
   }
 
   /**
