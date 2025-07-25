@@ -56,48 +56,70 @@ services:
       
       chmod +x /app/run-export.sh
       
-      # Create a simple scheduler that runs daily at 4 AM UTC
-      cat > /app/scheduler.sh << 'EOF'
-      #!/bin/bash
+      # Create a simple HTTP health check server
+      cat > /app/health_server.py << 'EOF'
+      import http.server
+      import socketserver
+      import json
+      from datetime import datetime
+      import threading
+      import subprocess
+      import os
       
-      echo "JSON export service started - daily runs at 4 AM UTC"
+      class HealthHandler(http.server.SimpleHTTPRequestHandler):
+          def do_GET(self):
+              if self.path == '/health' or self.path == '/':
+                  self.send_response(200)
+                  self.send_header('Content-type', 'application/json')
+                  self.end_headers()
+                  
+                  health_data = {
+                      "status": "healthy",
+                      "service": "json-export-cron",
+                      "timestamp": datetime.utcnow().isoformat() + "Z",
+                      "next_run": "Daily at 4 AM UTC"
+                  }
+                  
+                  self.wfile.write(json.dumps(health_data).encode())
+              else:
+                  self.send_response(404)
+                  self.end_headers()
       
-      # Run initial export immediately
-      /app/run-export.sh
+      def start_scheduler():
+          # Run initial export
+          subprocess.run(['/app/run-export.sh'])
+          
+          # Simple daily scheduler loop
+          while True:
+              import time
+              # Calculate seconds until next 4 AM UTC
+              now = datetime.utcnow()
+              current_seconds = now.hour * 3600 + now.minute * 60 + now.second
+              target_seconds = 4 * 3600  # 4 AM
+              
+              if current_seconds < target_seconds:
+                  sleep_seconds = target_seconds - current_seconds
+              else:
+                  sleep_seconds = 86400 - current_seconds + target_seconds
+              
+              print(f"Next export in {sleep_seconds} seconds")
+              time.sleep(sleep_seconds)
+              subprocess.run(['/app/run-export.sh'])
       
-      # Simple daily scheduler loop
-      while true; do
-        # Calculate seconds until next 4 AM UTC
-        current_hour=$(date -u +%H)
-        current_min=$(date -u +%M)
-        current_sec=$(date -u +%S)
-        
-        # Convert current time to seconds since midnight
-        current_seconds=$((current_hour * 3600 + current_min * 60 + current_sec))
-        
-        # Target time: 4 AM = 4 * 3600 = 14400 seconds
-        target_seconds=14400
-        
-        if [ $current_seconds -lt $target_seconds ]; then
-          # Next run is today at 4 AM
-          sleep_seconds=$((target_seconds - current_seconds))
-        else
-          # Next run is tomorrow at 4 AM
-          sleep_seconds=$((86400 - current_seconds + target_seconds))
-        fi
-        
-        echo "Next export scheduled in $sleep_seconds seconds ($(date -u -d "+${sleep_seconds} seconds" '+%Y-%m-%d %H:%M:%S UTC'))"
-        sleep $sleep_seconds
-        
-        # Run the export
-        /app/run-export.sh
-      done
+      if __name__ == '__main__':
+          # Start scheduler in background thread
+          scheduler_thread = threading.Thread(target=start_scheduler, daemon=True)
+          scheduler_thread.start()
+          
+          # Start HTTP server for health checks
+          PORT = int(os.environ.get('PORT', 8080))
+          with socketserver.TCPServer(("", PORT), HealthHandler) as httpd:
+              print(f"Health server started on port {PORT}")
+              httpd.serve_forever()
       EOF
       
-      chmod +x /app/scheduler.sh
-      
-      # Start the scheduler
-      /app/scheduler.sh
+      # Start the health server with background scheduler
+      python /app/health_server.py
     
     envs:
       - key: PYTHONPATH
@@ -110,5 +132,14 @@ services:
         scope: RUN_TIME
         value: "tomneyland/endless-gaming"
     
+    http_port: 8080
     instance_count: 1
     instance_size_slug: basic-s
+    
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 60
+      period_seconds: 10
+      timeout_seconds: 5
+      failure_threshold: 3
+      success_threshold: 1
