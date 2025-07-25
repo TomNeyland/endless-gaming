@@ -299,7 +299,7 @@
     "isFree": true,
     "requiredAge": 0,
     "website": "https://www.ea.com/games/apex-legends",
-    "releaseDate": "4 Nov, 2020",
+    "releaseDate": "Nov 4, 2020",
     "developers": [
       "Respawn"
     ],
@@ -689,7 +689,7 @@
     "isFree": false,
     "requiredAge": 0,
     "website": "https://www.pocketpair.jp/palworld",
-    "releaseDate": "Jan 18, 2024",
+    "releaseDate": "18 Jan, 2024",
     "developers": [
       "Pocketpair"
     ],
@@ -758,12 +758,12 @@
     ],
     "supportedLanguages": "English, Simplified Chinese, Traditional Chinese, Japanese, French, Italian, German, Spanish - Spain, Portuguese - Brazil, Russian, Korean, Indonesian, Spanish - Latin America, Thai, Turkish, Vietnamese, Polish",
     "priceData": {
-      "currency": "USD",
-      "initial": 2999,
-      "final": 2999,
+      "currency": "SAR",
+      "initial": 6149,
+      "final": 6149,
       "discount_percent": 0,
       "initial_formatted": "",
-      "final_formatted": "$29.99"
+      "final_formatted": "61.49 SR"
     },
     "pcRequirements": {
       "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 or later (64-Bit)<br></li><li><strong>Processor:</strong> i5-3570K 3.4 GHz 4 Core<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> GeForce GTX 1050 (2GB)<br></li><li><strong>DirectX:</strong> Version 11<br></li><li><strong>Network:</strong> Broadband Internet connection<br></li><li><strong>Storage:</strong> 40 GB available space<br></li><li><strong>Additional Notes:</strong> Internet connection required for multiplayer. SSD required.</li></ul>",
@@ -2073,12 +2073,12 @@
     "appId": 2358720,
     "name": "Black Myth: Wukong",
     "coverUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg?t=1749182199",
-    "shortDescription": "Black Myth: Wukong is an action RPG rooted in Chinese mythology. You shall set out as the Destined One to venture into the challenges and marvels ahead, to uncover the obscured truth beneath the veil of a glorious legend from the past.",
-    "detailedDescription": "<h1>Digital Deluxe Edition</h1><p><div class=\"bb_img_ctn\"><img class=\"bb_img\" src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/d501e94271636c800ada8bd089e75dba.avif?t=1749182199\" /></div><br><br>The Black Myth: Wukong Digital Deluxe Edition includes:<br>- Black Myth: Wukong Full Game<br>- Weapon: Bronzecloud Staff<br>- Equipment: Folk Opera Mask, Folk Opera Almsgiving Armor, Folk Opera Leather Bracers, and Folk Opera Buskins<br>- Curio: Wind Chimes<br>- Selected Digital Soundtrack<br><br>※ The included weapon, equipment, and curio can be claimed from the Trailblazer's Gift menu at the Keeper's Shrine (Respawn Point) during the early stages of the game.<br>※ By activating &quot;Music Library&quot; on the game's Title Screen, or downloading &quot;Black Myth: Wukong Soundtrack Selection&quot; through the platform, you can enjoy a curated list of tracks from the game. We highly recommend that you first experience these pieces as you journey through the game as the Destined One, then return here to relive them to your heart's content.</p><br><h1>About the Game</h1>Black Myth: Wukong is an action RPG rooted in Chinese mythology. The story is based on Journey to the West, one of the Four Great Classical Novels of Chinese literature. You shall set out as the Destined One to venture into the challenges and marvels ahead, to uncover the obscured truth beneath the veil of a glorious legend from the past.<br><br><div class=\"bb_img_ctn\"><img class=\"bb_img\" src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/8e5bb6e94a517b1ace5b9afd1b6c107e.avif?t=1749182199\" /></div><br><br><div class=\"bb_img_ctn\"><video class=\"bb_img\" autoplay muted loop playsinline poster=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/555d36e777f5a4f29e57e92bc53544d4.poster.avif?t=1749182199\" ><source src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/555d36e777f5a4f29e57e92bc53544d4.webm?t=1749182199\" type=\"video/webm; codecs=vp9\"><source src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/555d36e777f5a4f29e57e92bc53544d4.mp4?t=1749182199\" type=\"video/mp4\"></video></div><h2 class=\"bb_tag\">• Explore a Land of Vast Wonders</h2><br><i>&quot;A world unseen, where wonders gleam,<br>And with each stride, a new scene streams.&quot;</i><br><br>Enter a fascinating realm filled with the wonders and discoveries of ancient Chinese mythology!<br>As the Destined One, you shall traverse an array of breathtaking and distinctive landscapes from the classic tale, composing an epic of adventure that is seen anew.<br><br><br><div class=\"bb_img_ctn\"><video class=\"bb_img\" autoplay muted loop playsinline poster=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/7c829af6362f0989f0a28e8f9869e4f0.poster.avif?t=1749182199\" ><source src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/7c829af6362f0989f0a28e8f9869e4f0.webm?t=1749182199\" type=\"video/webm; codecs=vp9\"><source src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/7c829af6362f0989f0a28e8f9869e4f0.mp4?t=1749182199\" type=\"video/mp4\"></video></div><h2 class=\"bb_tag\">• Confront Mighty Foes, Old and New</h2><br><i>&quot;Heroic Monkey, might and fame, <br>Adversaries rise, to test his name.&quot;</i><br><br>One of the major highlights of Journey to the West is its diverse cast of adversaries, each with their unique strengths.<br>As the Destined One, you will encounter powerful foes and worthy rivals throughout your journey. Fearlessly engage them in epic battles where surrender is not an option.<br><br><br><div class=\"bb_img_ctn\"><video class=\"bb_img\" autoplay muted loop playsinline poster=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/5cfa5ba575a6f26c0b8a6c0a4a7b532c.poster.avif?t=1749182199\" ><source src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/5cfa5ba575a6f26c0b8a6c0a4a7b532c.webm?t=1749182199\" type=\"video/webm; codecs=vp9\"><source src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/5cfa5ba575a6f26c0b8a6c0a4a7b532c.mp4?t=1749182199\" type=\"video/mp4\"></video></div><h2 class=\"bb_tag\">• Temper Your Mastery of Varied Spells</h2><br><i>&quot;Spells unbound, talents in play,<br>Unleashed abilities seize the day.&quot;</i><br><br>Spells, transformations, and magic vessels of all manifestations, in which some counteract while others amplify, have long been iconic combat elements of Chinese mythology.<br>As the Destined One, aside from mastering various staff techniques, you can also freely combine different spells, abilities, weapons, and equipment to find a winning strategy that best suits your combat style.<br><br><br><div class=\"bb_img_ctn\"><video class=\"bb_img\" autoplay muted loop playsinline poster=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/4d44604b9ef17614057ebb67b01e2f4f.poster.avif?t=1749182199\" ><source src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/4d44604b9ef17614057ebb67b01e2f4f.webm?t=1749182199\" type=\"video/webm; codecs=vp9\"><source src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/4d44604b9ef17614057ebb67b01e2f4f.mp4?t=1749182199\" type=\"video/mp4\"></video></div><h2 class=\"bb_tag\">• Discover Heartfelt Tales Behind Every Facade</h2><br><i>&quot;Within all souls, both wild and tame,<br>There thrives a tale of life's fierce flame.&quot;</i><br><br>Beneath the ferocity and craftiness of your foes lies an engaging tapestry of their origins, personalities, and motivations waiting to be revealed.<br>As the Destined One, you will uncover the stories behind a variety of characters, delving beyond your battles with them to taste the love, hate, greed, and fury they once held and still carry within.",
+    "shortDescription": "Black Myth: Wukong é um RPG de ação inspirado na mitologia chinesa. Você assume o papel do Predestinado e tem a responsabilidade de encarar os desafios e as maravilhas do mundo para desvendar a verdade obscura por trás de uma lenda gloriosa do passado.",
+    "detailedDescription": "<h1>Edição Digital Deluxe</h1><p><div class=\"bb_img_ctn\"><img class=\"bb_img\" src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/7212a31666cc6059331d2824c258eb51.avif?t=1749182199\" /></div><br><br>A Edição Digital Deluxe de Black Myth: Wukong inclui:<br>- O jogo completo Black Myth: Wukong<br>- Arma: Bastão das Nuvens de Bronze<br>- Máscara da Ópera Nuo, Armadura de Esmolas de Ópera Nuo, Braçadeiras de Couro de Ópera Nuo e Botas de Ópera Nuo<br>- Objeto raro: Sinos de Vento<br>- Trilha sonora digital selecionada<br><br>※ A arma, os equipamentos e o objeto raro podem ser retirados no menu de Presentes do Pioneiro no Santuário do Guardião (ponto de renascimento) no começo do jogo.<br>※ Ao ativar a &quot;Biblioteca Musical&quot; na tela inicial do jogo ou baixar a &quot;Black Myth: Wukong Soundtrack Selection&quot; por meio da plataforma, você pode aproveitar uma lista selecionada de músicas do jogo. Recomendamos que as ouça pela primeira vez enquanto se aventura pelo jogo no papel do Predestinado e só depois retorne ao menu para ouvir quantas vezes quiser.</p><br><h1>Sobre o jogo</h1>Black Myth: Wukong é um RPG de ação inspirado na mitologia chinesa. A história é baseada em &quot;Jornada para o Oeste&quot;, um dos Quatro Grandes Romances Clássicos da literatura do país. Você assume o papel do Predestinado e tem a responsabilidade de encarar os desafios e as maravilhas do mundo para desvendar a verdade obscura por trás de uma lenda gloriosa do passado.<br><br><div class=\"bb_img_ctn\"><img class=\"bb_img\" src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/8e5bb6e94a517b1ace5b9afd1b6c107e.avif?t=1749182199\" /></div><br><br><div class=\"bb_img_ctn\"><video class=\"bb_img\" autoplay muted loop playsinline poster=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/555d36e777f5a4f29e57e92bc53544d4.poster.avif?t=1749182199\" ><source src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/555d36e777f5a4f29e57e92bc53544d4.webm?t=1749182199\" type=\"video/webm; codecs=vp9\"><source src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/555d36e777f5a4f29e57e92bc53544d4.mp4?t=1749182199\" type=\"video/mp4\"></video></div><h2 class=\"bb_tag\">• Explore uma terra de vastas maravilhas</h2><br><i>&quot;Um mundo desconhecido onde maravilhas reluzem<br>e a cada passo novos cenários surgem.&quot;</i><br><br>Entre em um reino fascinante repleto de maravilhas e descobertas da antiga mitologia chinesa!<br>No papel principal de Predestinado, você verá cenários de tirar o fôlego do romance clássico &quot;Jornada para o Oeste&quot; e criará um novo conto épico enquanto se aventura.<br><br><br><div class=\"bb_img_ctn\"><video class=\"bb_img\" autoplay muted loop playsinline poster=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/7c829af6362f0989f0a28e8f9869e4f0.poster.avif?t=1749182199\" ><source src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/7c829af6362f0989f0a28e8f9869e4f0.webm?t=1749182199\" type=\"video/webm; codecs=vp9\"><source src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/7c829af6362f0989f0a28e8f9869e4f0.mp4?t=1749182199\" type=\"video/mp4\"></video></div><h2 class=\"bb_tag\">• Enfrente poderosos inimigos clássicos e originais</h2><br><i>&quot;O macaco heroico, diante de força e glória, <br>enfrenta inimigos que desafiam sua história.&quot;</i><br><br>Uma das maiores virtudes da &quot;Jornada para o Oeste&quot; é a grande variedade de adversários com poderes únicos.<br>Você enfrentará inimigos poderosos e rivais dignos no decorrer da jornada. Trave corajosamente batalhas épicas em que não há chance de rendição.<br><br><br><div class=\"bb_img_ctn\"><video class=\"bb_img\" autoplay muted loop playsinline poster=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/5cfa5ba575a6f26c0b8a6c0a4a7b532c.poster.avif?t=1749182199\" ><source src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/5cfa5ba575a6f26c0b8a6c0a4a7b532c.webm?t=1749182199\" type=\"video/webm; codecs=vp9\"><source src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/5cfa5ba575a6f26c0b8a6c0a4a7b532c.mp4?t=1749182199\" type=\"video/mp4\"></video></div><h2 class=\"bb_tag\">• Domine diversos feitiços</h2><br><i>&quot;Se for capaz de dominar as magias e habilidades,<br>você derrotará inimigos sem maiores dificuldades.&quot;</i><br><br>Feitiços, transformações e aparatos mágicos, em suas manifestações que podem amplificar ou contrapor, sempre foram elementos emblemáticos do combate na mitologia chinesa.<br>Você precisará dominar técnicas com o bastão e terá liberdade para combinar diferentes feitiços, habilidades, armas e equipamentos a fim de moldar uma estratégia vencedora adequada ao seu estilo de luta.<br><br><br><div class=\"bb_img_ctn\"><video class=\"bb_img\" autoplay muted loop playsinline poster=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/4d44604b9ef17614057ebb67b01e2f4f.poster.avif?t=1749182199\" ><source src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/4d44604b9ef17614057ebb67b01e2f4f.webm?t=1749182199\" type=\"video/webm; codecs=vp9\"><source src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/extras/4d44604b9ef17614057ebb67b01e2f4f.mp4?t=1749182199\" type=\"video/mp4\"></video></div><h2 class=\"bb_tag\">• Descubra tramas comoventes onde menos se espera</h2><br><i>&quot;Todas as almas, selvagens ou domesticadas,<br>escondem histórias de vida muito delicadas.&quot;</i><br><br>Por trás da ferocidade e da astúcia dos seus inimigos, há um emaranhado de eventos que define suas origens, personalidades e motivações.<br>Como o Predestinado, você desvendará as histórias de vários personagens, indo além do confronto direto, para conhecer o motivo dos sentimentos complexos de amor, ódio, ganância e fúria que carregam consigo.",
     "isFree": false,
-    "requiredAge": "13",
+    "requiredAge": 0,
     "website": "https://www.heishenhua.com/",
-    "releaseDate": "Aug 19, 2024",
+    "releaseDate": "19/ago./2024",
     "developers": [
       "Game Science"
     ],
@@ -2088,11 +2088,11 @@
     "storeGenres": [
       {
         "id": "1",
-        "description": "Action"
+        "description": "Ação"
       },
       {
         "id": "25",
-        "description": "Adventure"
+        "description": "Aventura"
       },
       {
         "id": "3",
@@ -2102,53 +2102,53 @@
     "categories": [
       {
         "id": 2,
-        "description": "Single-player"
+        "description": "Um jogador"
       },
       {
         "id": 22,
-        "description": "Steam Achievements"
+        "description": "Conquistas Steam"
       },
       {
         "id": 28,
-        "description": "Full controller support"
+        "description": "Compat. total com controle"
       },
       {
         "id": 29,
-        "description": "Steam Trading Cards"
+        "description": "Cartas Colecionáveis Steam"
       },
       {
         "id": 74,
-        "description": "Playable without Timed Input"
+        "description": "Jogável sem precisar de reação rápida"
       },
       {
         "id": 69,
-        "description": "Stereo Sound"
+        "description": "Som estéreo"
       },
       {
         "id": 70,
-        "description": "Surround Sound"
+        "description": "Som surround"
       },
       {
         "id": 23,
-        "description": "Steam Cloud"
+        "description": "Nuvem Steam"
       },
       {
         "id": 62,
-        "description": "Family Sharing"
+        "description": "Compartilhamento em família"
       }
     ],
-    "supportedLanguages": "English<strong>*</strong>, French, German, Spanish - Spain, Japanese, Korean, Polish, Portuguese - Brazil, Russian, Simplified Chinese<strong>*</strong>, Traditional Chinese, Italian, Turkish, Thai<br><strong>*</strong>languages with full audio support",
+    "supportedLanguages": "Inglês<strong>*</strong>, Francês, Alemão, Espanhol (Espanha), Japonês, Coreano, Polonês, Português (Brasil), Russo, Chinês simplificado<strong>*</strong>, Chinês tradicional, Italiano, Turco, Tailandês<br><strong>*</strong>idiomas com suporte total de áudio",
     "priceData": {
-      "currency": "USD",
-      "initial": 5999,
-      "final": 5999,
+      "currency": "BRL",
+      "initial": 22999,
+      "final": 22999,
       "discount_percent": 0,
       "initial_formatted": "",
-      "final_formatted": "$59.99"
+      "final_formatted": "R$ 229,99"
     },
     "pcRequirements": {
-      "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 64-bit<br></li><li><strong>Processor:</strong> Intel Core i5-8400 / AMD Ryzen 5 1600<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA GeForce GTX 1060 6GB / AMD Radeon RX 580 8GB<br></li><li><strong>DirectX:</strong> Version 11<br></li><li><strong>Storage:</strong> 130 GB available space<br></li><li><strong>Sound Card:</strong> Windows Compatible Audio Device<br></li><li><strong>Additional Notes:</strong> HDD Supported, SSD Recommended. The above specifications were tested with DLSS/FSR/XeSS enabled.</li></ul>",
-      "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 64-bit<br></li><li><strong>Processor:</strong> Intel Core i7-9700 / AMD Ryzen 5 5500<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA GeForce RTX 2060 / AMD Radeon RX 5700 XT / INTEL Arc A750<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 130 GB available space<br></li><li><strong>Sound Card:</strong> Windows Compatible Audio Device<br></li><li><strong>Additional Notes:</strong> SSD Required. The above specifications were tested with DLSS/FSR/XeSS enabled.</li></ul>"
+      "minimum": "<strong>Mínimos:</strong><br><ul class=\"bb_ul\"><li>Requer um processador e sistema operacional de 64 bits<br></li><li><strong>SO:</strong> Windows 10 64-bit<br></li><li><strong>Processador:</strong> Intel Core i5-8400 / AMD Ryzen 5 1600<br></li><li><strong>Memória:</strong> 16 GB de RAM<br></li><li><strong>Placa de vídeo:</strong> NVIDIA GeForce GTX 1060 6GB / AMD Radeon RX 580 8GB<br></li><li><strong>DirectX:</strong> Versão 11<br></li><li><strong>Armazenamento:</strong> 130 GB de espaço disponível<br></li><li><strong>Placa de som:</strong> Windows Compatible Audio Device<br></li><li><strong>Outras observações:</strong> HDD Supported, SSD Recommended. The above specifications were tested with DLSS/FSR/XeSS enabled.</li></ul>",
+      "recommended": "<strong>Recomendados:</strong><br><ul class=\"bb_ul\"><li>Requer um processador e sistema operacional de 64 bits<br></li><li><strong>SO:</strong> Windows 10 64-bit<br></li><li><strong>Processador:</strong> Intel Core i7-9700 / AMD Ryzen 5 5500<br></li><li><strong>Memória:</strong> 16 GB de RAM<br></li><li><strong>Placa de vídeo:</strong> NVIDIA GeForce RTX 2060 / AMD Radeon RX 5700 XT / INTEL Arc A750<br></li><li><strong>DirectX:</strong> Versão 12<br></li><li><strong>Armazenamento:</strong> 130 GB de espaço disponível<br></li><li><strong>Placa de som:</strong> Windows Compatible Audio Device<br></li><li><strong>Outras observações:</strong> SSD Required. The above specifications were tested with DLSS/FSR/XeSS enabled.</li></ul>"
     },
     "screenshots": [
       {
@@ -4394,7 +4394,7 @@
     "isFree": false,
     "requiredAge": 0,
     "website": "https://www.monsterhunter.com/wilds/",
-    "releaseDate": "Feb 27, 2025",
+    "releaseDate": "27 Feb, 2025",
     "developers": [
       "CAPCOM Co., Ltd."
     ],
@@ -4463,12 +4463,12 @@
     ],
     "supportedLanguages": "English<strong>*</strong>, French<strong>*</strong>, Italian<strong>*</strong>, German<strong>*</strong>, Spanish - Spain<strong>*</strong>, Arabic, Spanish - Latin America, Portuguese - Brazil<strong>*</strong>, Polish, Russian<strong>*</strong>, Simplified Chinese<strong>*</strong>, Traditional Chinese, Japanese<strong>*</strong>, Korean<br><strong>*</strong>languages with full audio support",
     "priceData": {
-      "currency": "USD",
-      "initial": 6999,
-      "final": 6999,
+      "currency": "CAD",
+      "initial": 8999,
+      "final": 8999,
       "discount_percent": 0,
       "initial_formatted": "",
-      "final_formatted": "$69.99"
+      "final_formatted": "CDN$ 89.99"
     },
     "pcRequirements": {
       "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows®10 (64-bit Required)/Windows®11 (64-bit Required)<br></li><li><strong>Processor:</strong> Intel® Core™ i5-10400 or Intel® Core™ i3-12100 or AMD Ryzen™ 5 3600<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA® GeForce® GTX 1660(VRAM 6GB) or AMD Radeon™ RX 5500 XT(VRAM 8GB)<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Network:</strong> Broadband Internet connection<br></li><li><strong>Storage:</strong> 75 GB available space<br></li><li><strong>Additional Notes:</strong> SSD required. This game is expected to run at 1080p (upscaled from 720 native resolution) / 30 fps under the &quot;Lowest&quot; graphics setting. DirectStorage supported.</li></ul>",
@@ -5171,12 +5171,12 @@
     "appId": 1245620,
     "name": "ELDEN RING",
     "coverUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg?t=1748630546",
-    "shortDescription": "THE CRITICALLY ACCLAIMED FANTASY ACTION RPG. Rise, Tarnished, and be guided by grace to brandish the power of the Elden Ring and become an Elden Lord in the Lands Between.",
-    "detailedDescription": "<h1>ELDEN RING Shadow of the Erdtree Edition</h1><p><div class=\"bb_img_ctn\"><img class=\"bb_img\" src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/extras/ER_SHADOW-OF-THE-ERDTREE-EDITION_EN.gif?t=1748630546\" /></div><br>ELDEN RING Shadow of the Erdtree Edition includes:<br><ul class=\"bb_ul\"><li>ELDEN RING<br></li><li>ELDEN RING Shadow of the Erdtree expansion</li></ul></p><br><h1>ELDEN RING Shadow of the Erdtree Deluxe Edition</h1><p><div class=\"bb_img_ctn\"><img class=\"bb_img\" src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/extras/ER_SHADOW-OF-THE-ERDTREE-DELUXE-EDITION_EN.gif?t=1748630546\" /></div><br>ELDEN RING Shadow of the Erdtree Deluxe Edition includes:<br><ul class=\"bb_ul\"><li>ELDEN RING<br></li><li>ELDEN RING Shadow of the Erdtree expansion<br></li><li>ELDEN RING Digital Artbook &amp; Original Soundtrack<br></li><li>ELDEN RING Shadow of the Erdtree Artbook &amp; Soundtrack</li></ul></p><br><h1>About the Game</h1><strong>THE CRITICALLY ACCLAIMED FANTASY ACTION RPG</strong><br><i>Rise, Tarnished, and be guided by grace to brandish the power of the Elden Ring.</i><h2 class=\"bb_tag\">• A Breathtaking World Full of Excitement and Mystery</h2>The Lands Between are part of a vast continent where magnificent open fields and huge dungeons with complex and three-dimensional designs are seamlessly connected. As you explore, the joy of discovering unknown and overwhelming threats awaits you.<br>Mastery of the terrain and knowledge of its secrets can help you overcome enemies and defeat formidable bosses or lead invading players into traps.<br><br><div class=\"bb_img_ctn\"><img class=\"bb_img\" src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/extras/ER_STEAM_GIF_01.gif?t=1748630546\" /></div><h2 class=\"bb_tag\">• Defeat Challenging Foes in Intense Combat</h2>Combat in ELDEN RING is simple to learn yet offers hidden depths of mastery. As you seek to become the Elden Lord, you’ll need to explore the balance between attacking and avoiding damage, use a wide variety of weapons, spells, &amp; summons, and perfect your timing to take advantage of your opponents’ weaknesses.<br><br><div class=\"bb_img_ctn\"><img class=\"bb_img\" src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/extras/ER_STEAM_GIF_02.gif?t=1748630546\" /></div><h2 class=\"bb_tag\">• Create and Build Your Own Character</h2>In addition to customizing the appearance of your character, there are countless ways to combine the weapons, armor, usable items, and magic that you equip. You can develop your character according to your play style.<br>No matter if you prefer bold physical confrontation, tactical spellcasting, or the subtle art of stealth, you’ll be able to find gear that supports your choices.<br><br><div class=\"bb_img_ctn\"><img class=\"bb_img\" src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/extras/ER_STEAM_GIF_03.gif?t=1748630546\" /></div><h2 class=\"bb_tag\">• An Epic Drama Born from a Myth Created by George R.R. Martin</h2>The founding mythology of Elden Ring was written by George R. R. Martin and adapted into a rich multilayered story. Intersecting goals and desires between the characters create an intense narrative that weaves throughout the Lands Between. The events of the game can unravel in many ways, depending on your interventions.<br><br><div class=\"bb_img_ctn\"><img class=\"bb_img\" src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/extras/ER_STEAM_GIF_04.gif?t=1748630546\" /></div><h2 class=\"bb_tag\">• Play Alongside a Massive Worldwide Community</h2>The Tarnished community is massive and active. Your friends may already be among them. You can play with up to two other Tarnished as your cooperative teammates, either by inviting them using a shared password or by summoning them from a pool of nearby community members.<br>There are also ample opportunities to face off against other players, either through co-op invasions, invited duels, or the many player battle options available in the three Colosseums.<br><br><div class=\"bb_img_ctn\"><img class=\"bb_img\" src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/extras/ER_STEAM_GIF_05.gif?t=1748630546\" /></div>",
+    "shortDescription": "O NOVO RPG DE AÇÃO E FANTASIA. Levante-se, Maculado, e seja guiado pela graça para portar o poder do Anel Prístino e se tornar um Lorde Prístino nas Terras Intermédias.",
+    "detailedDescription": "<h1>ELDEN RING Shadow of the Erdtree Edition</h1><p><div class=\"bb_img_ctn\"><img class=\"bb_img\" src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/extras/ER_SHADOW-OF-THE-ERDTREE-EDITION_BR.gif?t=1748630546\" /></div><br>ELDEN RING Shadow of the Erdtree Edition inclui:<br>• ELDEN RING<br>• ELDEN RING Expansão Shadow of the Erdtree</p><br><h1>ELDEN RING Shadow of the Erdtree Deluxe Edition</h1><p><div class=\"bb_img_ctn\"><img class=\"bb_img\" src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/extras/ER_SHADOW-OF-THE-ERDTREE-DELUXE-EDITION_BR.gif?t=1748630546\" /></div><br>ELDEN RING Shadow of the Erdtree Deluxe Edition inclui:<br>• ELDEN RING<br>• ELDEN RING Expansão Shadow of the Erdtree<br>• ELDEN RING Livro de Arte Digital e Trilha Sonora Original<br>• ELDEN RING Shadow of the Erdtree Livro de Arte e Trilha Sonora</p><br><h1>Sobre o jogo</h1><div class=\"bb_img_ctn\"><img class=\"bb_img\" src=\"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/extras/ER_Steam_Gif_616x260.gif?t=1748630546\" /></div><br>O NOVO RPG DE AÇÃO E FANTASIA.<br>Levante-se, Maculado, e seja guiado pela graça para portar o poder do Anel Prístino e se tornar um Lorde Prístino nas Terras Intermédias.<br><br>• Um mundo vasto e emocionante<br>Um mundo vasto onde campos abertos e uma variedade de situações e masmorras imensas, com complexos designs tridimensionais se conectam com fluidez. Conforme explora, sinta a alegria de descobrir poderosas e desconhecidas ameaças que aguardam por você, levando a um grande senso de conquista.<br><br>• Crie seu próprio personagem<br>Além de personalizar a aparência do seu personagem, você pode combinar livremente armas, armaduras e magias que equipar. Você pode desenvolver seu personagem de acordo com seu estilo de jogo, como aumentar a força muscular para se tornar um poderoso guerreiro, ou dominar a magia.<br><br>• Um drama épico nascido de um mito<br>Uma história cheia de camadas, contada em fragmentos. Um drama épico onde os vários pensamentos dos personagens se interligam nas Terras Intermédias.<br><br>• Jogo on-line único que conecta você livremente aos outros<br>Além do multijogador, onde você pode se conectar diretamente com outros jogadores e viajarem juntos, o jogo suporta um elemento on-line assíncrono único que permite que você sinta a presença dos outros.",
     "isFree": false,
     "requiredAge": "16",
     "website": null,
-    "releaseDate": "Feb 24, 2022",
+    "releaseDate": "24/fev./2022",
     "developers": [
       "FromSoftware, Inc."
     ],
@@ -5187,7 +5187,7 @@
     "storeGenres": [
       {
         "id": "1",
-        "description": "Action"
+        "description": "Ação"
       },
       {
         "id": "3",
@@ -5197,85 +5197,85 @@
     "categories": [
       {
         "id": 2,
-        "description": "Single-player"
+        "description": "Um jogador"
       },
       {
         "id": 1,
-        "description": "Multi-player"
+        "description": "Multijogador"
       },
       {
         "id": 49,
-        "description": "PvP"
+        "description": "JxJ"
       },
       {
         "id": 36,
-        "description": "Online PvP"
+        "description": "JxJ on-line"
       },
       {
         "id": 9,
-        "description": "Co-op"
+        "description": "Cooperativo"
       },
       {
         "id": 38,
-        "description": "Online Co-op"
+        "description": "Cooperativo on-line"
       },
       {
         "id": 22,
-        "description": "Steam Achievements"
+        "description": "Conquistas Steam"
       },
       {
         "id": 28,
-        "description": "Full controller support"
+        "description": "Compat. total com controle"
       },
       {
         "id": 29,
-        "description": "Steam Trading Cards"
+        "description": "Cartas Colecionáveis Steam"
       },
       {
         "id": 67,
-        "description": "Camera Comfort"
+        "description": "Conforto de câmera"
       },
       {
         "id": 68,
-        "description": "Custom Volume Controls"
+        "description": "Controles de volume independentes"
       },
       {
         "id": 74,
-        "description": "Playable without Timed Input"
+        "description": "Jogável sem precisar de reação rápida"
       },
       {
         "id": 79,
-        "description": "Save Anytime"
+        "description": "Salvamento a qualquer momento"
       },
       {
         "id": 69,
-        "description": "Stereo Sound"
+        "description": "Som estéreo"
       },
       {
         "id": 70,
-        "description": "Surround Sound"
+        "description": "Som surround"
       },
       {
         "id": 23,
-        "description": "Steam Cloud"
+        "description": "Nuvem Steam"
       },
       {
         "id": 62,
-        "description": "Family Sharing"
+        "description": "Compartilhamento em família"
       }
     ],
-    "supportedLanguages": "English<strong>*</strong>, French, Italian, German, Spanish - Spain, Japanese, Korean, Polish, Portuguese - Brazil, Russian, Simplified Chinese, Spanish - Latin America, Thai, Traditional Chinese, Arabic<br><strong>*</strong>languages with full audio support",
+    "supportedLanguages": "Inglês<strong>*</strong>, Francês, Italiano, Alemão, Espanhol (Espanha), Japonês, Coreano, Polonês, Português (Brasil), Russo, Chinês simplificado, Espanhol (América Latina), Tailandês, Chinês tradicional, Árabe<br><strong>*</strong>idiomas com suporte total de áudio",
     "priceData": {
-      "currency": "USD",
-      "initial": 5999,
-      "final": 5999,
+      "currency": "BRL",
+      "initial": 27450,
+      "final": 27450,
       "discount_percent": 0,
       "initial_formatted": "",
-      "final_formatted": "$59.99"
+      "final_formatted": "R$ 274,50"
     },
     "pcRequirements": {
-      "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10<br></li><li><strong>Processor:</strong> INTEL CORE I5-8400 or AMD RYZEN 3 3300X<br></li><li><strong>Memory:</strong> 12 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA GEFORCE GTX 1060 3 GB or AMD RADEON RX 580 4 GB<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 60 GB available space<br></li><li><strong>Sound Card:</strong> Windows Compatible Audio Device<br></li><li><strong>Additional Notes:</strong> </li></ul>",
-      "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10/11<br></li><li><strong>Processor:</strong> INTEL CORE I7-8700K or AMD RYZEN 5 3600X<br></li><li><strong>Memory:</strong> 16 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA GEFORCE GTX 1070 8 GB or AMD RADEON RX VEGA 56 8 GB<br></li><li><strong>DirectX:</strong> Version 12<br></li><li><strong>Storage:</strong> 60 GB available space<br></li><li><strong>Sound Card:</strong> Windows Compatible Audio Device<br></li><li><strong>Additional Notes:</strong> </li></ul>"
+      "minimum": "<strong>Mínimos:</strong><br><ul class=\"bb_ul\"><li>Requer um processador e sistema operacional de 64 bits<br></li><li><strong>SO:</strong> Windows 10<br></li><li><strong>Processador:</strong> INTEL CORE I5-8400 or AMD RYZEN 3 3300X<br></li><li><strong>Memória:</strong> 12 GB de RAM<br></li><li><strong>Placa de vídeo:</strong> NVIDIA GEFORCE GTX 1060 3 GB or AMD RADEON RX 580 4 GB<br></li><li><strong>DirectX:</strong> Versão 12<br></li><li><strong>Armazenamento:</strong> 60 GB de espaço disponível<br></li><li><strong>Placa de som:</strong> Windows Compatible Audio Device<br></li><li><strong>Outras observações:</strong> </li></ul>",
+      "recommended": "<strong>Recomendados:</strong><br><ul class=\"bb_ul\"><li>Requer um processador e sistema operacional de 64 bits<br></li><li><strong>SO:</strong> Windows 10/11<br></li><li><strong>Processador:</strong> INTEL CORE I7-8700K or AMD RYZEN 5 3600X<br></li><li><strong>Memória:</strong> 16 GB de RAM<br></li><li><strong>Placa de vídeo:</strong> NVIDIA GEFORCE GTX 1070 8 GB or AMD RADEON RX VEGA 56 8 GB<br></li><li><strong>DirectX:</strong> Versão 12<br></li><li><strong>Armazenamento:</strong> 60 GB de espaço disponível<br></li><li><strong>Placa de som:</strong> Windows Compatible Audio Device<br></li><li><strong>Outras observações:</strong> </li></ul>"
     },
     "screenshots": [
       {
@@ -5331,116 +5331,74 @@
     ],
     "movies": [
       {
-        "id": 256864891,
-        "name": "ELDEN RING - Story Trailer",
-        "thumbnail": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/256864891/5231d5fc8ff9010cc6b18d1905e05f2dfc330457/movie_600x337.jpg?t=1739917119",
+        "id": 256889456,
+        "name": "ELDEN RING Accolades Trailer - UNRATED",
+        "thumbnail": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/256889456/movie.293x165.jpg?t=1654109241",
         "webm": {
-          "480": "http://video.akamai.steamstatic.com/store_trailers/256864891/movie480_vp9.webm?t=1739917119",
-          "max": "http://video.akamai.steamstatic.com/store_trailers/256864891/movie_max_vp9.webm?t=1739917119"
+          "480": "http://video.akamai.steamstatic.com/store_trailers/256889456/movie480_vp9.webm?t=1654109241",
+          "max": "http://video.akamai.steamstatic.com/store_trailers/256889456/movie_max_vp9.webm?t=1654109241"
         },
         "mp4": {
-          "480": "http://video.akamai.steamstatic.com/store_trailers/256864891/movie480.mp4?t=1739917119",
-          "max": "http://video.akamai.steamstatic.com/store_trailers/256864891/movie_max.mp4?t=1739917119"
+          "480": "http://video.akamai.steamstatic.com/store_trailers/256889456/movie480.mp4?t=1654109241",
+          "max": "http://video.akamai.steamstatic.com/store_trailers/256889456/movie_max.mp4?t=1654109241"
         },
         "highlight": true
       },
       {
-        "id": 257002650,
-        "name": "ELDEN RING Shadow of the Erdtree - Gameplay Reveal Trailer",
-        "thumbnail": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/257002650/movie.293x165.jpg?t=1709086258",
+        "id": 256864892,
+        "name": "ELDEN RING CGI Trailer - UNRATED",
+        "thumbnail": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/256864892/movie.293x165.jpg?t=1645830851",
         "webm": {
-          "480": "http://video.akamai.steamstatic.com/store_trailers/257002650/movie480_vp9.webm?t=1709086258",
-          "max": "http://video.akamai.steamstatic.com/store_trailers/257002650/movie_max_vp9.webm?t=1709086258"
+          "480": "http://video.akamai.steamstatic.com/store_trailers/256864892/movie480_vp9.webm?t=1645830851",
+          "max": "http://video.akamai.steamstatic.com/store_trailers/256864892/movie_max_vp9.webm?t=1645830851"
         },
         "mp4": {
-          "480": "http://video.akamai.steamstatic.com/store_trailers/257002650/movie480.mp4?t=1709086258",
-          "max": "http://video.akamai.steamstatic.com/store_trailers/257002650/movie_max.mp4?t=1709086258"
+          "480": "http://video.akamai.steamstatic.com/store_trailers/256864892/movie480.mp4?t=1645830851",
+          "max": "http://video.akamai.steamstatic.com/store_trailers/256864892/movie_max.mp4?t=1645830851"
         },
         "highlight": true
       },
       {
-        "id": 256839312,
-        "name": "ELDEN RING - Official Gameplay Trailer",
-        "thumbnail": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/256839312/3bcf246a6f06cc165a6afb8b15db4626efe10fcf/movie_600x337.jpg?t=1739917125",
+        "id": 256875482,
+        "name": "ELDEN RING Launch Trailer - UNRATED",
+        "thumbnail": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/256875482/movie.293x165.jpg?t=1645743462",
         "webm": {
-          "480": "http://video.akamai.steamstatic.com/store_trailers/256839312/movie480_vp9.webm?t=1739917125",
-          "max": "http://video.akamai.steamstatic.com/store_trailers/256839312/movie_max_vp9.webm?t=1739917125"
+          "480": "http://video.akamai.steamstatic.com/store_trailers/256875482/movie480_vp9.webm?t=1645743462",
+          "max": "http://video.akamai.steamstatic.com/store_trailers/256875482/movie_max_vp9.webm?t=1645743462"
         },
         "mp4": {
-          "480": "http://video.akamai.steamstatic.com/store_trailers/256839312/movie480.mp4?t=1739917125",
-          "max": "http://video.akamai.steamstatic.com/store_trailers/256839312/movie_max.mp4?t=1739917125"
+          "480": "http://video.akamai.steamstatic.com/store_trailers/256875482/movie480.mp4?t=1645743462",
+          "max": "http://video.akamai.steamstatic.com/store_trailers/256875482/movie_max.mp4?t=1645743462"
         },
         "highlight": true
       },
       {
-        "id": 256921983,
-        "name": "ELDEN RING - Colosseum Update Trailer",
-        "thumbnail": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/256921983/997facc1c3f48cafddc7e4d5133a66622c11645b/movie_600x337.jpg?t=1739917128",
+        "id": 256859891,
+        "name": "ELDEN RING Pre-order Trailer - UNRATED",
+        "thumbnail": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/256859891/movie.293x165.jpg?t=1636588786",
         "webm": {
-          "480": "http://video.akamai.steamstatic.com/store_trailers/256921983/movie480_vp9.webm?t=1739917128",
-          "max": "http://video.akamai.steamstatic.com/store_trailers/256921983/movie_max_vp9.webm?t=1739917128"
+          "480": "http://video.akamai.steamstatic.com/store_trailers/256859891/movie480_vp9.webm?t=1636588786",
+          "max": "http://video.akamai.steamstatic.com/store_trailers/256859891/movie_max_vp9.webm?t=1636588786"
         },
         "mp4": {
-          "480": "http://video.akamai.steamstatic.com/store_trailers/256921983/movie480.mp4?t=1739917128",
-          "max": "http://video.akamai.steamstatic.com/store_trailers/256921983/movie_max.mp4?t=1739917128"
+          "480": "http://video.akamai.steamstatic.com/store_trailers/256859891/movie480.mp4?t=1636588786",
+          "max": "http://video.akamai.steamstatic.com/store_trailers/256859891/movie_max.mp4?t=1636588786"
         },
         "highlight": true
       },
       {
-        "id": 257036554,
-        "name": "ELDEN RING Shadow of the Erdtree - Accolades Trailer",
-        "thumbnail": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/257036554/movie.293x165.jpg?t=1720481117",
+        "id": 256843493,
+        "name": "ELDEN RING Official Gameplay Trailer - UNRATED",
+        "thumbnail": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/256843493/movie.293x165.jpg?t=1641422481",
         "webm": {
-          "480": "http://video.akamai.steamstatic.com/store_trailers/257036554/movie480_vp9.webm?t=1720481117",
-          "max": "http://video.akamai.steamstatic.com/store_trailers/257036554/movie_max_vp9.webm?t=1720481117"
+          "480": "http://video.akamai.steamstatic.com/store_trailers/256843493/movie480_vp9.webm?t=1641422481",
+          "max": "http://video.akamai.steamstatic.com/store_trailers/256843493/movie_max_vp9.webm?t=1641422481"
         },
         "mp4": {
-          "480": "http://video.akamai.steamstatic.com/store_trailers/257036554/movie480.mp4?t=1720481117",
-          "max": "http://video.akamai.steamstatic.com/store_trailers/257036554/movie_max.mp4?t=1720481117"
+          "480": "http://video.akamai.steamstatic.com/store_trailers/256843493/movie480.mp4?t=1641422481",
+          "max": "http://video.akamai.steamstatic.com/store_trailers/256843493/movie_max.mp4?t=1641422481"
         },
         "highlight": true
-      },
-      {
-        "id": 257032751,
-        "name": "ELDEN RING Shadow of the Erdtree - Official Launch Trailer",
-        "thumbnail": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/257032751/65f9c2f9b53a005bdcf2b828a7789407907cef92/movie_600x337.jpg?t=1739922032",
-        "webm": {
-          "480": "http://video.akamai.steamstatic.com/store_trailers/257032751/movie480_vp9.webm?t=1739922032",
-          "max": "http://video.akamai.steamstatic.com/store_trailers/257032751/movie_max_vp9.webm?t=1739922032"
-        },
-        "mp4": {
-          "480": "http://video.akamai.steamstatic.com/store_trailers/257032751/movie480.mp4?t=1739922032",
-          "max": "http://video.akamai.steamstatic.com/store_trailers/257032751/movie_max.mp4?t=1739922032"
-        },
-        "highlight": true
-      },
-      {
-        "id": 257028328,
-        "name": "ELDEN RING Shadow of the Erdtree - Story Trailer",
-        "thumbnail": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/257028328/58855f3c493b4ccf5b995880b057dfb031bf0969/movie_600x337.jpg?t=1739922034",
-        "webm": {
-          "480": "http://video.akamai.steamstatic.com/store_trailers/257028328/movie480_vp9.webm?t=1739922034",
-          "max": "http://video.akamai.steamstatic.com/store_trailers/257028328/movie_max_vp9.webm?t=1739922034"
-        },
-        "mp4": {
-          "480": "http://video.akamai.steamstatic.com/store_trailers/257028328/movie480.mp4?t=1739922034",
-          "max": "http://video.akamai.steamstatic.com/store_trailers/257028328/movie_max.mp4?t=1739922034"
-        },
-        "highlight": true
-      },
-      {
-        "id": 256859890,
-        "name": "ELDEN RING - Pre-Order Trailer",
-        "thumbnail": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/256859890/movie.293x165.jpg?t=1716311581",
-        "webm": {
-          "480": "http://video.akamai.steamstatic.com/store_trailers/256859890/movie480_vp9.webm?t=1716311581",
-          "max": "http://video.akamai.steamstatic.com/store_trailers/256859890/movie_max_vp9.webm?t=1716311581"
-        },
-        "mp4": {
-          "480": "http://video.akamai.steamstatic.com/store_trailers/256859890/movie480.mp4?t=1716311581",
-          "max": "http://video.akamai.steamstatic.com/store_trailers/256859890/movie_max.mp4?t=1716311581"
-        },
-        "highlight": false
       }
     ],
     "price": "59.99",
@@ -6049,7 +6007,7 @@
     "isFree": false,
     "requiredAge": 0,
     "website": "https://www.wallpaperengine.io",
-    "releaseDate": "Nov 16, 2018",
+    "releaseDate": "16 Nov, 2018",
     "developers": [
       "Wallpaper Engine Team"
     ],
@@ -6106,12 +6064,12 @@
     ],
     "supportedLanguages": "English, German, Simplified Chinese, Polish, Portuguese - Brazil, French, Italian, Spanish - Spain, Finnish, Japanese, Korean, Swedish, Thai, Traditional Chinese, Turkish, Portuguese - Portugal, Russian, Danish, Czech, Arabic, Ukrainian, Indonesian, Persian",
     "priceData": {
-      "currency": "USD",
-      "initial": 499,
-      "final": 499,
+      "currency": "CAD",
+      "initial": 649,
+      "final": 649,
       "discount_percent": 0,
       "initial_formatted": "",
-      "final_formatted": "$4.99"
+      "final_formatted": "CDN$ 6.49"
     },
     "pcRequirements": {
       "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li><strong>OS:</strong> Windows 10, Windows 11<br></li><li><strong>Processor:</strong> 1.66 GHz Intel i5 or equivalent<br></li><li><strong>Memory:</strong> 1024 MB RAM<br></li><li><strong>Graphics:</strong> HD Graphics 4000 or above<br></li><li><strong>DirectX:</strong> Version 11<br></li><li><strong>Storage:</strong> 512 MB available space<br></li><li><strong>Additional Notes:</strong> Windows N versions require the 'Media Feature Pack' from Microsoft.</li></ul>",
@@ -6240,7 +6198,7 @@
     "isFree": false,
     "requiredAge": "17",
     "website": "https://baldursgate3.game",
-    "releaseDate": "3 Aug, 2023",
+    "releaseDate": "Aug 3, 2023",
     "developers": [
       "Larian Studios"
     ],
@@ -6357,12 +6315,12 @@
     ],
     "supportedLanguages": "English<strong>*</strong>, French, German, Spanish - Spain, Polish, Russian, Simplified Chinese, Turkish, Portuguese - Brazil, Italian, Spanish - Latin America, Traditional Chinese, Ukrainian, Korean, Japanese<br><strong>*</strong>languages with full audio support",
     "priceData": {
-      "currency": "CAD",
-      "initial": 7999,
-      "final": 7999,
+      "currency": "USD",
+      "initial": 5999,
+      "final": 5999,
       "discount_percent": 0,
       "initial_formatted": "",
-      "final_formatted": "CDN$ 79.99"
+      "final_formatted": "$59.99"
     },
     "pcRequirements": {
       "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS:</strong> Windows 10 64-bit<br></li><li><strong>Processor:</strong> Intel I5 4690 / AMD FX 8350<br></li><li><strong>Memory:</strong> 8 GB RAM<br></li><li><strong>Graphics:</strong> Nvidia GTX 970 / RX 480 (4GB+ of VRAM)<br></li><li><strong>DirectX:</strong> Version 11<br></li><li><strong>Storage:</strong> 150 GB available space<br></li><li><strong>Additional Notes:</strong> SSD required</li></ul>",
@@ -6843,7 +6801,7 @@
     "isFree": false,
     "requiredAge": 0,
     "website": "https://gmod.facepunch.com",
-    "releaseDate": "29 Nov, 2006",
+    "releaseDate": "Nov 29, 2006",
     "developers": [
       "Facepunch Studios"
     ],
@@ -6944,12 +6902,12 @@
     ],
     "supportedLanguages": "English<strong>*</strong>, French, Italian, German, Spanish - Spain, Bulgarian, Czech, Danish, Dutch, Finnish, Greek, Hungarian, Japanese, Korean, Norwegian, Polish, Portuguese - Portugal, Portuguese - Brazil, Russian, Simplified Chinese, Swedish, Thai, Traditional Chinese, Turkish, Ukrainian<br><strong>*</strong>languages with full audio support",
     "priceData": {
-      "currency": "CAD",
-      "initial": 1099,
-      "final": 1099,
+      "currency": "USD",
+      "initial": 999,
+      "final": 999,
       "discount_percent": 0,
       "initial_formatted": "",
-      "final_formatted": "CDN$ 10.99"
+      "final_formatted": "$9.99"
     },
     "pcRequirements": {
       "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li><strong>OS:</strong> Windows® 10<br></li><li><strong>Processor:</strong> 2 GHz Processor or better<br></li><li><strong>Memory:</strong> 4 GB RAM<br></li><li><strong>Graphics:</strong> 1GB dedicated VRAM or better<br></li><li><strong>DirectX:</strong> Version 9.0c<br></li><li><strong>Network:</strong> Broadband Internet connection<br></li><li><strong>Storage:</strong> 10 GB available space<br></li><li><strong>Sound Card:</strong> DirectX® 9 compatible<br></li><li><strong>Additional Notes:</strong> Mouse, Keyboard, Monitor</li></ul>",
@@ -8113,7 +8071,7 @@
     "isFree": false,
     "requiredAge": 0,
     "website": "http://www.playark.com",
-    "releaseDate": "27 Aug, 2017",
+    "releaseDate": "Aug 27, 2017",
     "developers": [
       "Studio Wildcard",
       "Instinct Games",
@@ -8198,12 +8156,12 @@
     ],
     "supportedLanguages": "English<strong>*</strong>, French<strong>*</strong>, Italian<strong>*</strong>, German<strong>*</strong>, Spanish - Spain<strong>*</strong>, Russian<strong>*</strong>, Portuguese - Brazil<strong>*</strong>, Simplified Chinese<strong>*</strong>, Czech<strong>*</strong>, Danish<strong>*</strong>, Dutch<strong>*</strong>, Hungarian<strong>*</strong>, Polish<strong>*</strong>, Swedish<strong>*</strong>, Thai<strong>*</strong>, Traditional Chinese<strong>*</strong>, Turkish<strong>*</strong>, Ukrainian<strong>*</strong>, Finnish<strong>*</strong>, Japanese<strong>*</strong>, Korean<strong>*</strong><br><strong>*</strong>languages with full audio support",
     "priceData": {
-      "currency": "GBP",
-      "initial": 1279,
-      "final": 1279,
+      "currency": "USD",
+      "initial": 1499,
+      "final": 1499,
       "discount_percent": 0,
       "initial_formatted": "",
-      "final_formatted": "£12.79"
+      "final_formatted": "$14.99"
     },
     "pcRequirements": {
       "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li><strong>OS *:</strong> Windows 7/8.1/10 (64-bit versions)<br></li><li><strong>Processor:</strong> Intel Core i5-2400/AMD FX-8320 or better<br></li><li><strong>Memory:</strong> 8 GB RAM<br></li><li><strong>Graphics:</strong> NVIDIA GTX 670 2GB/AMD Radeon HD 7870 2GB or better<br></li><li><strong>DirectX:</strong> Version 10<br></li><li><strong>Storage:</strong> 60 GB available space<br></li><li><strong>Additional Notes:</strong> Requires broadband internet connection for multiplayer</li></ul>"
@@ -8465,7 +8423,7 @@
     "isFree": false,
     "requiredAge": 0,
     "website": "http://www.stardewvalley.net",
-    "releaseDate": "26 Feb, 2016",
+    "releaseDate": "Feb 26, 2016",
     "developers": [
       "ConcernedApe"
     ],
@@ -8550,12 +8508,12 @@
     ],
     "supportedLanguages": "English, German, Spanish - Spain, Japanese, Portuguese - Brazil, Russian, Simplified Chinese, French, Italian, Hungarian, Korean, Turkish",
     "priceData": {
-      "currency": "CAD",
-      "initial": 1699,
-      "final": 1699,
+      "currency": "USD",
+      "initial": 1499,
+      "final": 1499,
       "discount_percent": 0,
       "initial_formatted": "",
-      "final_formatted": "CDN$ 16.99"
+      "final_formatted": "$14.99"
     },
     "pcRequirements": {
       "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li><strong>OS *:</strong> Windows Vista or greater<br></li><li><strong>Processor:</strong> 2 Ghz<br></li><li><strong>Memory:</strong> 2 GB RAM<br></li><li><strong>Graphics:</strong> 256 mb video memory, shader model 3.0+<br></li><li><strong>DirectX:</strong> Version 10<br></li><li><strong>Storage:</strong> 500 MB available space</li></ul>"
@@ -11291,7 +11249,7 @@
     "isFree": true,
     "requiredAge": 0,
     "website": "http://www.vrchat.com",
-    "releaseDate": "1 Feb, 2017",
+    "releaseDate": "Feb 1, 2017",
     "developers": [
       "VRChat Inc."
     ],
@@ -11845,12 +11803,12 @@
     ],
     "supportedLanguages": "English, Portuguese - Brazil, Spanish - Latin America, Spanish - Spain, Korean, Russian, French, Italian, German, Dutch, Japanese, Portuguese - Portugal, Simplified Chinese, Traditional Chinese",
     "priceData": {
-      "currency": "USD",
-      "initial": 249,
-      "final": 149,
+      "currency": "CAD",
+      "initial": 649,
+      "final": 389,
       "discount_percent": 40,
-      "initial_formatted": "$2.49",
-      "final_formatted": "$1.49 USD"
+      "initial_formatted": "CDN$ 6.49",
+      "final_formatted": "CDN$ 3.89"
     },
     "pcRequirements": {
       "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li><strong>OS:</strong> Windows 10 x32bit<br></li><li><strong>Processor:</strong> INTEL i3-4330<br></li><li><strong>Memory:</strong> 1 GB RAM<br></li><li><strong>Graphics:</strong> INTEL HD Graphics 4600</li></ul>",
@@ -12191,7 +12149,7 @@
     "isFree": false,
     "requiredAge": "17",
     "website": "https://www.2k.com/en-US/game/borderlands-2/",
-    "releaseDate": "Sep 17, 2012",
+    "releaseDate": "20 Sep, 2012",
     "developers": [
       "Gearbox Software",
       "Aspyr (Mac)",
@@ -12260,12 +12218,12 @@
     ],
     "supportedLanguages": "English<strong>*</strong>, French<strong>*</strong>, German<strong>*</strong>, Italian<strong>*</strong>, Japanese<strong>*</strong>, Spanish - Spain<strong>*</strong>, Korean, Traditional Chinese<br><strong>*</strong>languages with full audio support",
     "priceData": {
-      "currency": "USD",
-      "initial": 1999,
-      "final": 499,
+      "currency": "COP",
+      "initial": 4000000,
+      "final": 1000000,
       "discount_percent": 75,
-      "initial_formatted": "$19.99",
-      "final_formatted": "$4.99"
+      "initial_formatted": "COL$ 40.000",
+      "final_formatted": "COL$ 10.000"
     },
     "pcRequirements": {
       "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li><strong>OS *:</strong> Windows XP SP3<br>\t</li><li><strong>Processor:</strong> 2.4 GHz Dual Core Processor<br>\t</li><li><strong>Memory:</strong> 2 GB(XP)/ 2 GB(Vista)<br>\t</li><li><strong>Hard Disk Space:</strong> 13 GB free<br>\t</li><li><strong>Video Memory:</strong> 256 MB<br>\t</li><li><strong>Video Card:</strong> NVIDIA GeForce 8500 /ATI Radeon HD 2600<br>\t</li><li><strong>Sound:</strong> DirectX 9.0c Compatible<br>\t</li><li><strong>Other Requirements:</strong>Initial installation requires one-time internet connection for Steam authentication; software installations required (included with the game) include Steam Client, DirectX 9, Microsoft .NET 4 Framework, Visual C++ Redistributable 2005, Visual C++ Redistributable 2008, Visual C++ Redistributable 2010, and AMD CPU Drivers (XP Only/AMD Only)</li></ul>",
@@ -12924,7 +12882,7 @@
     "isFree": false,
     "requiredAge": 0,
     "website": "http://www.valheim.com",
-    "releaseDate": "Feb 2, 2021",
+    "releaseDate": "2 Feb, 2021",
     "developers": [
       "Iron Gate AB"
     ],
@@ -12989,12 +12947,12 @@
     ],
     "supportedLanguages": "English, French, German, Spanish - Spain, Russian, Simplified Chinese, Turkish, Japanese, Portuguese - Brazil, Polish, Ukrainian, Italian, Korean, Traditional Chinese",
     "priceData": {
-      "currency": "USD",
-      "initial": 1999,
-      "final": 1999,
+      "currency": "CAD",
+      "initial": 2699,
+      "final": 2699,
       "discount_percent": 0,
       "initial_formatted": "",
-      "final_formatted": "$19.99"
+      "final_formatted": "CDN$ 26.99"
     },
     "pcRequirements": {
       "minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li>Requires a 64-bit processor and operating system<br></li><li><strong>OS *:</strong> Windows 7 or later<br></li><li><strong>Processor:</strong> 2.6 GHz Quad Core or similar<br></li><li><strong>Memory:</strong> 8 GB RAM<br></li><li><strong>Graphics:</strong> GeForce GTX 950 or Radeon HD 7970<br></li><li><strong>DirectX:</strong> Version 11<br></li><li><strong>Storage:</strong> 1 GB available space<br></li><li><strong>Additional Notes:</strong> The following languages have been partially translated by the community: Svenska, Italiano, Romanian, български, македонски, Suomi, Dansk, íslenska, Lietuvių kalba, čeština, Magyar nyelv, Português europeu, 한국어 (불완전한), Norsk, ภาษาไทย, ქართული ენა, Abenaki, Slovenčina</li></ul>",
