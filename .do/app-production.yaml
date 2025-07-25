@@ -15,11 +15,16 @@ services:
       pip install poetry
       poetry config virtualenvs.create false
       poetry install --only=main
-      # Install GitHub CLI and cron
-      curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list
-      apt update
-      apt install -y gh cron jq
+      # Download and install GitHub CLI binary directly (no apt required)
+      curl -L https://github.com/cli/cli/releases/latest/download/gh_linux_amd64.tar.gz -o gh.tar.gz
+      tar -xzf gh.tar.gz
+      mv gh_*/bin/gh /app/gh
+      chmod +x /app/gh
+      rm -rf gh*
+      
+      # Download and install jq binary directly
+      curl -L https://github.com/jqlang/jq/releases/latest/download/jq-linux-amd64 -o /app/jq
+      chmod +x /app/jq
     
     run_command: |
       # Navigate to backend directory
@@ -35,13 +40,14 @@ services:
       python scripts/generate_master_json_direct.py /tmp/master.json --max-pages 15 --max-games 1000
       
       if [ -n "$GITHUB_TOKEN" ] && [ -n "$GITHUB_REPO" ]; then
-        CURRENT_SHA=$(gh api repos/$GITHUB_REPO/contents/master.json --jq '.sha' 2>/dev/null || echo "")
+        export PATH="/app:$PATH"
+        CURRENT_SHA=$(/app/gh api repos/$GITHUB_REPO/contents/master.json --jq '.sha' 2>/dev/null || echo "")
         CONTENT=$(base64 -i /tmp/master.json | tr -d '\n')
         
         if [ -n "$CURRENT_SHA" ]; then
-          gh api repos/$GITHUB_REPO/contents/master.json --method PUT --field message="🎮 Daily update - $(date '+%Y-%m-%d')" --field content="$CONTENT" --field sha="$CURRENT_SHA"
+          /app/gh api repos/$GITHUB_REPO/contents/master.json --method PUT --field message="🎮 Daily update - $(date '+%Y-%m-%d')" --field content="$CONTENT" --field sha="$CURRENT_SHA"
         else
-          gh api repos/$GITHUB_REPO/contents/master.json --method PUT --field message="🎮 Initial data - $(date '+%Y-%m-%d')" --field content="$CONTENT"
+          /app/gh api repos/$GITHUB_REPO/contents/master.json --method PUT --field message="🎮 Initial data - $(date '+%Y-%m-%d')" --field content="$CONTENT"
         fi
         echo "✅ Updated repository"
       fi
@@ -50,19 +56,48 @@ services:
       
       chmod +x /app/run-export.sh
       
-      # Set up cron job
-      echo "0 4 * * * /app/run-export.sh >> /tmp/cron.log 2>&1" | crontab -
+      # Create a simple scheduler that runs daily at 4 AM UTC
+      cat > /app/scheduler.sh << 'EOF'
+      #!/bin/bash
       
-      # Start cron and keep service alive
-      cron
       echo "JSON export service started - daily runs at 4 AM UTC"
       
-      # Run initial export
+      # Run initial export immediately
       /app/run-export.sh
       
-      # Keep service alive by tailing logs
-      touch /tmp/cron.log
-      tail -f /tmp/cron.log
+      # Simple daily scheduler loop
+      while true; do
+        # Calculate seconds until next 4 AM UTC
+        current_hour=$(date -u +%H)
+        current_min=$(date -u +%M)
+        current_sec=$(date -u +%S)
+        
+        # Convert current time to seconds since midnight
+        current_seconds=$((current_hour * 3600 + current_min * 60 + current_sec))
+        
+        # Target time: 4 AM = 4 * 3600 = 14400 seconds
+        target_seconds=14400
+        
+        if [ $current_seconds -lt $target_seconds ]; then
+          # Next run is today at 4 AM
+          sleep_seconds=$((target_seconds - current_seconds))
+        else
+          # Next run is tomorrow at 4 AM
+          sleep_seconds=$((86400 - current_seconds + target_seconds))
+        fi
+        
+        echo "Next export scheduled in $sleep_seconds seconds ($(date -u -d "+${sleep_seconds} seconds" '+%Y-%m-%d %H:%M:%S UTC'))"
+        sleep $sleep_seconds
+        
+        # Run the export
+        /app/run-export.sh
+      done
+      EOF
+      
+      chmod +x /app/scheduler.sh
+      
+      # Start the scheduler
+      /app/scheduler.sh
     
     envs:
       - key: PYTHONPATH
