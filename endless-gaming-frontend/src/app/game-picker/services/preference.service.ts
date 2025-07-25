@@ -18,7 +18,8 @@ export class PreferenceService {
   private preferenceSummary$ = new BehaviorSubject<PreferenceSummary>({ likedTags: [], dislikedTags: [] });
   private weightVector: Float32Array = new Float32Array(0);
   private tagDict: TagDictionary | null = null;
-  private comparisonCount = 0;
+  private actualVoteCount = 0; // Only counts non-skip votes that contribute to learning
+  private totalComparisonCount = 0; // Counts all comparisons including skips (for compatibility)
   private readonly learningRate = 0.1;
   private readonly STORAGE_KEY = 'endless-gaming-preferences';
   
@@ -29,6 +30,18 @@ export class PreferenceService {
     timestamp: number;
     weightUpdate: { winnerVec: any; loserVec: any; gradient: number; };
   }> = [];
+
+  /**
+   * Record a skip (comparison made but no preference learned).
+   * This increments total comparison count but not actual vote count.
+   */
+  recordSkip(): void {
+    this.totalComparisonCount++;
+    console.log(`⏭️ Skip recorded - Total comparisons: ${this.totalComparisonCount}, Actual votes: ${this.actualVoteCount}`);
+    
+    // Save to localStorage to persist skip count
+    this.saveToLocalStorage();
+  }
 
   /**
    * Update preferences based on a user choice.
@@ -67,7 +80,9 @@ export class PreferenceService {
     this.updateWeightsFromVector(winnerVec, gradient * this.learningRate);
     this.updateWeightsFromVector(loserVec, -gradient * this.learningRate);
 
-    this.comparisonCount++;
+    // Increment actual vote count (this was a real preference, not a skip)
+    this.actualVoteCount++;
+    this.totalComparisonCount++; // Keep total for compatibility
     this.updatePreferenceSummary();
     
     // Save to localStorage after each vote
@@ -162,7 +177,8 @@ export class PreferenceService {
     if (this.tagDict) {
       this.weightVector = new Float32Array(this.tagDict.size);
     }
-    this.comparisonCount = 0;
+    this.actualVoteCount = 0;
+    this.totalComparisonCount = 0;
     this.preferenceHistory = [];
     this.clearLocalStorage();
     this.updatePreferenceSummary();
@@ -175,7 +191,8 @@ export class PreferenceService {
   initializeModel(tagDict: TagDictionary): void {
     this.tagDict = tagDict;
     this.weightVector = new Float32Array(tagDict.size);
-    this.comparisonCount = 0;
+    this.actualVoteCount = 0;
+    this.totalComparisonCount = 0;
     this.preferenceHistory = [];
     
     // Try to load existing preferences from localStorage
@@ -191,7 +208,9 @@ export class PreferenceService {
   getPreferenceState(): UserPreferenceState {
     return {
       weightVector: Array.from(this.weightVector),
-      comparisonCount: this.comparisonCount,
+      comparisonCount: this.actualVoteCount, // Save actual votes as comparisonCount for compatibility
+      actualVoteCount: this.actualVoteCount, // Explicit field for clarity
+      totalComparisonCount: this.totalComparisonCount, // Include skips
       tagDict: this.tagDict
     };
   }
@@ -204,7 +223,11 @@ export class PreferenceService {
     if (state.tagDict) {
       this.tagDict = state.tagDict;
       this.weightVector = new Float32Array(state.weightVector);
-      this.comparisonCount = state.comparisonCount;
+      
+      // Handle both old and new state formats
+      this.actualVoteCount = state.actualVoteCount || state.comparisonCount || 0;
+      this.totalComparisonCount = state.totalComparisonCount || state.comparisonCount || 0;
+      
       this.updatePreferenceSummary();
     }
   }
@@ -223,10 +246,26 @@ export class PreferenceService {
   }
 
   /**
-   * Get current comparison count.
+   * Get current actual vote count (excludes skips).
+   * This is the count that matters for preference learning and auto-navigation.
    */
   getComparisonCount(): number {
-    return this.comparisonCount;
+    return this.actualVoteCount;
+  }
+
+  /**
+   * Get actual vote count (same as getComparisonCount, but more explicit).
+   */
+  getActualVoteCount(): number {
+    return this.actualVoteCount;
+  }
+
+  /**
+   * Get total comparison count (includes skips).
+   * Useful for UI progress tracking.
+   */
+  getTotalComparisonCount(): number {
+    return this.totalComparisonCount;
   }
 
   /**
@@ -240,7 +279,7 @@ export class PreferenceService {
    * - Weight distribution (focused weights = higher confidence)
    */
   getModelConfidence(): number {
-    if (!this.tagDict || this.comparisonCount === 0) {
+    if (!this.tagDict || this.actualVoteCount === 0) {
       return 0;
     }
 
@@ -313,7 +352,7 @@ export class PreferenceService {
     const currentSummary = this.preferenceSummary$.value;
     const hasPreferences = currentSummary.likedTags.length > 0 || currentSummary.dislikedTags.length > 0;
 
-    console.log(`🔍 Preference Debug [Vote ${this.comparisonCount}]:`, {
+    console.log(`🔍 Preference Debug [Vote ${this.actualVoteCount}]:`, {
       hasPreferences,
       weightMagnitude: weightMagnitude.toFixed(3),
       nonZeroWeights: nonZeroWeights.length,
@@ -395,6 +434,8 @@ export class PreferenceService {
         const state: UserPreferenceState = JSON.parse(storedData);
         console.log('🔄 Parsed state:', {
           comparisonCount: state.comparisonCount,
+          actualVoteCount: state.actualVoteCount,
+          totalComparisonCount: state.totalComparisonCount,
           weightVectorLength: state.weightVector?.length,
           hasTagDict: !!state.tagDict
         });
@@ -405,8 +446,12 @@ export class PreferenceService {
             JSON.stringify(state.tagDict.tagToIndex) === JSON.stringify(this.tagDict.tagToIndex)) {
           
           this.weightVector = new Float32Array(state.weightVector);
-          this.comparisonCount = state.comparisonCount;
-          console.log(`🔄 Successfully loaded ${this.comparisonCount} votes from localStorage`);
+          
+          // Handle both old and new state formats for backwards compatibility
+          this.actualVoteCount = state.actualVoteCount || state.comparisonCount || 0;
+          this.totalComparisonCount = state.totalComparisonCount || state.comparisonCount || 0;
+          
+          console.log(`🔄 Successfully loaded ${this.actualVoteCount} actual votes (${this.totalComparisonCount} total comparisons) from localStorage`);
         } else {
           console.log('🔄 Tag dictionary mismatch:');
           console.log('  - Stored size:', state.tagDict?.size, 'Current size:', this.tagDict?.size);
@@ -435,8 +480,9 @@ export class PreferenceService {
 
   /**
    * Check if user has sufficient votes for recommendations.
+   * Only counts actual votes, not skips.
    */
   hasMinimumVotes(minVotes: number = 5): boolean {
-    return this.comparisonCount >= minVotes;
+    return this.actualVoteCount >= minVotes;
   }
 }

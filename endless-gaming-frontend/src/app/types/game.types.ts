@@ -70,7 +70,9 @@ export interface GamePair {
  */
 export interface UserPreferenceState {
   weightVector: number[];      // Dense weight vector (serializable)
-  comparisonCount: number;     // Number of comparisons made
+  comparisonCount: number;     // Number of comparisons made (for compatibility, same as actualVoteCount)
+  actualVoteCount?: number;    // Number of actual votes (excludes skips) - optional for backwards compatibility
+  totalComparisonCount?: number; // Total comparisons including skips - optional for backwards compatibility
   tagDict: TagDictionary | null; // Associated tag dictionary
 }
 

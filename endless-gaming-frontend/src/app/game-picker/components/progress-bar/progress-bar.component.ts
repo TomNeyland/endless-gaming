@@ -74,7 +74,7 @@ export class ProgressBarComponent implements OnInit, OnDestroy {
       return 'No progress data';
     }
     
-    return `${this.progress.current} / ${this.progress.total} comparisons`;
+    return `${this.progress.current} / ${this.progress.total} votes`;
   }
 
   /**
@@ -122,7 +122,7 @@ export class ProgressBarComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get remaining comparisons.
+   * Get remaining votes needed.
    */
   getRemainingCount(): number {
     if (!this.hasProgress() || !this.progress) {

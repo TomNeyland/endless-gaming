@@ -25,6 +25,9 @@ export class PairService {
     timestamp: number;
   }> = [];
   
+  // Track actual votes separately from skips for progress tracking
+  private actualVotes = 0;
+  
   private usedPairs = new Set<string>(); // Track all used pairs to prevent duplicates
   
   // Performance caches
@@ -53,8 +56,8 @@ export class PairService {
       return null;
     }
 
-    // Bootstrap phase: use random pairs for first few comparisons
-    if (this.choiceHistory.length < 3) {
+    // Bootstrap phase: use random pairs for first few votes
+    if (this.actualVotes < 3) {
       console.log('🎲 PairService: Bootstrap phase - getting random pair');
       return this.getRandomPair();
     }
@@ -62,8 +65,8 @@ export class PairService {
     // Preference-guided sampling phase (comparisons 4+)
     console.log('🎲 PairService: Preference-guided sampling phase');
     
-    // In infinite mode with many comparisons, focus on top games
-    if (this.infiniteMode && this.choiceHistory.length >= this.TARGET_COMPARISONS) {
+    // In infinite mode with many votes, focus on top games
+    if (this.infiniteMode && this.actualVotes >= this.TARGET_COMPARISONS) {
       console.log('🎲 PairService: Infinite mode - focusing on top games');
       return this.getTopGamesPair();
     }
@@ -91,11 +94,16 @@ export class PairService {
 
     // Update preferences if not skipped
     if (pick === 'left') {
+      this.actualVotes++;
       this.preferenceService.updatePreferences(leftGame, rightGame);
       this.invalidateCaches(); // Preference model changed
     } else if (pick === 'right') {
+      this.actualVotes++;
       this.preferenceService.updatePreferences(rightGame, leftGame);
       this.invalidateCaches(); // Preference model changed
+    } else if (pick === 'skip') {
+      // Record skip for proper counting (doesn't contribute to ML model)
+      this.preferenceService.recordSkip();
     }
   }
 
@@ -122,9 +130,9 @@ export class PairService {
       return true;
     }
     
-    // Normal mode: check target comparisons
-    if (this.choiceHistory.length >= this.TARGET_COMPARISONS) {
-      console.log('🎲 PairService: hasMorePairs = false (reached target)');
+    // Normal mode: check target votes
+    if (this.actualVotes >= this.TARGET_COMPARISONS) {
+      console.log('🎲 PairService: hasMorePairs = false (reached target votes)');
       return false;
     }
     
@@ -150,7 +158,7 @@ export class PairService {
     const total = Math.min(this.TARGET_COMPARISONS, maxPossiblePairs);
     
     return {
-      current: this.choiceHistory.length,
+      current: this.actualVotes, // Only count actual votes, not skips
       total: total
     };
   }
@@ -180,6 +188,7 @@ export class PairService {
    */
   resetProgress(): void {
     this.choiceHistory = [];
+    this.actualVotes = 0;
     this.usedPairs.clear(); // Clear used pairs to allow all pairs again
     this.invalidateCaches(); // Clear performance caches
     this.preferenceService.resetPreferences();
@@ -285,11 +294,11 @@ export class PairService {
       return null;
     }
 
-    // Determine preference pool size based on comparison count (progressive targeting)
+    // Determine preference pool size based on actual vote count (progressive targeting)
     let preferencePercentile: number;
-    if (this.choiceHistory.length < 7) {
+    if (this.actualVotes < 7) {
       preferencePercentile = 0.5; // Top 50% (moderate targeting)
-    } else if (this.choiceHistory.length < 15) {
+    } else if (this.actualVotes < 15) {
       preferencePercentile = 0.3; // Top 30% (higher targeting)
     } else {
       preferencePercentile = 0.2; // Top 20% (maximum targeting)
