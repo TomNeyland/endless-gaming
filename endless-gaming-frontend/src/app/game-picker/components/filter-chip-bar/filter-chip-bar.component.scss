@@ -1,0 +1,375 @@
+// Filter chip bar styling - compact horizontal layout
+.filter-chip-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  background: transparent;
+  border-radius: 8px;
+  flex-wrap: wrap;
+  
+  // Smooth entrance animation
+  animation: slideInFromTop 0.3s ease-out;
+  
+  // Filter toggle button
+  .filter-toggle-button {
+    border-radius: 24px;
+    font-weight: 600;
+    text-transform: none;
+    min-width: 100px;
+    height: 40px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+    transition: all 0.2s ease;
+    
+    &:hover {
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      transform: translateY(-1px);
+    }
+    
+    .button-text {
+      margin-left: 8px;
+      font-size: 14px;
+    }
+    
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+  
+  // Active filters container
+  .active-filters-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0; // Allow shrinking
+    
+    .filter-chips {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex: 1;
+      min-width: 0; // Allow shrinking
+      
+      .filter-chip {
+        max-height: 32px;
+        border-radius: 16px;
+        font-size: 12px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        cursor: default;
+        
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .filter-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+          margin-right: 4px;
+        }
+        
+        .filter-content {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          
+          .filter-label {
+            opacity: 0.8;
+            font-weight: 400;
+          }
+          
+          .filter-value {
+            font-weight: 600;
+          }
+        }
+        
+        mat-icon[matChipRemove] {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+          margin-left: 4px;
+          opacity: 0.7;
+          
+          &:hover {
+            opacity: 1;
+          }
+        }
+        
+        // Type-specific styling
+        &.filter-chip-search {
+          background-color: #e3f2fd;
+          color: #1976d2;
+          
+          .filter-icon {
+            color: #1976d2;
+          }
+        }
+        
+        &.filter-chip-price {
+          background-color: #e8f5e8;
+          color: #2e7d32;
+          
+          .filter-icon {
+            color: #4caf50;
+          }
+        }
+        
+        &.filter-chip-required-tag {
+          background-color: #fff3e0;
+          color: #ef6c00;
+          
+          .filter-icon {
+            color: #ff9800;
+          }
+        }
+        
+        &.filter-chip-excluded-tag {
+          background-color: #ffebee;
+          color: #c62828;
+          
+          .filter-icon {
+            color: #f44336;
+          }
+        }
+        
+        &.filter-chip-review {
+          background-color: #f3e5f5;
+          color: #6a1b9a;
+          
+          .filter-icon {
+            color: #9c27b0;
+          }
+        }
+        
+        &.filter-chip-limit {
+          background-color: #e0f2f1;
+          color: #00695c;
+          
+          .filter-icon {
+            color: #009688;
+          }
+        }
+        
+        &.filter-chip-developer,
+        &.filter-chip-publisher {
+          background-color: #e8eaf6;
+          color: #3f51b5;
+          
+          .filter-icon {
+            color: #5c6bc0;
+          }
+        }
+      }
+      
+      // More filters chip
+      .more-filters-chip {
+        background-color: #f5f5f5;
+        color: #666;
+        border: 1px dashed #ccc;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background-color: #eeeeee;
+          border-color: #999;
+          transform: translateY(-1px);
+        }
+        
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+          margin-right: 4px;
+        }
+      }
+    }
+    
+    // Clear all button
+    .clear-all-button {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        transform: scale(1.1);
+        background-color: rgba(244, 67, 54, 0.1);
+      }
+      
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+  
+  // Results indicator
+  .results-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background-color: rgba(102, 126, 234, 0.1);
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--mdc-theme-primary, #667eea);
+    flex-shrink: 0;
+    
+    .results-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+    
+    .results-text {
+      white-space: nowrap;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .filter-chip-bar {
+    gap: 12px;
+    padding: 8px 0;
+    
+    .filter-toggle-button {
+      min-width: 80px;
+      height: 36px;
+      
+      .button-text {
+        display: none; // Hide text on mobile, show only icon
+      }
+    }
+    
+    .active-filters-container {
+      gap: 8px;
+      
+      .filter-chips {
+        gap: 6px;
+        
+        .filter-chip {
+          max-height: 28px;
+          font-size: 11px;
+          
+          .filter-content {
+            .filter-label {
+              display: none; // Hide labels on mobile for space
+            }
+          }
+          
+          .filter-icon {
+            font-size: 14px;
+            width: 14px;
+            height: 14px;
+          }
+        }
+      }
+      
+      .clear-all-button {
+        width: 32px;
+        height: 32px;
+        
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+    
+    .results-indicator {
+      padding: 4px 8px;
+      font-size: 11px;
+      
+      .results-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+      }
+    }
+  }
+}
+
+// Very small screens (phones in portrait)
+@media (max-width: 480px) {
+  .filter-chip-bar {
+    .active-filters-container .filter-chips {
+      .filter-chip {
+        .filter-content .filter-value {
+          max-width: 80px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+}
+
+// Animation keyframes
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// Focus and accessibility
+.filter-chip-bar {
+  button:focus-visible {
+    outline: 2px solid var(--mdc-theme-primary, #667eea);
+    outline-offset: 2px;
+  }
+  
+  .filter-chip:focus-within {
+    outline: 2px solid var(--mdc-theme-primary, #667eea);
+    outline-offset: 2px;
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .filter-chip-bar {
+    .filter-chip {
+      border: 1px solid #000;
+      
+      &.filter-chip-search,
+      &.filter-chip-price,
+      &.filter-chip-required-tag,
+      &.filter-chip-excluded-tag,
+      &.filter-chip-review,
+      &.filter-chip-limit,
+      &.filter-chip-developer,
+      &.filter-chip-publisher {
+        color: #000;
+        background-color: #fff;
+      }
+    }
+    
+    .more-filters-chip {
+      border: 2px dashed #000;
+      color: #000;
+      background-color: #fff;
+    }
+  }
+}
+
+// Print styles (hide when printing)
+@media print {
+  .filter-chip-bar {
+    display: none;
+  }
+}

@@ -1,11 +1,46 @@
-<div class="recommendation-list">
-    <!-- Subtle Loading Indicator -->
-    @if (isRefreshing()) {
-      <div class="subtle-refresh-indicator">
-        <mat-spinner diameter="16" strokeWidth="2"></mat-spinner>
-        <span>Updating...</span>
-      </div>
-    }
+<div class="recommendation-list-container">
+  
+  <!-- Filter System -->
+  <div class="filter-section">
+    <!-- Filter Chip Bar -->
+    <app-filter-chip-bar
+      [showFilterButton]="true"
+      (filterButtonClick)="openFilterPanel()"
+      (clearAllClick)="closeFilterPanel()">
+    </app-filter-chip-bar>
+  </div>
+
+  <!-- Main Content with Sidebar Layout -->
+  <mat-sidenav-container class="main-container">
+    
+    <!-- Filter Panel Sidebar -->
+    <mat-sidenav 
+      #filterSidenav
+      mode="side"
+      position="end"
+      [opened]="isFilterPanelOpen()"
+      (openedChange)="onFilterPanelOpenChange($event)"
+      class="filter-sidebar">
+      
+      <app-filter-panel
+        [games]="games"
+        [isOpen]="isFilterPanelOpen()"
+        (openChange)="onFilterPanelOpenChange($event)"
+        (filtersApplied)="closeFilterPanel()">
+      </app-filter-panel>
+      
+    </mat-sidenav>
+
+    <!-- Main Recommendations Content -->
+    <mat-sidenav-content class="recommendations-content">
+      <div class="recommendation-list">
+        <!-- Subtle Loading Indicator -->
+        @if (isRefreshing()) {
+          <div class="subtle-refresh-indicator">
+            <mat-spinner diameter="16" strokeWidth="2"></mat-spinner>
+            <span>Updating...</span>
+          </div>
+        }
     
     @if (hasRecommendations()) {
     <!-- Top 3 Premium Recommendations -->
@@ -154,14 +189,25 @@
       </button>
 
     } @else {
-    <mat-card class="no-recommendations">
-      <mat-card-content>
-        <div class="no-recommendations-content">
-          <mat-icon class="large-icon">sentiment_very_dissatisfied</mat-icon>
-          <h2 class="mat-headline-5">No Recommendations Available</h2>
-          <p class="mat-body-1">Complete some game comparisons to get personalized recommendations!</p>
-        </div>
-      </mat-card-content>
-    </mat-card>
-    }
+        <mat-card class="no-recommendations">
+          <mat-card-content>
+            <div class="no-recommendations-content">
+              <mat-icon class="large-icon">sentiment_very_dissatisfied</mat-icon>
+              <h2 class="mat-headline-5">No Recommendations Available</h2>
+              <p class="mat-body-1">
+                @if (isFiltering()) {
+                  No games match your current filters. Try adjusting your filter criteria.
+                } @else {
+                  Complete some game comparisons to get personalized recommendations!
+                }
+              </p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+        }
+      </div>
+    </mat-sidenav-content>
+    
+  </mat-sidenav-container>
+  
 </div>

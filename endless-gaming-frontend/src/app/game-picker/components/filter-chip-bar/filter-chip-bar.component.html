@@ -1,0 +1,96 @@
+@if (shouldShow()) {
+  <div class="filter-chip-bar">
+    
+    <!-- Filter Button -->
+    @if (showFilterButton) {
+      <button 
+        mat-raised-button 
+        color="primary"
+        class="filter-toggle-button"
+        (click)="openFilterPanel()"
+        [matTooltip]="getFilterButtonTooltip()">
+        
+        <mat-icon 
+          [matBadge]="activeFilterCount()" 
+          [matBadgeHidden]="activeFilterCount() === 0"
+          matBadgeColor="accent"
+          matBadgeSize="small">
+          tune
+        </mat-icon>
+        
+        <span class="button-text">
+          {{ isFiltering() ? 'Filters' : 'Filter' }}
+        </span>
+      </button>
+    }
+    
+    <!-- Active Filter Chips -->
+    @if (isFiltering()) {
+      <div class="active-filters-container">
+        
+        <!-- Individual Filter Chips -->
+        <mat-chip-set class="filter-chips">
+          @for (filter of getVisibleFilters(); track trackByFilter($index, filter)) {
+            <mat-chip 
+              [class]="getFilterChipClass(filter.type)"
+              class="filter-chip"
+              (removed)="removeFilter(filter.type, filter.value)"
+              [matTooltip]="filter.label + ': ' + filter.value">
+              
+              <mat-icon class="filter-icon">{{ getFilterIcon(filter.type) }}</mat-icon>
+              
+              <span class="filter-content">
+                <span class="filter-label">{{ filter.label }}:</span>
+                <span class="filter-value">{{ formatFilterValue(filter.value) }}</span>
+              </span>
+              
+              <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+          }
+          
+          <!-- "Show More" chip when there are hidden filters -->
+          @if (getHiddenFilterCount() > 0 && !showAllChips) {
+            <mat-chip 
+              class="more-filters-chip"
+              (click)="toggleShowAllChips()"
+              [matTooltip]="'Click to show ' + getHiddenFilterCount() + ' more filters'">
+              <mat-icon>more_horiz</mat-icon>
+              <span>+{{ getHiddenFilterCount() }} more</span>
+            </mat-chip>
+          }
+          
+          <!-- "Show Less" chip when all chips are visible -->
+          @if (showAllChips && activeFilters.length > maxVisibleChips) {
+            <mat-chip 
+              class="more-filters-chip"
+              (click)="toggleShowAllChips()"
+              matTooltip="Click to show fewer filters">
+              <mat-icon>expand_less</mat-icon>
+              <span>show less</span>
+            </mat-chip>
+          }
+        </mat-chip-set>
+        
+        <!-- Clear All Button -->
+        <button 
+          mat-icon-button 
+          class="clear-all-button"
+          (click)="clearAllFilters()"
+          [matTooltip]="getClearAllTooltip()"
+          color="warn">
+          <mat-icon>clear_all</mat-icon>
+        </button>
+        
+      </div>
+    }
+    
+    <!-- Results Count (when filtering) -->
+    @if (isFiltering()) {
+      <div class="results-indicator">
+        <mat-icon class="results-icon">filter_list</mat-icon>
+        <span class="results-text">{{ activeFilterCount() }} active</span>
+      </div>
+    }
+    
+  </div>
+}

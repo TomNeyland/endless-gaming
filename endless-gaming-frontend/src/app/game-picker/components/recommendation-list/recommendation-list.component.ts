@@ -8,11 +8,15 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { GameRecommendation, GameRecord } from '../../../types/game.types';
 import { PreferenceService } from '../../services/preference.service';
 import { PairService } from '../../services/pair.service';
 import { AnimationService } from '../../services/animation.service';
 import { VotingDrawerService } from '../../services/voting-drawer.service';
+import { GameFilterService } from '../../services/game-filter.service';
+import { FilterPanelComponent } from '../filter-panel/filter-panel.component';
+import { FilterChipBarComponent } from '../filter-chip-bar/filter-chip-bar.component';
 import { Subscription } from 'rxjs';
 
 /**
@@ -33,7 +37,10 @@ import { Subscription } from 'rxjs';
     MatChipsModule,
     MatBadgeModule,
     MatTooltipModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatSidenavModule,
+    FilterPanelComponent,
+    FilterChipBarComponent
   ],
   templateUrl: './recommendation-list.component.html',
   styleUrl: './recommendation-list.component.scss'
@@ -43,23 +50,32 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   private pairService = inject(PairService);
   private animationService = inject(AnimationService);
   private votingDrawerService = inject(VotingDrawerService);
+  private gameFilterService = inject(GameFilterService);
   private preferenceSummarySubscription?: Subscription;
+  private filterSubscription?: Subscription;
   
   @Input() games: GameRecord[] = [];
   @Input() maxRecommendations: number = 100;
   
   recommendations: GameRecommendation[] = [];
+  filteredRecommendations: GameRecommendation[] = [];
   
   // Reactive state for live updates
   public readonly isRefreshing = signal(false);
   public readonly lastUpdateTime = signal<Date | null>(null);
   
+  // Filter panel state
+  public readonly isFilterPanelOpen = signal(false);
+  public readonly isFiltering = this.gameFilterService.isFiltering;
+  
   // Track which games have expanded tags
   public expandedTags = new Set<number>();
 
   ngOnInit(): void {
+    this.initializeFilters();
     this.generateRecommendations();
     this.subscribeToPreferenceUpdates();
+    this.subscribeToFilterUpdates();
     
     // Auto-open voting drawer when user reaches recommendations page
     setTimeout(() => {
@@ -69,6 +85,16 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.preferenceSummarySubscription?.unsubscribe();
+    this.filterSubscription?.unsubscribe();
+  }
+
+  /**
+   * Initialize filter service with game data
+   */
+  private initializeFilters(): void {
+    if (this.games.length > 0) {
+      this.gameFilterService.initializeOptions(this.games);
+    }
   }
 
   /**
@@ -85,16 +111,29 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Subscribe to filter changes to update displayed recommendations
+   */
+  private subscribeToFilterUpdates(): void {
+    this.filterSubscription = this.gameFilterService.getFilters().subscribe(() => {
+      this.applyFiltersToRecommendations();
+    });
+  }
+
+  /**
    * Generate recommendations from input games using ML model.
    */
   private generateRecommendations(): void {
     if (this.games.length === 0) {
       this.recommendations = [];
+      this.filteredRecommendations = [];
       return;
     }
 
     this.recommendations = this.preferenceService.rankGames(this.games)
       .slice(0, this.maxRecommendations);
+    
+    // Apply filters to the generated recommendations
+    this.applyFiltersToRecommendations();
   }
 
   /**
@@ -115,6 +154,9 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
     // Generate new recommendations immediately
     this.recommendations = this.preferenceService.rankGames(this.games)
       .slice(0, this.maxRecommendations);
+    
+    // Apply filters to the new recommendations
+    this.applyFiltersToRecommendations();
     
     // Update timestamps
     this.lastUpdateTime.set(new Date());
@@ -143,6 +185,13 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
     
     // Emit change event for potential parent components
     this.onRecommendationsUpdated(previousRecommendations, this.recommendations);
+  }
+
+  /**
+   * Apply current filters to recommendations
+   */
+  private applyFiltersToRecommendations(): void {
+    this.filteredRecommendations = this.gameFilterService.applyFiltersToRecommendations(this.recommendations);
   }
 
   /**
@@ -224,28 +273,28 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
    * Check if recommendations are available.
    */
   hasRecommendations(): boolean {
-    return this.recommendations.length > 0;
+    return this.filteredRecommendations.length > 0;
   }
 
   /**
-   * Get recommendations for display (limited by maxRecommendations).
+   * Get recommendations for display (filtered).
    */
   getDisplayRecommendations(): GameRecommendation[] {
-    return this.recommendations;
+    return this.filteredRecommendations;
   }
 
   /**
    * Get top 3 premium recommendations for featured display.
    */
   getTopRecommendations(): GameRecommendation[] {
-    return this.recommendations.slice(0, 3);
+    return this.filteredRecommendations.slice(0, 3);
   }
 
   /**
    * Get remaining recommendations for compact list display.
    */
   getCompactRecommendations(): GameRecommendation[] {
-    return this.recommendations.slice(3);
+    return this.filteredRecommendations.slice(3);
   }
 
   /**
@@ -350,7 +399,28 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
    */
   getRecommendationPercentage(): number {
     if (this.games.length === 0) return 0;
-    return Math.round((this.recommendations.length / this.games.length) * 100);
+    return Math.round((this.filteredRecommendations.length / this.games.length) * 100);
+  }
+
+  /**
+   * Open the filter panel
+   */
+  public openFilterPanel(): void {
+    this.isFilterPanelOpen.set(true);
+  }
+
+  /**
+   * Close the filter panel
+   */
+  public closeFilterPanel(): void {
+    this.isFilterPanelOpen.set(false);
+  }
+
+  /**
+   * Handle filter panel open/close events
+   */
+  public onFilterPanelOpenChange(isOpen: boolean): void {
+    this.isFilterPanelOpen.set(isOpen);
   }
 
   /**
@@ -364,11 +434,11 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
    * Get score range for display.
    */
   getScoreRange(): { min: number, max: number } {
-    if (this.recommendations.length === 0) {
+    if (this.filteredRecommendations.length === 0) {
       return { min: 0, max: 0 };
     }
 
-    const scores = this.recommendations.map(r => r.score);
+    const scores = this.filteredRecommendations.map(r => r.score);
     return {
       min: Math.min(...scores),
       max: Math.max(...scores)
