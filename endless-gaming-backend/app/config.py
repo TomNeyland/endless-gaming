@@ -24,6 +24,10 @@ class Config:
     
     # CORS settings
     CORS_ORIGINS = os.environ.get('CORS_ORIGINS', '*').split(',')
+    
+    # Steam API settings
+    STEAM_API_KEY = os.environ.get('STEAM_API_KEY')
+    STEAM_API_BASE_URL = 'https://api.steampowered.com'
 
 
 class DevelopmentConfig(Config):
