@@ -210,8 +210,47 @@
       }
     }
   }
+}
 
-
+// ONLY target Steam images in tab content (not gallery or header)
+::ng-deep .game-details-modal .content-tabs .tab-content {
+  // Nuclear option: Force ALL images in tab content ONLY to be reasonable size
+  img {
+    display: block !important;
+    margin: 16px auto !important;
+    max-width: 600px !important;
+    max-height: 400px !important;
+    height: auto !important;
+    width: auto !important;
+    object-fit: contain !important;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    float: none !important;
+  }
+  
+  // Also target common Steam classes and containers
+  .bb_img_ctn,
+  .bb_img_ctn img,
+  [class*="bb_"] img {
+    display: block !important;
+    margin: 16px auto !important;
+    max-width: 600px !important;
+    max-height: 400px !important;
+    height: auto !important;
+    width: auto !important;
+    object-fit: contain !important;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    float: none !important;
+  }
+  
+  // Center any containers
+  .bb_img_ctn,
+  div:has(img),
+  p:has(img) {
+    text-align: center !important;
+    display: block !important;
+  }
 }
 
 // Responsive Design

@@ -11,7 +11,6 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { GameRecord, Screenshot, Movie } from '../../../types/game.types';
 import { formatGameAge, getAgeBadge } from '../../../utils/game-age.utils';
 import { MediaGalleryComponent, MediaGalleryEvent } from '../../../shared/components/media-gallery/media-gallery.component';
-import { CollapsibleSectionComponent } from '../../../shared/components/collapsible-section/collapsible-section.component';
 
 export interface GameDetailsModalData {
   game: GameRecord;
@@ -36,8 +35,7 @@ export interface GameDetailsModalData {
     MatIconModule,
     MatChipsModule,
     MatTooltipModule,
-    MediaGalleryComponent,
-    CollapsibleSectionComponent
+    MediaGalleryComponent
   ],
   templateUrl: './game-details-modal.component.html',
   styleUrl: './game-details-modal.component.scss'

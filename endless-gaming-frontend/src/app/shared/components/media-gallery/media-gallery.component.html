@@ -2,61 +2,60 @@
   
   @if (hasMedia()) {
     
-    <!-- Hero Featured Media Section -->
-    @if (featuredItem) {
-      <div class="hero-section">
-        <div class="hero-container" (click)="onFeaturedItemClick()">
-          
-          <!-- Featured Screenshot -->
-          @if (featuredItemType === 'screenshot' && isScreenshot(featuredItem)) {
-            <div class="hero-screenshot" [@hoverScale]="'default'">
-              <img 
-                [src]="getScreenshotUrl(featuredItem, true)"
-                [alt]="'Featured Screenshot'"
-                class="hero-image"
-                loading="eager">
-              <div class="hero-overlay">
-                <mat-icon class="hero-icon">fullscreen</mat-icon>
-                <span class="hero-text">View in fullscreen</span>
-              </div>
-            </div>
-          }
-          
-          <!-- Featured Video -->
-          @if (featuredItemType === 'video' && isVideo(featuredItem)) {
-            <div class="hero-video" [@hoverScale]="'default'">
-              <img 
-                [src]="getVideoThumbnail(featuredItem)"
-                [alt]="getVideoTitle(featuredItem)"
-                class="hero-image">
-              <div class="hero-overlay video-overlay">
-                <mat-icon class="hero-play-icon">play_circle</mat-icon>
-                <div class="hero-video-info">
-                  <span class="hero-video-title">{{ getVideoTitle(featuredItem) }}</span>
-                  <span class="hero-text">Click to play</span>
+    <!-- Featured Media Grid Section (2x2) -->
+    @if (featuredItems.length > 0) {
+      <div class="featured-section">
+        <div class="featured-grid">
+          @for (featuredItem of featuredItems; track featuredItem.item.id; let i = $index) {
+            <div 
+              class="featured-item"
+              [class.is-video]="featuredItem.type === 'video'"
+              [class.is-screenshot]="featuredItem.type === 'screenshot'"
+              [@hoverScale]="'default'"
+              (click)="onFeaturedItemClick(featuredItem)">
+              
+              <!-- Featured Screenshot -->
+              @if (featuredItem.type === 'screenshot' && isScreenshot(featuredItem.item)) {
+                <img 
+                  [src]="getScreenshotUrl(featuredItem.item, true)"
+                  [alt]="'Featured Screenshot ' + (i + 1)"
+                  class="featured-image"
+                  loading="eager">
+                <div class="featured-overlay">
+                  <mat-icon class="featured-icon">fullscreen</mat-icon>
                 </div>
-              </div>
+              }
+              
+              <!-- Featured Video -->
+              @if (featuredItem.type === 'video' && isVideo(featuredItem.item)) {
+                <img 
+                  [src]="getVideoThumbnail(featuredItem.item)"
+                  [alt]="getVideoTitle(featuredItem.item)"
+                  class="featured-image">
+                <div class="featured-overlay video-overlay">
+                  <mat-icon class="featured-play-icon">play_circle</mat-icon>
+                </div>
+              }
             </div>
           }
-          
         </div>
       </div>
     }
     
-    <!-- Gallery Grid Section -->
-    @if (galleryItems.length > 1) {
+    <!-- Gallery Grid Section (remaining items) -->
+    @if (galleryItems.length > 4) {
       <div class="gallery-section">
         <div class="gallery-header">
           <h3 class="gallery-title">
             <mat-icon>photo_library</mat-icon>
-            Gallery ({{ getMediaCount() }} items)
+            More Media ({{ galleryItems.length - 4 }} items)
           </h3>
         </div>
         
         <div class="gallery-grid">
           @for (galleryItem of galleryItems; track galleryItem.item.id; let i = $index) {
-            <!-- Skip the first item if it's the featured item -->
-            @if (i > 0 || galleryItem.item !== featuredItem) {
+            <!-- Skip the first 4 items (they're in the featured grid) -->
+            @if (i >= 4) {
               <div 
                 class="gallery-item"
                 [class.is-video]="galleryItem.type === 'video'"

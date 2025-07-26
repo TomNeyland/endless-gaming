@@ -69,8 +69,7 @@ export class MediaGalleryComponent implements OnInit {
   @Output() galleryEvent = new EventEmitter<MediaGalleryEvent>();
 
   // Gallery state
-  public featuredItem: Screenshot | Movie | null = null;
-  public featuredItemType: 'screenshot' | 'video' = 'screenshot';
+  public featuredItems: Array<{item: Screenshot | Movie, type: 'screenshot' | 'video', index: number}> = [];
   public galleryItems: Array<{item: Screenshot | Movie, type: 'screenshot' | 'video', index: number}> = [];
   
   // Lightbox state
@@ -84,11 +83,12 @@ export class MediaGalleryComponent implements OnInit {
   }
 
   /**
-   * Initialize gallery with featured item and grid items.
+   * Initialize gallery with 2x2 featured grid and remaining items.
    * Videos are prioritized for featured display and shown first in gallery.
    */
   private initializeGallery(): void {
     this.galleryItems = [];
+    this.featuredItems = [];
     
     // Add videos to gallery first (prioritized)
     this.videos.forEach((video, index) => {
@@ -108,14 +108,8 @@ export class MediaGalleryComponent implements OnInit {
       });
     });
     
-    // Set featured item (first video or first screenshot if no videos)
-    if (this.videos.length > 0) {
-      this.featuredItem = this.videos[0];
-      this.featuredItemType = 'video';
-    } else if (this.screenshots.length > 0) {
-      this.featuredItem = this.screenshots[0];
-      this.featuredItemType = 'screenshot';
-    }
+    // Set featured items (first 4 items for 2x2 grid)
+    this.featuredItems = this.galleryItems.slice(0, 4);
   }
 
   /**
@@ -149,10 +143,8 @@ export class MediaGalleryComponent implements OnInit {
   /**
    * Handle featured item click.
    */
-  public onFeaturedItemClick(): void {
-    if (this.featuredItem) {
-      this.openLightbox(this.featuredItem, this.featuredItemType, 0);
-    }
+  public onFeaturedItemClick(featuredItem: {item: Screenshot | Movie, type: 'screenshot' | 'video', index: number}): void {
+    this.openLightbox(featuredItem.item, featuredItem.type, featuredItem.index);
   }
 
   /**
