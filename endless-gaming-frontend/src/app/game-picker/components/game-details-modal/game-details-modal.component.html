@@ -126,112 +126,154 @@
       </div>
     }
     
-    <!-- Collapsible Content Sections -->
-    <div class="content-sections">
-      
-      <!-- About This Game Section -->
-      @if (game.detailedDescription) {
-        <app-collapsible-section
-          title="About This Game"
-          icon="description"
-          [isExpanded]="true">
-          <div [innerHTML]="sanitizeHtml(game.detailedDescription)"></div>
-        </app-collapsible-section>
-      }
-      
-      <!-- System Requirements Section -->
-      @if (hasSystemRequirements()) {
-        <app-collapsible-section
-          title="System Requirements"
-          icon="settings"
-          [isExpanded]="false">
-          <div class="requirements-grid">
-            @if (game.pcRequirements?.minimum) {
-              <div class="requirement-block">
-                <h4>Minimum</h4>
-                <div class="requirement-content" [innerHTML]="getMinimumRequirements()">
+    <!-- Content Tabs -->
+    <div class="content-tabs">
+      <mat-tab-group>
+        
+        <!-- About This Game Tab -->
+        @if (game.detailedDescription) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon>description</mat-icon>
+              About This Game
+            </ng-template>
+            <div class="tab-content">
+              <div [innerHTML]="sanitizeHtml(game.detailedDescription)"></div>
+            </div>
+          </mat-tab>
+        }
+        
+        <!-- Details & Stats Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>info</mat-icon>
+            Details & Stats
+          </ng-template>
+          <div class="tab-content">
+            
+            <!-- Game Info Cards -->
+            <div class="info-cards-grid">
+              @if (getDevelopersText() !== 'Unknown') {
+                <div class="info-card">
+                  <div class="info-icon">
+                    <mat-icon>code</mat-icon>
+                  </div>
+                  <div class="info-content">
+                    <div class="info-label">Developer</div>
+                    <div class="info-value">{{ getDevelopersText() }}</div>
+                  </div>
+                </div>
+              }
+              
+              @if (getPublishersText() !== 'Unknown') {
+                <div class="info-card">
+                  <div class="info-icon">
+                    <mat-icon>business</mat-icon>
+                  </div>
+                  <div class="info-content">
+                    <div class="info-label">Publisher</div>
+                    <div class="info-value">{{ getPublishersText() }}</div>
+                  </div>
+                </div>
+              }
+              
+              @if (game.releaseDate) {
+                <div class="info-card">
+                  <div class="info-icon">
+                    <mat-icon>calendar_today</mat-icon>
+                  </div>
+                  <div class="info-content">
+                    <div class="info-label">Release Date</div>
+                    <div class="info-value">{{ game.releaseDate }}</div>
+                  </div>
+                </div>
+              }
+              
+              @if (game.requiredAge) {
+                <div class="info-card">
+                  <div class="info-icon">
+                    <mat-icon>shield</mat-icon>
+                  </div>
+                  <div class="info-content">
+                    <div class="info-label">Age Rating</div>
+                    <div class="info-value">{{ game.requiredAge }}+</div>
+                  </div>
+                </div>
+              }
+            </div>
+            
+            <!-- Genres Section -->
+            @if (getStoreGenres().length > 0) {
+              <div class="detail-section">
+                <h4 class="section-subtitle">
+                  <mat-icon>category</mat-icon>
+                  Genres
+                </h4>
+                <div class="genre-chips">
+                  @for (genre of getStoreGenres(); track genre) {
+                    <div class="genre-chip">{{ genre }}</div>
+                  }
                 </div>
               </div>
             }
             
-            @if (game.pcRequirements?.recommended) {
-              <div class="requirement-block">
-                <h4>Recommended</h4>
-                <div class="requirement-content" [innerHTML]="getRecommendedRequirements()">
+            <!-- Features Section -->
+            @if (getCategories().length > 0) {
+              <div class="detail-section">
+                <h4 class="section-subtitle">
+                  <mat-icon>star</mat-icon>
+                  Features
+                </h4>
+                <div class="features-grid">
+                  @for (feature of getCategories().slice(0, 12); track feature) {
+                    <div class="feature-item">
+                      <mat-icon class="feature-icon">check_circle</mat-icon>
+                      <span class="feature-text">{{ feature }}</span>
+                    </div>
+                  }
+                  @if (getCategories().length > 12) {
+                    <div class="feature-item more-features">
+                      <mat-icon class="feature-icon">add</mat-icon>
+                      <span class="feature-text">+{{ getCategories().length - 12 }} more features</span>
+                    </div>
+                  }
                 </div>
               </div>
             }
+            
           </div>
-        </app-collapsible-section>
-      }
-      
-      <!-- Details & Stats Section -->
-      <app-collapsible-section
-        title="Details & Stats"
-        icon="info"
-        [isExpanded]="false">
-        <div class="details-grid">
-          @if (getDevelopersText() !== 'Unknown') {
-            <div class="detail-item">
-              <label>Developer:</label>
-              <span>{{ getDevelopersText() }}</span>
-            </div>
-          }
-          
-          @if (getPublishersText() !== 'Unknown') {
-            <div class="detail-item">
-              <label>Publisher:</label>
-              <span>{{ getPublishersText() }}</span>
-            </div>
-          }
-          
-          @if (game.releaseDate) {
-            <div class="detail-item">
-              <label>Release Date:</label>
-              <span>{{ game.releaseDate }}</span>
-            </div>
-          }
-          
-          @if (getStoreGenres().length > 0) {
-            <div class="detail-item">
-              <label>Genres:</label>
-              <span>{{ getStoreGenres().join(', ') }}</span>
-            </div>
-          }
-          
-          @if (getCategories().length > 0) {
-            <div class="detail-item">
-              <label>Features:</label>
-              <span>{{ getCategories().join(', ') }}</span>
-            </div>
-          }
-          
-          @if (game.requiredAge) {
-            <div class="detail-item">
-              <label>Age Rating:</label>
-              <span>{{ game.requiredAge }}+</span>
-            </div>
-          }
-        </div>
-      </app-collapsible-section>
-      
-      <!-- Tags & Features Section -->
-      @if (getTopTags().length > 0) {
-        <app-collapsible-section
-          title="Tags & Features"
-          icon="local_offer"
-          [isExpanded]="false">
-          <div class="tags-container">
-            @for (tagData of getTopTags(); track tagData.tag) {
-              <div class="tag-item">
-                <span class="tag-name">{{ tagData.tag }}</span>
-                <span class="tag-votes">{{ tagData.votes | number }}</span>
+        </mat-tab>
+        
+        <!-- System Requirements Tab -->
+        @if (hasSystemRequirements()) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon>settings</mat-icon>
+              System Requirements
+            </ng-template>
+            <div class="tab-content">
+              <div class="requirements-grid">
+                @if (game.pcRequirements?.minimum) {
+                  <div class="requirement-block">
+                    <h4>Minimum</h4>
+                    <div class="requirement-content" [innerHTML]="getMinimumRequirements()">
+                    </div>
+                  </div>
+                }
+                
+                @if (game.pcRequirements?.recommended) {
+                  <div class="requirement-block">
+                    <h4>Recommended</h4>
+                    <div class="requirement-content" [innerHTML]="getRecommendedRequirements()">
+                    </div>
+                  </div>
+                }
               </div>
-            }
-          </div>
-        </app-collapsible-section>
-      }
-      
+            </div>
+          </mat-tab>
+        }
+        
+      </mat-tab-group>
     </div>
     
   </div>

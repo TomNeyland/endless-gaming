@@ -215,9 +215,57 @@
     }
   }
 
-  // Content Sections
-  .content-sections {
-    padding: 24px;
+  // Content Tabs Section
+  .content-tabs {
+    padding: 0;
+    
+    ::ng-deep .mat-mdc-tab-group {
+      .mat-mdc-tab-header {
+        background: #262626;
+        border-bottom: 1px solid #404040;
+      }
+      
+      .mat-mdc-tab-body-wrapper {
+        background: #1a1a1a;
+      }
+    }
+    
+    .tab-content {
+      padding: 32px 28px;  // Increased from 24px to provide more breathing room
+      min-height: 200px;
+      
+      // All content styling for better readability
+      p {
+        margin: 0 0 16px 0;
+        line-height: 1.6;
+        color: #e0e0e0;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+      
+      h4, h5, h6 {
+        color: #f0f0f0;
+        margin: 0 0 16px 0;
+        font-weight: 600;
+      }
+      
+      ul, ol {
+        margin: 0 0 16px 0;
+        padding-left: 20px;
+        
+        li {
+          margin: 6px 0;
+          line-height: 1.5;
+        }
+      }
+      
+      strong {
+        color: #f0f0f0;
+        font-weight: 600;
+      }
+    }
   }
 
 
@@ -276,9 +324,11 @@
       }
     }
 
-    // Mobile content sections
-    .content-sections {
-      padding: 16px;
+    // Mobile content tabs
+    .content-tabs {
+      .tab-content {
+        padding: 20px 16px;  // Adjusted mobile padding
+      }
     }
   }
 }

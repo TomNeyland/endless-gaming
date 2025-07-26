@@ -85,20 +85,12 @@ export class MediaGalleryComponent implements OnInit {
 
   /**
    * Initialize gallery with featured item and grid items.
+   * Videos are prioritized for featured display and shown first in gallery.
    */
   private initializeGallery(): void {
     this.galleryItems = [];
     
-    // Add screenshots to gallery
-    this.screenshots.forEach((screenshot, index) => {
-      this.galleryItems.push({
-        item: screenshot,
-        type: 'screenshot',
-        index
-      });
-    });
-    
-    // Add videos to gallery
+    // Add videos to gallery first (prioritized)
     this.videos.forEach((video, index) => {
       this.galleryItems.push({
         item: video,
@@ -107,13 +99,22 @@ export class MediaGalleryComponent implements OnInit {
       });
     });
     
-    // Set featured item (first screenshot or first video if no screenshots)
-    if (this.screenshots.length > 0) {
-      this.featuredItem = this.screenshots[0];
-      this.featuredItemType = 'screenshot';
-    } else if (this.videos.length > 0) {
+    // Add screenshots to gallery after videos
+    this.screenshots.forEach((screenshot, index) => {
+      this.galleryItems.push({
+        item: screenshot,
+        type: 'screenshot',
+        index
+      });
+    });
+    
+    // Set featured item (first video or first screenshot if no videos)
+    if (this.videos.length > 0) {
       this.featuredItem = this.videos[0];
       this.featuredItemType = 'video';
+    } else if (this.screenshots.length > 0) {
+      this.featuredItem = this.screenshots[0];
+      this.featuredItemType = 'screenshot';
     }
   }
 

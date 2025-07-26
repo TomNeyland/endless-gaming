@@ -165,6 +165,28 @@ export class GameDetailsModalComponent implements OnInit {
   }
 
   /**
+   * Get tag size class based on vote count for visual hierarchy
+   */
+  public getTagSizeClass(votes: number): string {
+    const maxVotes = Math.max(...this.getTopTags().map(t => t.votes));
+    const percentage = (votes / maxVotes) * 100;
+    
+    if (percentage >= 80) return 'tag-xl';
+    if (percentage >= 60) return 'tag-lg';
+    if (percentage >= 40) return 'tag-md';
+    if (percentage >= 20) return 'tag-sm';
+    return 'tag-xs';
+  }
+
+  /**
+   * Get tag popularity percentage for progress bar
+   */
+  public getTagPopularityPercentage(votes: number): number {
+    const maxVotes = Math.max(...this.getTopTags().map(t => t.votes));
+    return Math.round((votes / maxVotes) * 100);
+  }
+
+  /**
    * Sanitize HTML content for safe display
    */
   public sanitizeHtml(html: string | null | undefined): SafeHtml {
