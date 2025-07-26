@@ -358,6 +358,22 @@
           background: var(--gaming-card-bg);
           border-radius: 8px;
           padding: 0;
+          
+          // Override Material Card margins and force compact layout
+          ::ng-deep mat-card.preference-summary {
+            margin: 0;
+            width: 100%;
+            
+            // Force single column layout in drawer
+            .preferences-grid {
+              grid-template-columns: 1fr !important;
+              gap: 12px !important;
+              
+              .preference-section {
+                min-height: auto !important;
+              }
+            }
+          }
         }
       }
       
