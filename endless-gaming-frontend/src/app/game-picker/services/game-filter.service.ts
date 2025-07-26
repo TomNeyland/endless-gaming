@@ -91,14 +91,14 @@ const DEFAULT_FILTERS: GameFilters = {
   priceTiers: [],
   requiredTags: [],
   excludedTags: [],
-  minReviewScore: 0,
-  minReviewCount: 0,
+  minReviewScore: 70,  // Start at 70%
+  minReviewCount: 0,   // Will be removed from UI
   includedDevelopers: [],
   excludedPublishers: [],
   scoreRange: { min: -10, max: 10 },
   topNOnly: null,
   ageCategories: [],
-  releaseYearRange: { min: 1970, max: new Date().getFullYear() },
+  releaseYearRange: { min: 1970, max: new Date().getFullYear() }, // Will be updated dynamically
   maxGameAge: null,
   searchText: ''
 };
@@ -164,6 +164,10 @@ export class GameFilterService {
   private tagCaseMap = signal<Map<string, string>>(new Map()); // lowercase -> correct case
   private availableDevelopers = signal<string[]>([]);
   private availablePublishers = signal<string[]>([]);
+  
+  // Data ranges from actual dataset
+  private dataYearRange = signal<{ min: number, max: number }>({ min: 1970, max: new Date().getFullYear() });
+  private dataPriceRange = signal<{ min: number, max: number }>({ min: 0, max: 100 });
   
   // Filter stats
   private filterStats = signal<FilterStats>({
@@ -246,29 +250,76 @@ export class GameFilterService {
    * Initialize available options from game data
    */
   initializeOptions(games: GameRecord[]): void {
-    // Extract unique tags with counts and case mapping
-    const tagCounts = new Map<string, number>();
+    // Extract unique tags with game counts (not vote counts) and case mapping
+    const tagGameCounts = new Map<string, Set<number>>(); // track unique game IDs per tag
     const caseMap = new Map<string, string>(); // lowercase -> correct case
     
     games.forEach(game => {
       Object.entries(game.tags || {}).forEach(([tag, votes]) => {
         const lowerTag = tag.toLowerCase();
         
-        // Accumulate votes for case-insensitive tag
-        tagCounts.set(lowerTag, (tagCounts.get(lowerTag) || 0) + votes);
+        // Track this game for this tag (unique games count)
+        if (!tagGameCounts.has(lowerTag)) {
+          tagGameCounts.set(lowerTag, new Set());
+        }
+        tagGameCounts.get(lowerTag)!.add(game.appId);
         
-        // Keep the most common case variant (or first one encountered)
-        if (!caseMap.has(lowerTag) || votes > (tagCounts.get(lowerTag) || 0)) {
+        // Keep the most common case variant (first one encountered with most votes)
+        if (!caseMap.has(lowerTag)) {
           caseMap.set(lowerTag, tag);
         }
       });
     });
     
-    // Build sorted arrays with frequency data
-    const sortedTagsWithFrequency = Array.from(tagCounts.entries())
-      .map(([lowerTag, count]) => ({
+    // Analyze actual price and year ranges from the dataset
+    const prices: number[] = [];
+    const years: number[] = [];
+    
+    games.forEach(game => {
+      // Extract prices
+      if (game.price && game.price !== 'Free') {
+        const price = parseFloat(game.price.replace('$', ''));
+        if (!isNaN(price)) {
+          prices.push(price);
+        }
+      }
+      
+      // Extract years from release date (assuming formats like "Aug 21, 2012")
+      if (game.releaseDate) {
+        const yearMatch = game.releaseDate.match(/\b(19|20)\d{2}\b/);
+        if (yearMatch) {
+          const year = parseInt(yearMatch[0]);
+          if (year >= 1970 && year <= new Date().getFullYear()) {
+            years.push(year);
+          }
+        }
+      }
+    });
+    
+    // Store data ranges for slider min/max values (don't update filter values)
+    if (prices.length > 0) {
+      const maxPrice = Math.max(...prices);
+      const roundedMaxPrice = Math.ceil(maxPrice / 10) * 10;
+      this.dataPriceRange.set({
+        min: 0,
+        max: Math.min(roundedMaxPrice, 100) // Cap at $100 for UI
+      });
+    }
+    
+    if (years.length > 0) {
+      const minYear = Math.min(...years);
+      const maxYear = Math.max(...years);
+      this.dataYearRange.set({
+        min: minYear,
+        max: maxYear
+      });
+    }
+    
+    // Build sorted arrays with unique game counts
+    const sortedTagsWithFrequency = Array.from(tagGameCounts.entries())
+      .map(([lowerTag, gameIds]) => ({
         tag: caseMap.get(lowerTag) || lowerTag,
-        count
+        count: gameIds.size // Number of unique games with this tag
       }))
       .sort((a, b) => b.count - a.count);
     
@@ -294,6 +345,42 @@ export class GameFilterService {
     
     // Update total games count
     this.updateFilterStats(games.length, games.length);
+    
+    console.log('🏷️ GameFilterService: Initialized with', sortedTags.length, 'unique tags');
+    console.log('💰 Price range:', prices.length > 0 ? `$0-$${Math.min(Math.ceil(Math.max(...prices) / 10) * 10, 100)}` : 'No price data');
+    console.log('📅 Year range:', years.length > 0 ? `${Math.min(...years)}-${Math.max(...years)}` : 'No year data');
+  }
+  
+  /**
+   * Update tag counts based on currently filtered games.
+   * This method should be called whenever filters change to show "remaining" game counts.
+   */
+  updateTagCountsForFilteredGames(filteredGames: GameRecord[]): void {
+    const tagGameCounts = new Map<string, Set<number>>();
+    const caseMap = this.tagCaseMap();
+    
+    // Count unique games for each tag in the filtered set
+    filteredGames.forEach(game => {
+      Object.entries(game.tags || {}).forEach(([tag, votes]) => {
+        const lowerTag = tag.toLowerCase();
+        
+        if (!tagGameCounts.has(lowerTag)) {
+          tagGameCounts.set(lowerTag, new Set());
+        }
+        tagGameCounts.get(lowerTag)!.add(game.appId);
+      });
+    });
+    
+    // Rebuild sorted arrays with updated counts
+    const sortedTagsWithFrequency = Array.from(tagGameCounts.entries())
+      .map(([lowerTag, gameIds]) => ({
+        tag: caseMap.get(lowerTag) || lowerTag,
+        count: gameIds.size
+      }))
+      .filter(item => item.count > 0) // Only show tags that have remaining games
+      .sort((a, b) => b.count - a.count);
+    
+    this.availableTagsWithFrequency.set(sortedTagsWithFrequency);
   }
   
   /**
@@ -345,6 +432,20 @@ export class GameFilterService {
    */
   getAvailablePublishers(): string[] {
     return this.availablePublishers();
+  }
+
+  /**
+   * Get data year range from actual dataset
+   */
+  getDataYearRange(): { min: number, max: number } {
+    return this.dataYearRange();
+  }
+
+  /**
+   * Get data price range from actual dataset
+   */
+  getDataPriceRange(): { min: number, max: number } {
+    return this.dataPriceRange();
   }
   
   /**
@@ -469,6 +570,9 @@ export class GameFilterService {
     
     // Update stats
     this.updateFilterStats(games.length, filteredGames.length);
+    
+    // Update tag counts based on filtered games to show "remaining" counts
+    this.updateTagCountsForFilteredGames(filteredGames);
     
     return filteredGames;
   }

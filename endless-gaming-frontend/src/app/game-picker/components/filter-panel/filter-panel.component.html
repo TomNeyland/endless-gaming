@@ -65,7 +65,7 @@
         @if (!isFreeOnly) {
           <div class="price-range">
             <label>Max Price: {{ formatPrice(priceRange.max) }}</label>
-            <mat-slider [min]="0" [max]="100" [step]="5">
+            <mat-slider [min]="0" [max]="100" [step]="10">
               <input 
                 matSliderThumb 
                 [(ngModel)]="priceRange.max"
@@ -104,7 +104,7 @@
         @if (ageCategories.length === 0) {
           <div class="year-range">
             <label>Release Year: {{ releaseYearRange.min }} - {{ releaseYearRange.max }}</label>
-            <mat-slider [min]="1970" [max]="getCurrentYear()" [step]="1">
+            <mat-slider [min]="getDataYearRange().min" [max]="getDataYearRange().max" [step]="1">
               <input 
                 matSliderStartThumb 
                 [(ngModel)]="releaseYearRange.min"
@@ -227,7 +227,7 @@
       <div class="review-controls">
         <div class="review-score">
           <label>Min Rating: {{ formatPercentage(minReviewScore) }}</label>
-          <mat-slider [min]="0" [max]="100" [step]="10">
+          <mat-slider [min]="0" [max]="100" [step]="1">
             <input 
               matSliderThumb 
               [(ngModel)]="minReviewScore"
@@ -235,15 +235,6 @@
           </mat-slider>
         </div>
         
-        <div class="review-count">
-          <label>Min Reviews: {{ minReviewCount }}</label>
-          <mat-slider [min]="0" [max]="5000" [step]="100">
-            <input 
-              matSliderThumb 
-              [(ngModel)]="minReviewCount"
-              (ngModelChange)="onReviewCountChange($event)">
-          </mat-slider>
-        </div>
       </div>
     </div>
 

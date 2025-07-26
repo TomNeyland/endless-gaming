@@ -65,8 +65,8 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
   public priceRange = { min: 0, max: 100 };
   public requiredTags: string[] = [];
   public excludedTags: string[] = [];
-  public minReviewScore = 0;
-  public minReviewCount = 0;
+  public minReviewScore = 70;  // Start at 70%
+  public minReviewCount = 0;   // Will be hidden from UI
   public topNOnly: number | null = null;
   
   // Age filter form models
@@ -306,11 +306,11 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
    */
   private formatTagWithFrequency(tag: string, count: number): string {
     if (count >= 1000000) {
-      return `${tag} (${Math.round(count / 1000000)}M votes)`;
+      return `${tag} (${Math.round(count / 1000000)}M games)`;
     } else if (count >= 1000) {
-      return `${tag} (${Math.round(count / 1000)}k votes)`;
+      return `${tag} (${Math.round(count / 1000)}k games)`;
     } else {
-      return `${tag} (${count} votes)`;
+      return `${tag} (${count} games)`;
     }
   }
 
@@ -319,11 +319,11 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
    */
   public formatTagFrequency(count: number): string {
     if (count >= 1000000) {
-      return `${Math.round(count / 1000000)}M votes`;
+      return `${Math.round(count / 1000000)}M games`;
     } else if (count >= 1000) {
-      return `${Math.round(count / 1000)}k votes`;
+      return `${Math.round(count / 1000)}k games`;
     } else {
-      return `${count} votes`;
+      return `${count} games`;
     }
   }
   
@@ -350,5 +350,12 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
    */
   public getCurrentYear(): number {
     return new Date().getFullYear();
+  }
+
+  /**
+   * Get actual data year range from GameFilterService
+   */
+  public getDataYearRange(): { min: number, max: number } {
+    return this.gameFilterService.getDataYearRange();
   }
 }
