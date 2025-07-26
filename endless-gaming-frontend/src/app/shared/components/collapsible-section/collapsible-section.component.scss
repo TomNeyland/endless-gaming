@@ -1,0 +1,273 @@
+.collapsible-section {
+  margin-bottom: 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid #333;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  
+  &.is-expanded {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: #444;
+  }
+  
+  &.is-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    
+    .section-header {
+      cursor: not-allowed;
+    }
+  }
+  
+  // Section Header
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid transparent;
+    transition: all 0.2s ease;
+    
+    &:hover:not(.is-disabled) {
+      background: rgba(102, 126, 234, 0.1);
+    }
+    
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      
+      .section-icon {
+        color: #667eea;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+      
+      .section-title {
+        color: #f0f0f0;
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+        user-select: none;
+      }
+    }
+    
+    .expand-icon {
+      color: #b0b0b0;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      transition: color 0.2s ease;
+    }
+    
+    &:hover .expand-icon {
+      color: #667eea;
+    }
+  }
+  
+  // Section Content
+  .section-content {
+    overflow: hidden;
+    
+    .content-wrapper {
+      padding: 20px;
+      color: #e0e0e0;
+      
+      // Content styling
+      p {
+        margin: 0 0 16px 0;
+        line-height: 1.6;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+      
+      h4, h5, h6 {
+        color: #f0f0f0;
+        margin: 0 0 12px 0;
+        font-weight: 600;
+      }
+      
+      ul, ol {
+        margin: 0 0 16px 0;
+        padding-left: 20px;
+        
+        li {
+          margin: 4px 0;
+          line-height: 1.5;
+        }
+      }
+      
+      strong {
+        color: #f0f0f0;
+        font-weight: 600;
+      }
+      
+      // Details grid styling (for game details)
+      .details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 12px;
+        
+        .detail-item {
+          display: flex;
+          gap: 8px;
+          padding: 8px 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          
+          &:last-child {
+            border-bottom: none;
+          }
+          
+          label {
+            font-weight: 600;
+            color: #b0b0b0;
+            min-width: 120px;
+            flex-shrink: 0;
+          }
+          
+          span {
+            color: #e0e0e0;
+            flex: 1;
+          }
+        }
+      }
+      
+      // Requirements grid styling
+      .requirements-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        
+        .requirement-block {
+          h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 12px 0;
+            color: #f0f0f0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+          }
+          
+          .requirement-content {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #b0b0b0;
+            
+            ul {
+              margin: 0;
+              padding-left: 16px;
+            }
+            
+            li {
+              margin: 4px 0;
+            }
+            
+            strong {
+              font-weight: 600;
+              color: #f0f0f0;
+            }
+          }
+        }
+      }
+      
+      // Tags display styling
+      .tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        
+        .tag-item {
+          background: rgba(102, 126, 234, 0.15);
+          color: #667eea;
+          padding: 6px 12px;
+          border-radius: 16px;
+          font-size: 12px;
+          font-weight: 600;
+          border: 1px solid rgba(102, 126, 234, 0.3);
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          
+          .tag-votes {
+            background: rgba(102, 126, 234, 0.3);
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .collapsible-section {
+    margin-bottom: 12px;
+    
+    .section-header {
+      padding: 14px 16px;
+      
+      .header-content {
+        gap: 10px;
+        
+        .section-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+        
+        .section-title {
+          font-size: 15px;
+        }
+      }
+      
+      .expand-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+    
+    .section-content {
+      .content-wrapper {
+        padding: 16px;
+        
+        .details-grid {
+          grid-template-columns: 1fr;
+          gap: 8px;
+          
+          .detail-item {
+            flex-direction: column;
+            gap: 4px;
+            
+            label {
+              min-width: auto;
+            }
+          }
+        }
+        
+        .requirements-grid {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        
+        .tags-container {
+          gap: 6px;
+          
+          .tag-item {
+            font-size: 11px;
+            padding: 4px 8px;
+          }
+        }
+      }
+    }
+  }
+}

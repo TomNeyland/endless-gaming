@@ -10,8 +10,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { GameRecord, Screenshot, Movie } from '../../../types/game.types';
 import { formatGameAge, getAgeBadge } from '../../../utils/game-age.utils';
-import { MediaCarouselComponent } from '../../../shared/components/media-carousel/media-carousel.component';
-import { MediaCarouselEvent } from '../../../shared/components/media-carousel/media-item.interface';
+import { MediaGalleryComponent, MediaGalleryEvent } from '../../../shared/components/media-gallery/media-gallery.component';
+import { CollapsibleSectionComponent } from '../../../shared/components/collapsible-section/collapsible-section.component';
 
 export interface GameDetailsModalData {
   game: GameRecord;
@@ -36,7 +36,8 @@ export interface GameDetailsModalData {
     MatIconModule,
     MatChipsModule,
     MatTooltipModule,
-    MediaCarouselComponent
+    MediaGalleryComponent,
+    CollapsibleSectionComponent
   ],
   templateUrl: './game-details-modal.component.html',
   styleUrl: './game-details-modal.component.scss'
@@ -202,11 +203,11 @@ export class GameDetailsModalComponent implements OnInit {
   }
 
   /**
-   * Handle media carousel events.
+   * Handle media gallery events.
    */
-  public onCarouselEvent(event: MediaCarouselEvent): void {
-    console.log('Media carousel event:', event);
-    // Handle carousel events if needed (e.g., analytics, state management)
+  public onGalleryEvent(event: MediaGalleryEvent): void {
+    console.log('Media gallery event:', event);
+    // Handle gallery events if needed (e.g., analytics, state management)
   }
 
   /**

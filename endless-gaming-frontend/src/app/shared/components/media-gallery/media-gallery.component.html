@@ -1,0 +1,196 @@
+<div class="media-gallery" [class.has-media]="hasMedia()">
+  
+  @if (hasMedia()) {
+    
+    <!-- Hero Featured Media Section -->
+    @if (featuredItem) {
+      <div class="hero-section">
+        <div class="hero-container" (click)="onFeaturedItemClick()">
+          
+          <!-- Featured Screenshot -->
+          @if (featuredItemType === 'screenshot' && isScreenshot(featuredItem)) {
+            <div class="hero-screenshot" [@hoverScale]="'default'">
+              <img 
+                [src]="getScreenshotUrl(featuredItem, true)"
+                [alt]="'Featured Screenshot'"
+                class="hero-image"
+                loading="eager">
+              <div class="hero-overlay">
+                <mat-icon class="hero-icon">fullscreen</mat-icon>
+                <span class="hero-text">View in fullscreen</span>
+              </div>
+            </div>
+          }
+          
+          <!-- Featured Video -->
+          @if (featuredItemType === 'video' && isVideo(featuredItem)) {
+            <div class="hero-video" [@hoverScale]="'default'">
+              <img 
+                [src]="getVideoThumbnail(featuredItem)"
+                [alt]="getVideoTitle(featuredItem)"
+                class="hero-image">
+              <div class="hero-overlay video-overlay">
+                <mat-icon class="hero-play-icon">play_circle</mat-icon>
+                <div class="hero-video-info">
+                  <span class="hero-video-title">{{ getVideoTitle(featuredItem) }}</span>
+                  <span class="hero-text">Click to play</span>
+                </div>
+              </div>
+            </div>
+          }
+          
+        </div>
+      </div>
+    }
+    
+    <!-- Gallery Grid Section -->
+    @if (galleryItems.length > 1) {
+      <div class="gallery-section">
+        <div class="gallery-header">
+          <h3 class="gallery-title">
+            <mat-icon>photo_library</mat-icon>
+            Gallery ({{ getMediaCount() }} items)
+          </h3>
+        </div>
+        
+        <div class="gallery-grid">
+          @for (galleryItem of galleryItems; track galleryItem.item.id; let i = $index) {
+            <!-- Skip the first item if it's the featured item -->
+            @if (i > 0 || galleryItem.item !== featuredItem) {
+              <div 
+                class="gallery-item"
+                [class.is-video]="galleryItem.type === 'video'"
+                [class.is-screenshot]="galleryItem.type === 'screenshot'"
+                [@itemEnter]
+                (click)="onGalleryItemClick(galleryItem)">
+                
+                <!-- Screenshot Item -->
+                @if (galleryItem.type === 'screenshot' && isScreenshot(galleryItem.item)) {
+                  <div class="gallery-screenshot">
+                    <img 
+                      [src]="getScreenshotUrl(galleryItem.item)"
+                      [alt]="'Screenshot ' + (i + 1)"
+                      class="gallery-image"
+                      loading="lazy">
+                    <div class="gallery-overlay">
+                      <mat-icon class="gallery-icon">zoom_in</mat-icon>
+                    </div>
+                  </div>
+                }
+                
+                <!-- Video Item -->
+                @if (galleryItem.type === 'video' && isVideo(galleryItem.item)) {
+                  <div class="gallery-video">
+                    <img 
+                      [src]="getVideoThumbnail(galleryItem.item)"
+                      [alt]="getVideoTitle(galleryItem.item)"
+                      class="gallery-image">
+                    <div class="gallery-overlay video-overlay">
+                      <mat-icon class="gallery-play-icon">play_circle</mat-icon>
+                    </div>
+                    <div class="gallery-video-info">
+                      <span class="gallery-video-title">{{ getVideoTitle(galleryItem.item) }}</span>
+                    </div>
+                  </div>
+                }
+                
+              </div>
+            }
+          }
+        </div>
+      </div>
+    }
+    
+  } @else {
+    <!-- Empty State -->
+    <div class="empty-state">
+      <mat-icon class="empty-icon">photo_library</mat-icon>
+      <h3 class="empty-title">No Media Available</h3>
+      <p class="empty-description">This game doesn't have any screenshots or videos to display.</p>
+    </div>
+  }
+  
+</div>
+
+<!-- Lightbox Modal -->
+@if (isLightboxOpen && lightboxItem) {
+  <div 
+    class="lightbox-overlay" 
+    [@lightboxFade]
+    (click)="closeLightbox()"
+    (keydown)="onLightboxKeydown($event)"
+    tabindex="0">
+    
+    <div class="lightbox-container" (click)="$event.stopPropagation()">
+      
+      <!-- Lightbox Header -->
+      <div class="lightbox-header">
+        <div class="lightbox-info">
+          @if (lightboxItemType === 'video' && isVideo(lightboxItem)) {
+            <h3 class="lightbox-title">{{ getVideoTitle(lightboxItem) }}</h3>
+          } @else {
+            <h3 class="lightbox-title">Screenshot {{ lightboxIndex + 1 }} of {{ getMediaCount() }}</h3>
+          }
+        </div>
+        
+        <button 
+          mat-icon-button 
+          class="lightbox-close"
+          (click)="closeLightbox()"
+          matTooltip="Close (Esc)">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      
+      <!-- Lightbox Content -->
+      <div class="lightbox-content">
+        
+        <!-- Screenshot in Lightbox -->
+        @if (lightboxItemType === 'screenshot' && isScreenshot(lightboxItem)) {
+          <img 
+            [src]="getScreenshotUrl(lightboxItem, true)"
+            [alt]="'Screenshot ' + (lightboxIndex + 1)"
+            class="lightbox-image">
+        }
+        
+        <!-- Video in Lightbox -->
+        @if (lightboxItemType === 'video' && isVideo(lightboxItem)) {
+          <video 
+            class="lightbox-video"
+            controls
+            autoplay
+            [poster]="getVideoThumbnail(lightboxItem)">
+            <source [src]="getVideoSource(lightboxItem)" type="video/mp4">
+            <source [src]="getVideoSource(lightboxItem)" type="video/webm">
+            Your browser does not support video playback.
+          </video>
+        }
+        
+      </div>
+      
+      <!-- Lightbox Navigation -->
+      @if (galleryItems.length > 1) {
+        <div class="lightbox-navigation">
+          <button 
+            mat-icon-button 
+            class="lightbox-nav lightbox-nav-prev"
+            [disabled]="lightboxIndex === 0"
+            (click)="lightboxPrevious()"
+            matTooltip="Previous (←)">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          
+          <button 
+            mat-icon-button 
+            class="lightbox-nav lightbox-nav-next"
+            [disabled]="lightboxIndex === galleryItems.length - 1"
+            (click)="lightboxNext()"
+            matTooltip="Next (→)">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      }
+      
+    </div>
+  </div>
+}

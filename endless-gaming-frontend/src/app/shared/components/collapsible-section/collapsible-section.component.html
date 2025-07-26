@@ -1,0 +1,26 @@
+<div class="collapsible-section" [class.is-expanded]="isExpanded" [class.is-disabled]="disabled">
+  
+  <!-- Section Header -->
+  <div class="section-header" (click)="toggle()">
+    <div class="header-content">
+      <mat-icon class="section-icon">{{ icon }}</mat-icon>
+      <h3 class="section-title">{{ title }}</h3>
+    </div>
+    
+    <mat-icon 
+      class="expand-icon" 
+      [@iconRotation]="getAnimationState()">
+      expand_more
+    </mat-icon>
+  </div>
+  
+  <!-- Section Content -->
+  <div 
+    class="section-content"
+    [@expandCollapse]="getAnimationState()">
+    <div class="content-wrapper">
+      <ng-content></ng-content>
+    </div>
+  </div>
+  
+</div>
