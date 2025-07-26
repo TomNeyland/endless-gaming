@@ -4,10 +4,12 @@
   max-height: 90vh;
   width: 100%;
   max-width: 1200px;
-  background: white;
+  background: #1a1a1a;
+  color: #e0e0e0;
   border-radius: 8px;
   overflow: hidden;
   outline: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
 
   // Modal Header
   .modal-header {
@@ -131,6 +133,7 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    background: #1a1a1a;
 
     .details-tabs {
       flex: 1;
@@ -141,6 +144,23 @@
         flex: 1;
         display: flex;
         flex-direction: column;
+        
+        .mat-mdc-tab-header {
+          background: #262626;
+          border-bottom: 1px solid #333;
+        }
+        
+        .mat-mdc-tab {
+          color: #b0b0b0;
+          
+          &.mdc-tab--active {
+            color: #667eea;
+          }
+        }
+        
+        .mat-mdc-tab-body-wrapper {
+          background: #1a1a1a;
+        }
       }
 
       ::ng-deep .mat-mdc-tab-body-wrapper {
@@ -152,19 +172,22 @@
         padding: 24px;
         max-height: 60vh;
         overflow-y: auto;
+        background: #1a1a1a;
+        color: #e0e0e0;
       }
     }
   }
 
-  // Media Tab Styles
-  .media-content {
-    padding: 0 !important; // Remove default padding for carousel
-    max-height: none; // Allow carousel to manage its own height
-    overflow: visible; // Let carousel handle overflow
+  // Media Section Styles (now in Details tab)
+  .media-section {
+    margin-bottom: 32px;
+    padding: 0;
     
     app-media-carousel {
       width: 100%;
       display: block;
+      border-radius: 8px;
+      overflow: hidden;
     }
   }
 
@@ -177,7 +200,7 @@
         font-size: 20px;
         font-weight: 600;
         margin: 0 0 16px 0;
-        color: #333;
+        color: #f0f0f0;
       }
 
       .short-description {
@@ -185,18 +208,18 @@
         line-height: 1.6;
         margin-bottom: 16px;
         font-weight: 500;
-        color: #555;
+        color: #d0d0d0;
       }
 
       .detailed-description {
         font-size: 14px;
         line-height: 1.6;
-        color: #666;
+        color: #b0b0b0;
 
         ::ng-deep {
           h1, h2, h3, h4, h5, h6 {
             margin: 16px 0 8px 0;
-            color: #333;
+            color: #f0f0f0;
           }
 
           ul, ol {
@@ -210,7 +233,7 @@
 
           strong {
             font-weight: 600;
-            color: #333;
+            color: #f0f0f0;
           }
         }
       }
@@ -223,7 +246,7 @@
         font-size: 18px;
         font-weight: 600;
         margin: 0 0 16px 0;
-        color: #333;
+        color: #f0f0f0;
       }
 
       .details-grid {
@@ -237,12 +260,12 @@
 
           label {
             font-weight: 600;
-            color: #666;
+            color: #b0b0b0;
             min-width: 100px;
           }
 
           span {
-            color: #333;
+            color: #e0e0e0;
           }
         }
       }
@@ -253,7 +276,7 @@
         font-size: 18px;
         font-weight: 600;
         margin: 0 0 16px 0;
-        color: #333;
+        color: #f0f0f0;
       }
 
       .requirements-grid {
@@ -266,7 +289,7 @@
             font-size: 16px;
             font-weight: 600;
             margin: 0 0 12px 0;
-            color: #333;
+            color: #f0f0f0;
             padding-bottom: 8px;
             border-bottom: 2px solid #667eea;
           }
@@ -274,7 +297,7 @@
           .requirement-content {
             font-size: 13px;
             line-height: 1.5;
-            color: #666;
+            color: #b0b0b0;
 
             ::ng-deep {
               ul {
@@ -288,7 +311,7 @@
 
               strong {
                 font-weight: 600;
-                color: #333;
+                color: #f0f0f0;
               }
             }
           }

@@ -86,9 +86,27 @@
   <div class="modal-content">
     <mat-tab-group class="details-tabs" dynamicHeight>
       
-      <!-- Overview Tab -->
-      <mat-tab label="Overview">
+      <!-- Main Details Tab -->
+      <mat-tab label="Details">
         <div class="tab-content overview-content">
+          
+          <!-- Media Carousel (moved from separate tab) -->
+          @if (hasMedia()) {
+            <div class="media-section">
+              <app-media-carousel
+                [screenshots]="game.screenshots || []"
+                [videos]="game.movies || []"
+                [config]="{
+                  showFullscreen: true,
+                  autoPlayVideos: false,
+                  showThumbnails: true,
+                  enableKeyboard: true,
+                  enableSwipe: true
+                }"
+                (carouselEvent)="onCarouselEvent($event)">
+              </app-media-carousel>
+            </div>
+          }
           
           <!-- Description -->
           @if (game.shortDescription || game.detailedDescription) {
@@ -184,31 +202,6 @@
           
         </div>
       </mat-tab>
-      
-      <!-- Media Tab (Screenshots + Videos) -->
-      @if (hasMedia()) {
-        <mat-tab>
-          <ng-template mat-tab-label>
-            <mat-icon>perm_media</mat-icon>
-            Media ({{ getMediaCount() }})
-          </ng-template>
-          
-          <div class="tab-content media-content">
-            <app-media-carousel
-              [screenshots]="game.screenshots || []"
-              [videos]="game.movies || []"
-              [config]="{
-                showFullscreen: true,
-                autoPlayVideos: false,
-                showThumbnails: true,
-                enableKeyboard: true,
-                enableSwipe: true
-              }"
-              (carouselEvent)="onCarouselEvent($event)">
-            </app-media-carousel>
-          </div>
-        </mat-tab>
-      }
       
     </mat-tab-group>
   </div>
