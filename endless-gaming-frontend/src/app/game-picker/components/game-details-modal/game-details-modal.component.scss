@@ -79,6 +79,15 @@
         }
       }
 
+      .game-description {
+        font-size: 15px;
+        line-height: 1.5;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 16px;
+        font-weight: 400;
+        max-width: 90%;
+      }
+
       .quick-tags {
         display: flex;
         flex-wrap: wrap;
@@ -137,72 +146,6 @@
     padding: 0;
   }
 
-  // Quick Overview Section (at top)
-  .quick-overview {
-    padding: 24px;
-    margin-bottom: 0;
-    border-bottom: 1px solid #333;
-    
-    .overview-description {
-      font-size: 16px;
-      line-height: 1.6;
-      color: #d0d0d0;
-      margin-bottom: 16px;
-      font-weight: 500;
-    }
-    
-    .overview-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      
-      .overview-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        
-        .overview-tag {
-          background: rgba(102, 126, 234, 0.2);
-          color: #667eea;
-          padding: 4px 12px;
-          border-radius: 16px;
-          font-size: 12px;
-          font-weight: 600;
-          border: 1px solid rgba(102, 126, 234, 0.3);
-        }
-      }
-      
-      .overview-rating {
-        .rating-bar-container {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          
-          .rating-bar {
-            flex: 1;
-            max-width: 200px;
-            height: 6px;
-            background: #333;
-            border-radius: 3px;
-            overflow: hidden;
-            
-            .rating-fill {
-              height: 100%;
-              background: linear-gradient(90deg, #ff4444 0%, #ffaa00 50%, #00aa00 100%);
-              transition: width 0.3s ease;
-              border-radius: 3px;
-            }
-          }
-          
-          .rating-text {
-            font-size: 13px;
-            color: #b0b0b0;
-            white-space: nowrap;
-          }
-        }
-      }
-    }
-  }
 
   // Media Gallery Section
   .media-section {
@@ -300,29 +243,6 @@
       }
     }
 
-    // Mobile adjustments for overview section
-    .quick-overview {
-      padding: 16px;
-      
-      .overview-meta {
-        .overview-tags {
-          .overview-tag {
-            font-size: 11px;
-            padding: 3px 8px;
-          }
-        }
-        
-        .overview-rating .rating-bar-container {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 8px;
-          
-          .rating-bar {
-            max-width: 100%;
-          }
-        }
-      }
-    }
 
     // Mobile content tabs
     .content-tabs {

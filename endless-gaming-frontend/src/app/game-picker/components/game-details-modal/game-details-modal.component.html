@@ -39,6 +39,13 @@
           }
         </div>
         
+        <!-- Game Description -->
+        @if (game.shortDescription) {
+          <div class="game-description">
+            {{ game.shortDescription }}
+          </div>
+        }
+        
         <!-- Top Tags -->
         @if (getTopTags(6).length > 0) {
           <div class="quick-tags">
@@ -84,36 +91,6 @@
 
   <!-- Visual-First Content -->
   <div class="modal-content">
-    
-    <!-- Quick Overview Section -->
-    <div class="quick-overview">
-      @if (game.shortDescription) {
-        <div class="overview-description">
-          {{ game.shortDescription }}
-        </div>
-      }
-      
-      <div class="overview-meta">
-        <!-- Top Tags -->
-        <div class="overview-tags">
-          @for (tagData of getTopTags(4); track tagData.tag) {
-            <span class="overview-tag">{{ tagData.tag }}</span>
-          }
-        </div>
-        
-        <!-- Rating Bar -->
-        @if (game.reviewPos || game.reviewNeg) {
-          <div class="overview-rating">
-            <div class="rating-bar-container">
-              <div class="rating-bar">
-                <div class="rating-fill" [style.width]="getReviewPercentage() + '%'"></div>
-              </div>
-              <span class="rating-text">{{ getReviewPercentage() }}% positive ({{ getTotalReviews() | number }} reviews)</span>
-            </div>
-          </div>
-        }
-      </div>
-    </div>
     
     <!-- Media Gallery Section -->
     @if (hasMedia()) {
