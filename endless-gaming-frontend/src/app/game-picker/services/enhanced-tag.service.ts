@@ -123,6 +123,14 @@ export class EnhancedTagService {
     // Get unique tags - fetch more candidates to ensure we have enough after deduplication
     const allUniqueTags = this.getUniqueTags(game, tfidfAnalysis, Math.max(uniqueCount * 3, 10), tagRarityService);
     
+    // DEBUG: Log TF-IDF calculation results
+    if (game.name.includes('Palworld') || game.name.includes('Counter-Strike')) {
+      console.log(`🔍 TF-IDF Debug for "${game.name}":`, {
+        allUniqueTags: allUniqueTags.map(t => ({ tag: t.tag, tfidfScore: t.tfidfScore, votes: t.votes })),
+        popularTags: popularTags.map(t => ({ tag: t.tag, votes: t.votes }))
+      });
+    }
+    
     // Deduplicate: remove unique tags that are already in popular tags
     const popularTagNames = new Set(popularTags.map(t => t.tag));
     const uniqueTags = allUniqueTags

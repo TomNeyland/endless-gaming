@@ -71,12 +71,12 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
   // Optimized tag computation using signals
   public readonly leftGameTags = computed(() => {
     const game = this.getLeftGame();
-    return game ? this.getEnhancedTags(game, 2, 1) : [];
+    return game ? this.getEnhancedTags(game, 1, 2) : [];
   });
 
   public readonly rightGameTags = computed(() => {
     const game = this.getRightGame();
-    return game ? this.getEnhancedTags(game, 2, 1) : [];
+    return game ? this.getEnhancedTags(game, 1, 2) : [];
   });
 
   ngOnInit(): void {

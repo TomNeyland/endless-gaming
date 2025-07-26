@@ -58,12 +58,24 @@ export class TagRarityService {
     const inverseFrequency = new Map<string, number>();
     const totalVotes = Array.from(tagVoteSum.values()).reduce((sum, votes) => sum + votes, 0);
     
+    // DEBUG: Log some key stats
+    const sortedByVotes = Array.from(tagVoteSum.entries()).sort((a, b) => b[1] - a[1]);
+    console.log(`🔍 TF-IDF Analysis - Total votes: ${totalVotes}, Tags analyzed: ${tagVoteSum.size}`);
+    console.log('📊 Top 10 tags by total votes:', sortedByVotes.slice(0, 10));
+    console.log('📊 Bottom 10 tags by total votes:', sortedByVotes.slice(-10));
+    
     tagVoteSum.forEach((voteSum, tag) => {
       if (voteSum > 0 && totalVotes > 0) {
         // IDF formula using vote-weighted frequency: log(total_votes / tag_vote_sum)
         // This makes tags with fewer total votes across all games have higher IDF scores
         const idf = Math.log(totalVotes / voteSum);
         inverseFrequency.set(tag, idf);
+        
+        // DEBUG: Log specific tags of interest
+        if (tag.toLowerCase().includes('creature') || tag.toLowerCase().includes('collector') || 
+            tag.toLowerCase().includes('action') || tag.toLowerCase().includes('fps')) {
+          console.log(`🏷️  Tag "${tag}": ${voteSum} votes, IDF = ${idf.toFixed(3)}`);
+        }
       } else {
         inverseFrequency.set(tag, 0);
       }

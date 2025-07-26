@@ -30,7 +30,7 @@
               <span class="price">{{ getGamePrice(getLeftGame()!) }}</span>
             </div>
             <div class="game-tags">
-              @for (tag of getEnhancedTags(getLeftGame()!, 2, 1); track tag.tag) {
+              @for (tag of getEnhancedTags(getLeftGame()!, 1, 2); track tag.tag) {
                 <span class="tag-chip" [class]="'tag-' + tag.type" [title]="getTagTooltip(tag)">
                   @if (tag.type === 'popular') {
                     <mat-icon class="tag-icon">trending_up</mat-icon>
@@ -79,7 +79,7 @@
               <span class="price">{{ getGamePrice(getRightGame()!) }}</span>
             </div>
             <div class="game-tags">
-              @for (tag of getEnhancedTags(getRightGame()!, 2, 1); track tag.tag) {
+              @for (tag of getEnhancedTags(getRightGame()!, 1, 2); track tag.tag) {
                 <span class="tag-chip" [class]="'tag-' + tag.type" [title]="getTagTooltip(tag)">
                   @if (tag.type === 'popular') {
                     <mat-icon class="tag-icon">trending_up</mat-icon>

@@ -47,9 +47,9 @@
         }
         
         <!-- Enhanced Tags -->
-        @if (getEnhancedTags(4, 2).length > 0) {
+        @if (getEnhancedTags(2, 4).length > 0) {
           <div class="quick-tags">
-            @for (tag of getEnhancedTags(4, 2); track tag.tag) {
+            @for (tag of getEnhancedTags(2, 4); track tag.tag) {
               <span class="tag-chip" [class]="'tag-' + tag.type" [matTooltip]="getTagTooltip(tag)">
                 @if (tag.type === 'popular') {
                   <mat-icon class="tag-icon">trending_up</mat-icon>
