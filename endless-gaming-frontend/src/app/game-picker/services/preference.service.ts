@@ -503,11 +503,11 @@ export class PreferenceService {
       }
     }
 
-    // Sort by weight and take top 5 liked and disliked
+    // Sort by weight and return ALL significant liked and disliked tags
     tagWeights.sort((a, b) => b.weight - a.weight);
     
-    const likedTags = tagWeights.filter(tw => tw.weight > 0).slice(0, 5);
-    const dislikedTags = tagWeights.filter(tw => tw.weight < 0).slice(-5).reverse();
+    const likedTags = tagWeights.filter(tw => tw.weight > 0);
+    const dislikedTags = tagWeights.filter(tw => tw.weight < 0).reverse();
 
     this.preferenceSummary$.next({
       likedTags: likedTags.map(tw => ({ tag: tw.tag, weight: tw.weight })),

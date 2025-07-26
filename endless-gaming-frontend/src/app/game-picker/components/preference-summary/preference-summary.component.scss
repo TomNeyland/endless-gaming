@@ -86,9 +86,31 @@
     }
   }
 
-  // Tag list styling (improved consistency)
+  // Tag list styling (improved consistency with scrolling)
   .tag-list {
     height: 100%;
+    max-height: 300px; // Limit height to enable scrolling
+    overflow-y: auto;
+    padding-right: 4px; // Space for scrollbar
+    
+    // Custom scrollbar styling
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 3px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
     
     .tag-item {
       margin-bottom: 12px;

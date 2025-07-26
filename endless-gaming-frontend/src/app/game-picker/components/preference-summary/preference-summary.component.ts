@@ -53,17 +53,17 @@ export class PreferenceSummaryComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get liked tags for display.
+   * Get ALL liked tags for display (no limit).
    */
   getLikedTags(): Array<{tag: string, weight: number}> {
-    return this.preferenceSummary.likedTags.slice(0, this.maxTags);
+    return this.preferenceSummary.likedTags;
   }
 
   /**
-   * Get disliked tags for display.
+   * Get ALL disliked tags for display (no limit).
    */
   getDislikedTags(): Array<{tag: string, weight: number}> {
-    return this.preferenceSummary.dislikedTags.slice(0, this.maxTags);
+    return this.preferenceSummary.dislikedTags;
   }
 
   /**
