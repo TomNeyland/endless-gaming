@@ -16,6 +16,7 @@ import { AnimationService } from '../../services/animation.service';
 import { GameFilterService } from '../../services/game-filter.service';
 import { EnhancedTagService } from '../../services/enhanced-tag.service';
 import { TagRarityService } from '../../services/tag-rarity.service';
+import { RadialTagMenuService } from '../../services/radial-tag-menu.service';
 
 /**
  * Slide-out drawer component for continuous voting with live recommendation updates.
@@ -48,6 +49,7 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
   public gameFilterService = inject(GameFilterService);
   private enhancedTagService = inject(EnhancedTagService);
   private tagRarityService = inject(TagRarityService);
+  private radialTagMenuService = inject(RadialTagMenuService);
   
   @Input() isOpen = false;
   @Input() games: GameRecord[] = [];
@@ -307,15 +309,24 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
   }
 
   /**
-   * Get tooltip text for enhanced tags.
+   * Handle tag click events to open radial menu
    */
-  getTagTooltip(tag: EnhancedTag): string {
-    if (tag.type === 'popular') {
-      return `Popular tag: ${tag.votes.toLocaleString()} votes across many games`;
-    } else {
-      const multiplierText = tag.multiplier ? ` (${tag.multiplier.toFixed(1)}x learning impact)` : '';
-      return `Distinctive tag: Rare across the catalog${multiplierText}`;
-    }
+  onTagClick(event: MouseEvent, tagName: string): void {
+    // Prevent all event propagation and default behavior
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    event.preventDefault();
+    
+    // Get click coordinates for menu positioning
+    const position = {
+      x: event.clientX,
+      y: event.clientY
+    };
+    
+    console.log(`🏷️ Tag clicked in voting drawer: ${tagName} at position (${position.x}, ${position.y})`);
+    
+    // Open radial menu at click location
+    this.radialTagMenuService.openMenu(tagName, position);
   }
 
   /**

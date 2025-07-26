@@ -1,0 +1,193 @@
+// Modern radial tag menu with glassmorphism and smooth animations
+.radial-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.radial-menu {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  cursor: default;
+  
+  .action-button {
+    position: absolute;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 
+                0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), 
+                  0 3px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    &:active {
+      transform: scale(0.95);
+    }
+    
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      color: white;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+    }
+    
+    // Position buttons in cardinal directions
+    &.like-action {
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #4caf50, #66bb6a);
+      
+      &:hover {
+        background: linear-gradient(135deg, #43a047, #5cb85c);
+        transform: translateX(-50%) scale(1.1);
+      }
+    }
+    
+    &.include-action {
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      background: linear-gradient(135deg, #2196f3, #42a5f5);
+      
+      &:hover {
+        background: linear-gradient(135deg, #1976d2, #1e88e5);
+        transform: translateY(-50%) scale(1.1);
+      }
+    }
+    
+    &.dislike-action {
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #f44336, #e57373);
+      
+      &:hover {
+        background: linear-gradient(135deg, #d32f2f, #c62828);
+        transform: translateX(-50%) scale(1.1);
+      }
+    }
+    
+    &.exclude-action {
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      background: linear-gradient(135deg, #ff9800, #ffb74d);
+      
+      &:hover {
+        background: linear-gradient(135deg, #f57c00, #ef6c00);
+        transform: translateY(-50%) scale(1.1);
+      }
+    }
+  }
+  
+  .center-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 8px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    
+    .tag-name {
+      color: var(--gaming-text-primary);
+      font-weight: 500;
+      font-size: 14px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      white-space: nowrap;
+    }
+  }
+}
+
+// Animation enhancements
+.action-button {
+  // Ripple effect on click
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transition: width 0.3s, height 0.3s, top 0.3s, left 0.3s;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  
+  &:active::after {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// Responsive design for mobile
+@media (max-width: 768px) {
+  .radial-menu {
+    width: 180px;
+    height: 180px;
+    
+    .action-button {
+      width: 48px;
+      height: 48px;
+      
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+    
+    .center-indicator {
+      .tag-name {
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .action-button {
+    border: 2px solid white;
+    
+    &.like-action {
+      background: #4caf50;
+    }
+    
+    &.include-action {
+      background: #2196f3;
+    }
+    
+    &.dislike-action {
+      background: #f44336;
+    }
+    
+    &.exclude-action {
+      background: #ff9800;
+    }
+  }
+}

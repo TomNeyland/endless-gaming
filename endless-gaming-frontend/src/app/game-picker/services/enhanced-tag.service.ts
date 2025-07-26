@@ -156,4 +156,63 @@ export class EnhancedTagService {
       allTags
     };
   }
+
+  /**
+   * Get ALL game tags with enhanced type classification.
+   * Classifies each tag as either popular or unique based on TF-IDF analysis.
+   * 
+   * @param game Game to analyze
+   * @param tfidfAnalysis TF-IDF analysis data for tag rarity
+   * @param tagRarityService Optional service for getting importance multipliers
+   * @returns Array of all tags sorted by vote count with type classification
+   */
+  getAllEnhancedTags(
+    game: GameRecord, 
+    tfidfAnalysis: TagRarityAnalysis, 
+    tagRarityService?: TagRarityService
+  ): EnhancedTag[] {
+    if (!game.tags) {
+      return [];
+    }
+
+    const enhancedTags: EnhancedTag[] = [];
+
+    // Analyze each tag to determine its type
+    Object.entries(game.tags).forEach(([tag, votes]) => {
+      const idfScore = tfidfAnalysis.inverseFrequency.get(tag);
+      
+      let tagType: 'popular' | 'unique' = 'popular';
+      let tfidfScore: number | undefined;
+      let multiplier: number | undefined;
+
+      // If we have TF-IDF data, calculate rarity
+      if (idfScore !== undefined) {
+        const maxVotesInGame = Math.max(...Object.values(game.tags));
+        const tf = maxVotesInGame > 0 ? votes / maxVotesInGame : 0;
+        tfidfScore = tf * idfScore;
+
+        // Classify as unique if TF-IDF score is above a threshold
+        // This threshold determines what constitutes a "rare" tag
+        const uniqueThreshold = 0.1; // Adjust this to fine-tune classification
+        if (tfidfScore > uniqueThreshold) {
+          tagType = 'unique';
+        }
+
+        if (tagRarityService) {
+          multiplier = tagRarityService.getTagImportanceMultiplier(tag);
+        }
+      }
+
+      enhancedTags.push({
+        tag,
+        votes,
+        type: tagType,
+        tfidfScore,
+        multiplier
+      });
+    });
+
+    // Sort by vote count (most popular first)
+    return enhancedTags.sort((a, b) => b.votes - a.votes);
+  }
 }

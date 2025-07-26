@@ -58,6 +58,43 @@
         border-radius: 10px;
         font-size: 0.75rem;
         padding: 2px 8px;
+        
+        // Clickable tag styling
+        &.clickable-tag {
+          cursor: pointer;
+          user-select: none;
+          position: relative;
+          transition: all 0.2s ease;
+          
+          &:hover {
+            background: var(--gaming-accent);
+            color: white;
+            transform: scale(1.05) translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          }
+          
+          &:active {
+            transform: scale(0.98);
+          }
+          
+          // Subtle indicator that tag is clickable
+          &::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 3px;
+            height: 3px;
+            background: var(--gaming-accent);
+            border-radius: 50%;
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+          }
+          
+          &:hover::after {
+            opacity: 0;
+          }
+        }
       }
     }
   }
@@ -539,6 +576,40 @@
                 font-size: 0.75rem;
                 font-weight: 500;
                 transition: all 0.2s ease;
+                
+                // Clickable tag styling
+                &.clickable-tag {
+                  cursor: pointer;
+                  user-select: none;
+                  position: relative;
+                  
+                  &:hover {
+                    transform: scale(1.05) translateY(-1px);
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                  }
+                  
+                  &:active {
+                    transform: scale(0.98);
+                  }
+                  
+                  // Subtle indicator that tag is clickable
+                  &::after {
+                    content: '';
+                    position: absolute;
+                    top: 2px;
+                    right: 2px;
+                    width: 3px;
+                    height: 3px;
+                    background: currentColor;
+                    border-radius: 50%;
+                    opacity: 0.7;
+                    transition: opacity 0.2s ease;
+                  }
+                  
+                  &:hover::after {
+                    opacity: 0;
+                  }
+                }
                 
                 // Popular tags (blue theme for widespread appeal)
                 &.tag-popular {

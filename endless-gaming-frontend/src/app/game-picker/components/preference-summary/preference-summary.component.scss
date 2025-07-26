@@ -103,6 +103,43 @@
         border-color: rgba(255, 255, 255, 0.15);
       }
       
+      // Interactive tag styling
+      &.clickable-tag {
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+        
+        &:hover {
+          background: rgba(255, 255, 255, 0.08);
+          border-color: var(--gaming-accent);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        &:active {
+          transform: translateY(0);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        // Add subtle indicator that tag is clickable
+        &::after {
+          content: '';
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          width: 4px;
+          height: 4px;
+          background: var(--gaming-accent);
+          border-radius: 50%;
+          opacity: 0.6;
+          transition: opacity 0.2s ease;
+        }
+        
+        &:hover::after {
+          opacity: 1;
+        }
+      }
+      
       &.liked-tag {
         border-left: 2.5px solid #4caf50;
         

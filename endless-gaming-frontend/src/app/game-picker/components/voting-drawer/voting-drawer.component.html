@@ -69,7 +69,7 @@
                       </div>
                       <div class="game-tags">
                         @for (tag of leftGameTags(); track tag.tag) {
-                          <span class="tag-chip" [class]="'tag-' + tag.type" [title]="getTagTooltip(tag)">
+                          <span class="tag-chip clickable-tag" [class]="'tag-' + tag.type" (click)="onTagClick($event, tag.tag)">
                             @if (tag.type === 'popular') {
                               <mat-icon class="tag-icon">trending_up</mat-icon>
                             } @else {
@@ -119,7 +119,7 @@
                       </div>
                       <div class="game-tags">
                         @for (tag of rightGameTags(); track tag.tag) {
-                          <span class="tag-chip" [class]="'tag-' + tag.type" [title]="getTagTooltip(tag)">
+                          <span class="tag-chip clickable-tag" [class]="'tag-' + tag.type" (click)="onTagClick($event, tag.tag)">
                             @if (tag.type === 'popular') {
                               <mat-icon class="tag-icon">trending_up</mat-icon>
                             } @else {

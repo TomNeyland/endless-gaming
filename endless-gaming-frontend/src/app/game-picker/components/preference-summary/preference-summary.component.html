@@ -24,7 +24,7 @@
           @if (getLikedTags().length > 0) {
             <div class="tag-list">
               @for (tagData of getLikedTags(); track tagData.tag) {
-                <div class="tag-item liked-tag">
+                <div class="tag-item liked-tag clickable-tag" (click)="onTagClick($event, tagData.tag)">
                   <div class="tag-header">
                     <span class="tag-name mat-body-2">{{ tagData.tag }}</span>
                     <span class="tag-weight mat-caption">{{ formatWeight(tagData.weight) }}</span>
@@ -56,7 +56,7 @@
           @if (getDislikedTags().length > 0) {
             <div class="tag-list">
               @for (tagData of getDislikedTags(); track tagData.tag) {
-                <div class="tag-item disliked-tag">
+                <div class="tag-item disliked-tag clickable-tag" (click)="onTagClick($event, tagData.tag)">
                   <div class="tag-header">
                     <span class="tag-name mat-body-2">{{ tagData.tag }}</span>
                     <span class="tag-weight mat-caption">{{ formatWeight(getAbsWeight(tagData.weight)) }}</span>

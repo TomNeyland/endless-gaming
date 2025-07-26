@@ -7,6 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { PreferenceSummary, TagRarityAnalysis } from '../../../types/game.types';
 import { PreferenceService } from '../../services/preference.service';
 import { TagRarityService } from '../../services/tag-rarity.service';
+import { RadialTagMenuService } from '../../services/radial-tag-menu.service';
 import { Subscription } from 'rxjs';
 
 /**
@@ -25,6 +26,7 @@ import { Subscription } from 'rxjs';
 export class PreferenceSummaryComponent implements OnInit, OnDestroy {
   private preferenceService = inject(PreferenceService);
   private tagRarityService = inject(TagRarityService);
+  private radialTagMenuService = inject(RadialTagMenuService);
   private subscription?: Subscription;
   
   @Input() tagRarityAnalysis?: TagRarityAnalysis | null = null;
@@ -185,5 +187,26 @@ export class PreferenceSummaryComponent implements OnInit, OnDestroy {
     } else {
       return 'show_chart'; // Low impact - common tag
     }
+  }
+
+  /**
+   * Handle tag click events to open radial menu
+   */
+  onTagClick(event: MouseEvent, tagName: string): void {
+    // Prevent all event propagation and default behavior
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    event.preventDefault();
+    
+    // Get click coordinates for menu positioning
+    const position = {
+      x: event.clientX,
+      y: event.clientY
+    };
+    
+    console.log(`🏷️ Tag clicked: ${tagName} at position (${position.x}, ${position.y})`);
+    
+    // Open radial menu at click location
+    this.radialTagMenuService.openMenu(tagName, position);
   }
 }

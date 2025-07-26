@@ -13,6 +13,7 @@ import { formatGameAge, getAgeBadge } from '../../../utils/game-age.utils';
 import { MediaGalleryComponent, MediaGalleryEvent } from '../../../shared/components/media-gallery/media-gallery.component';
 import { EnhancedTagService } from '../../services/enhanced-tag.service';
 import { TagRarityService } from '../../services/tag-rarity.service';
+import { RadialTagMenuService } from '../../services/radial-tag-menu.service';
 
 export interface GameDetailsModalData {
   game: GameRecord;
@@ -50,6 +51,7 @@ export class GameDetailsModalComponent implements OnInit {
   public selectedVideo: Movie | null = null;
   private enhancedTagService = inject(EnhancedTagService);
   private tagRarityService = inject(TagRarityService);
+  private radialTagMenuService = inject(RadialTagMenuService);
 
   constructor(
     private dialogRef: MatDialogRef<GameDetailsModalComponent>,
@@ -133,15 +135,52 @@ export class GameDetailsModalComponent implements OnInit {
   }
 
   /**
-   * Get tooltip text for enhanced tags.
+   * Get ALL game tags sorted by vote count with enhanced type information.
    */
-  public getTagTooltip(tag: EnhancedTag): string {
-    if (tag.type === 'popular') {
-      return `Popular tag: ${tag.votes.toLocaleString()} votes across many games`;
-    } else {
-      const multiplierText = tag.multiplier ? ` (${tag.multiplier.toFixed(1)}x learning impact)` : '';
-      return `Distinctive tag: Rare across the catalog${multiplierText}`;
+  public getAllGameTags(): EnhancedTag[] {
+    if (!this.game?.tags) {
+      return [];
     }
+
+    // If TF-IDF analysis is available, classify all tags
+    if (this.tagRarityAnalysis) {
+      return this.enhancedTagService.getAllEnhancedTags(
+        this.game,
+        this.tagRarityAnalysis,
+        this.tagRarityService
+      );
+    }
+
+    // Fallback: return all tags as popular type, sorted by votes
+    return Object.entries(this.game.tags)
+      .map(([tag, votes]) => ({
+        tag,
+        votes,
+        type: 'popular' as const,
+        multiplier: undefined
+      }))
+      .sort((a, b) => b.votes - a.votes);
+  }
+
+  /**
+   * Handle tag click events to open radial menu
+   */
+  public onTagClick(event: MouseEvent, tagName: string): void {
+    // Prevent all event propagation and default behavior
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    event.preventDefault();
+    
+    // Get click coordinates for menu positioning
+    const position = {
+      x: event.clientX,
+      y: event.clientY
+    };
+    
+    console.log(`🏷️ Tag clicked in game details modal: ${tagName} at position (${position.x}, ${position.y})`);
+    
+    // Open radial menu at click location
+    this.radialTagMenuService.openMenu(tagName, position);
   }
 
   /**

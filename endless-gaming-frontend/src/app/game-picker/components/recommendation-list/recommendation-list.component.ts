@@ -16,6 +16,7 @@ import { GameFilterService } from '../../services/game-filter.service';
 import { GameDetailsService } from '../../services/game-details.service';
 import { EnhancedTagService } from '../../services/enhanced-tag.service';
 import { TagRarityService } from '../../services/tag-rarity.service';
+import { RadialTagMenuService } from '../../services/radial-tag-menu.service';
 import { getAgeBadge } from '../../../utils/game-age.utils';
 import { Subscription } from 'rxjs';
 
@@ -49,6 +50,7 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   private gameDetailsService = inject(GameDetailsService);
   private enhancedTagService = inject(EnhancedTagService);
   private tagRarityService = inject(TagRarityService);
+  private radialTagMenuService = inject(RadialTagMenuService);
   private preferenceSummarySubscription?: Subscription;
   private filterSubscription?: Subscription;
   
@@ -389,17 +391,6 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
     return this.enhancedTagService.getPopularTags(game, popularCount + uniqueCount);
   }
 
-  /**
-   * Get tooltip text for enhanced tags.
-   */
-  getTagTooltip(tag: EnhancedTag): string {
-    if (tag.type === 'popular') {
-      return `Popular tag: ${tag.votes.toLocaleString()} votes across many games`;
-    } else {
-      const multiplierText = tag.multiplier ? ` (${tag.multiplier.toFixed(1)}x learning impact)` : '';
-      return `Distinctive tag: Rare across the catalog${multiplierText}`;
-    }
-  }
 
   /**
    * Handle recommendation item click - open game details modal.
@@ -580,5 +571,26 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
     }
     
     return truncated + '...';
+  }
+
+  /**
+   * Handle tag click events to open radial menu
+   */
+  onTagClick(event: MouseEvent, tagName: string): void {
+    // Prevent all event propagation and default behavior
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    event.preventDefault();
+    
+    // Get click coordinates for menu positioning
+    const position = {
+      x: event.clientX,
+      y: event.clientY
+    };
+    
+    console.log(`🏷️ Tag clicked in recommendations: ${tagName} at position (${position.x}, ${position.y})`);
+    
+    // Open radial menu at click location
+    this.radialTagMenuService.openMenu(tagName, position);
   }
 }
