@@ -34,24 +34,35 @@ export class TagRarityService {
       return this.cachedAnalysis;
     }
 
-    const tagFrequency = new Map<string, number>();
+    const tagFrequency = new Map<string, number>(); // Document frequency (how many games have this tag)
+    const tagVoteSum = new Map<string, number>();   // Total votes across all games for this tag
     const totalGames = games.length;
 
-    // Count how many games contain each tag
+    // Count both document frequency AND total vote sums for each tag
     games.forEach(game => {
       const gameTags = new Set(Object.keys(game.tags));
+      
+      // Document frequency: count unique games that have this tag
       gameTags.forEach(tag => {
         tagFrequency.set(tag, (tagFrequency.get(tag) || 0) + 1);
+      });
+      
+      // Vote-weighted frequency: sum all votes for this tag across games
+      Object.entries(game.tags).forEach(([tag, votes]) => {
+        tagVoteSum.set(tag, (tagVoteSum.get(tag) || 0) + votes);
       });
     });
 
     // Calculate inverse document frequency (IDF) for each tag
+    // Using VOTE-WEIGHTED frequency instead of just document count
     const inverseFrequency = new Map<string, number>();
+    const totalVotes = Array.from(tagVoteSum.values()).reduce((sum, votes) => sum + votes, 0);
     
-    tagFrequency.forEach((count, tag) => {
-      if (count > 0 && totalGames > 0) {
-        // IDF formula: log(total_documents / documents_containing_term)
-        const idf = Math.log(totalGames / count);
+    tagVoteSum.forEach((voteSum, tag) => {
+      if (voteSum > 0 && totalVotes > 0) {
+        // IDF formula using vote-weighted frequency: log(total_votes / tag_vote_sum)
+        // This makes tags with fewer total votes across all games have higher IDF scores
+        const idf = Math.log(totalVotes / voteSum);
         inverseFrequency.set(tag, idf);
       } else {
         inverseFrequency.set(tag, 0);

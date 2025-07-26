@@ -63,9 +63,13 @@ export class EnhancedTagService {
       const idfScore = tfidfAnalysis.inverseFrequency.get(tag);
       
       if (idfScore !== undefined) {
+        // Term Frequency (TF): normalized vote count within this game
+        // Simple normalization: votes / max_votes_in_this_game
+        const maxVotesInGame = Math.max(...Object.values(game.tags));
+        const tf = maxVotesInGame > 0 ? votes / maxVotesInGame : 0;
+        
         // TF-IDF = Term Frequency * Inverse Document Frequency
-        // For display purposes, we use the IDF score directly since TF is just tag strength within the game
-        const tfidfScore = idfScore;
+        const tfidfScore = tf * idfScore;
         
         let multiplier: number | undefined;
         if (tagRarityService) {
