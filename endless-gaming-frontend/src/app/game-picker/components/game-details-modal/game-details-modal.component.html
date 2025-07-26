@@ -90,6 +90,36 @@
       <mat-tab label="Details">
         <div class="tab-content overview-content">
           
+          <!-- Quick Overview Section -->
+          <div class="quick-overview">
+            @if (game.shortDescription) {
+              <div class="overview-description">
+                {{ game.shortDescription }}
+              </div>
+            }
+            
+            <div class="overview-meta">
+              <!-- Top Tags -->
+              <div class="overview-tags">
+                @for (tagData of getTopTags(4); track tagData.tag) {
+                  <span class="overview-tag">{{ tagData.tag }}</span>
+                }
+              </div>
+              
+              <!-- Rating Bar -->
+              @if (game.reviewPos || game.reviewNeg) {
+                <div class="overview-rating">
+                  <div class="rating-bar-container">
+                    <div class="rating-bar">
+                      <div class="rating-fill" [style.width]="getReviewPercentage() + '%'"></div>
+                    </div>
+                    <span class="rating-text">{{ getReviewPercentage() }}% positive ({{ getTotalReviews() | number }} reviews)</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+          
           <!-- Media Carousel (moved from separate tab) -->
           @if (hasMedia()) {
             <div class="media-section">
@@ -108,19 +138,12 @@
             </div>
           }
           
-          <!-- Description -->
-          @if (game.shortDescription || game.detailedDescription) {
+          <!-- Detailed Description -->
+          @if (game.detailedDescription) {
             <div class="description-section">
-              <h3>Description</h3>
-              @if (game.shortDescription) {
-                <div class="short-description">
-                  {{ game.shortDescription }}
-                </div>
-              }
-              @if (game.detailedDescription) {
-                <div class="detailed-description" [innerHTML]="sanitizeHtml(game.detailedDescription)">
-                </div>
-              }
+              <h3>About This Game</h3>
+              <div class="detailed-description" [innerHTML]="sanitizeHtml(game.detailedDescription)">
+              </div>
             </div>
           }
           

@@ -157,6 +157,13 @@ export class GameDetailsModalComponent implements OnInit {
   }
 
   /**
+   * Get total review count
+   */
+  public getTotalReviews(): number {
+    return (this.game.reviewPos || 0) + (this.game.reviewNeg || 0);
+  }
+
+  /**
    * Sanitize HTML content for safe display
    */
   public sanitizeHtml(html: string | null | undefined): SafeHtml {
