@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { PreferenceService } from './preference.service';
+import { TagRarityService } from './tag-rarity.service';
 import { GameRecord, TagDictionary, UserPreferenceState, PreferenceSummary, GameRecommendation } from '../../types/game.types';
 
 describe('PreferenceService', () => {
@@ -47,6 +48,11 @@ describe('PreferenceService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({});
     service = TestBed.inject(PreferenceService);
+    
+    // Clear localStorage to ensure test isolation
+    localStorage.clear();
+    
+    // Initialize with clean state
     service.initializeModel(mockTagDict);
   });
 
@@ -389,6 +395,245 @@ describe('PreferenceService', () => {
       
       expect(rec1[0].score).toBe(rec2[0].score);
       expect(rec1[0].rank).toBe(rec2[0].rank);
+    });
+  });
+
+  describe('TF-IDF Integration', () => {
+    let tagRarityService: TagRarityService;
+
+    // Extended mock games for TF-IDF testing
+    const tfidfMockGames: GameRecord[] = [
+      {
+        appId: 730,
+        name: 'Counter-Strike: Global Offensive',
+        coverUrl: null,
+        price: 'Free',
+        developer: 'Valve',
+        publisher: 'Valve',
+        tags: { 'FPS': 91172, 'Shooter': 65634, 'Action': 45123 }, // Action is common
+        genres: ['Action'],
+        reviewPos: 1000000,
+        reviewNeg: 100000
+      },
+      {
+        appId: 570,
+        name: 'Dota 2',
+        coverUrl: null,
+        price: 'Free',
+        developer: 'Valve',
+        publisher: 'Valve',
+        tags: { 'MOBA': 55432, 'Strategy': 34521, 'Action': 67890 }, // MOBA is rare, Action common
+        genres: ['Strategy'],
+        reviewPos: 800000,
+        reviewNeg: 120000
+      },
+      {
+        appId: 440,
+        name: 'Team Fortress 2',
+        coverUrl: null,
+        price: 'Free',
+        developer: 'Valve',
+        publisher: 'Valve',
+        tags: { 'FPS': 72134, 'Shooter': 48291, 'Action': 31205 }, // All common tags
+        genres: ['Action'],
+        reviewPos: 600000,
+        reviewNeg: 80000
+      },
+      {
+        appId: 12210,
+        name: 'Grand Theft Auto IV',
+        coverUrl: null,
+        price: '19.99',
+        developer: 'Rockstar',
+        publisher: 'Rockstar',
+        tags: { 'Open World': 89123, 'Crime': 45612, 'Action': 78345 }, // Crime is rare
+        genres: ['Action'],
+        reviewPos: 400000,
+        reviewNeg: 200000
+      },
+      {
+        appId: 35720,
+        name: 'Trine 2',
+        coverUrl: null,
+        price: '14.99',
+        developer: 'Frozenbyte',
+        publisher: 'Frozenbyte',
+        tags: { 'Puzzle-Platformer': 12345, 'Co-op': 23456, 'Fantasy': 34567 }, // All very rare
+        genres: ['Adventure'],
+        reviewPos: 50000,
+        reviewNeg: 5000
+      }
+    ];
+
+    const tfidfTagDict: TagDictionary = {
+      tagToIndex: {
+        'FPS': 0,
+        'Shooter': 1,
+        'Action': 2,
+        'MOBA': 3,
+        'Strategy': 4,
+        'Open World': 5,
+        'Crime': 6,
+        'Puzzle-Platformer': 7,
+        'Co-op': 8,
+        'Fantasy': 9
+      },
+      indexToTag: ['FPS', 'Shooter', 'Action', 'MOBA', 'Strategy', 'Open World', 'Crime', 'Puzzle-Platformer', 'Co-op', 'Fantasy'],
+      size: 10
+    };
+
+    beforeEach(() => {
+      tagRarityService = TestBed.inject(TagRarityService);
+      
+      // Clear localStorage to ensure test isolation
+      localStorage.clear();
+      
+      // Initialize with clean state
+      service.initializeModel(tfidfTagDict);
+    });
+
+    it('should initialize with TagRarityService integration', () => {
+      service.setTagRarityService(tagRarityService);
+      expect(service.hasTFIDFEnabled()).toBe(true);
+    });
+
+    it('should calculate TF-IDF analysis when TF-IDF is enabled', () => {
+      service.setTagRarityService(tagRarityService);
+      service.enableTFIDF(tfidfMockGames);
+      
+      const analysis = service.getTagRarityAnalysis();
+      expect(analysis).toBeTruthy();
+      expect(analysis!.totalGames).toBe(tfidfMockGames.length);
+      
+      // Action appears in 4 games, should have lower IDF
+      const actionFreq = analysis!.tagFrequency.get('Action');
+      expect(actionFreq).toBe(4);
+      
+      // MOBA appears in 1 game, should have higher IDF
+      const mobaFreq = analysis!.tagFrequency.get('MOBA');
+      expect(mobaFreq).toBe(1);
+    });
+
+    it('should apply higher learning weights to rare tags during preference updates', () => {
+      service.setTagRarityService(tagRarityService);
+      service.enableTFIDF(tfidfMockGames);
+      
+      // Clear initial weights
+      service.resetPreferences();
+      const initialState = service.getPreferenceState();
+      const initialWeights = Array.from(initialState.weightVector);
+      
+      // Update preferences: choose MOBA game (rare tags) over Action game (common tags)
+      const mobaGame = tfidfMockGames[1]; // Dota 2 - has MOBA tag (rare)
+      const actionGame = tfidfMockGames[0]; // CS:GO - has FPS, Shooter, Action (common)
+      
+      service.updatePreferences(mobaGame, actionGame);
+      
+      const updatedState = service.getPreferenceState();
+      
+      // Get indices for comparison
+      const mobaIndex = tfidfTagDict.tagToIndex['MOBA'];
+      const actionIndex = tfidfTagDict.tagToIndex['Action'];
+      
+      // MOBA should have received a larger weight increase due to TF-IDF
+      const mobaWeightChange = Math.abs(updatedState.weightVector[mobaIndex] - initialWeights[mobaIndex]);
+      const actionWeightChange = Math.abs(updatedState.weightVector[actionIndex] - initialWeights[actionIndex]);
+      
+      // The exact values depend on the TF-IDF calculation, but MOBA should have more impact
+      expect(mobaWeightChange).toBeGreaterThan(0);
+      expect(actionWeightChange).toBeLessThan(mobaWeightChange);
+    });
+
+    it('should work without TF-IDF when not enabled (backward compatibility)', () => {
+      // Don't set TagRarityService - should work normally
+      expect(service.hasTFIDFEnabled()).toBe(false);
+      
+      service.updatePreferences(tfidfMockGames[0], tfidfMockGames[1]);
+      
+      expect(service.getComparisonCount()).toBe(1);
+      
+      const state = service.getPreferenceState();
+      let hasNonZeroWeights = false;
+      for (let weight of state.weightVector) {
+        if (Math.abs(weight) > 0) {
+          hasNonZeroWeights = true;
+          break;
+        }
+      }
+      expect(hasNonZeroWeights).toBe(true);
+    });
+
+    it('should disable TF-IDF when TagRarityService is removed', () => {
+      service.setTagRarityService(tagRarityService);
+      service.enableTFIDF(tfidfMockGames);
+      expect(service.hasTFIDFEnabled()).toBe(true);
+      
+      service.setTagRarityService(null);
+      expect(service.hasTFIDFEnabled()).toBe(false);
+    });
+
+    it('should reflect TF-IDF impact in preference summaries', () => {
+      service.setTagRarityService(tagRarityService);
+      service.enableTFIDF(tfidfMockGames);
+      
+      // Build preferences by choosing rare tag games
+      const rareTagGame = tfidfMockGames[4]; // Trine 2 - very rare tags
+      const commonTagGame = tfidfMockGames[0]; // CS:GO - common tags
+      
+      service.updatePreferences(rareTagGame, commonTagGame);
+      
+      service.getPreferenceSummary().subscribe(summary => {
+        // Should show preference for rare tags with higher weights
+        expect(summary.likedTags.length).toBeGreaterThan(0);
+        
+        // Find if any rare tags appear in the summary
+        const rareTagsInSummary = summary.likedTags.filter(tagWeight => 
+          ['Puzzle-Platformer', 'Co-op', 'Fantasy'].includes(tagWeight.tag)
+        );
+        expect(rareTagsInSummary.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('should improve game ranking quality with TF-IDF enabled', () => {
+      service.setTagRarityService(tagRarityService);
+      service.enableTFIDF(tfidfMockGames);
+      
+      // Train preferences to like rare tags
+      const rareTagGame = tfidfMockGames[4]; // Trine 2
+      const commonTagGame = tfidfMockGames[0]; // CS:GO
+      
+      // Multiple training iterations
+      for (let i = 0; i < 3; i++) {
+        service.updatePreferences(rareTagGame, commonTagGame);
+      }
+      
+      const recommendations = service.rankGames(tfidfMockGames);
+      
+      // The rare tag game should rank higher due to TF-IDF weighting
+      const rareGameRec = recommendations.find(r => r.game.appId === rareTagGame.appId);
+      const commonGameRec = recommendations.find(r => r.game.appId === commonTagGame.appId);
+      
+      expect(rareGameRec!.score).toBeGreaterThan(commonGameRec!.score);
+      expect(rareGameRec!.rank).toBeLessThan(commonGameRec!.rank);
+    });
+
+    it('should handle TF-IDF configuration changes', () => {
+      service.setTagRarityService(tagRarityService);
+      
+      // Configure TF-IDF with custom settings
+      const customConfig = {
+        maxMultiplier: 2.5,
+        minMultiplier: 0.8,
+        smoothingEnabled: true
+      };
+      
+      tagRarityService.configure(customConfig);
+      service.enableTFIDF(tfidfMockGames);
+      
+      // Verify configuration is applied
+      const retrievedConfig = tagRarityService.getConfiguration();
+      expect(retrievedConfig.maxMultiplier).toBe(2.5);
+      expect(retrievedConfig.minMultiplier).toBe(0.8);
     });
   });
 });

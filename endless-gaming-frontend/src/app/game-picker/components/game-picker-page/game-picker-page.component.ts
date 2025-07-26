@@ -122,6 +122,11 @@ export class GamePickerPageComponent implements OnInit {
     console.log('🎮 GamePickerPage: Initializing preference model...');
     this.preferenceService.initializeModel(tagDict);
     
+    // Enable TF-IDF analysis for tag rarity insights
+    console.log('🎮 GamePickerPage: Enabling TF-IDF analysis...');
+    this.preferenceService.enableTFIDF(games);
+    console.log('🎮 GamePickerPage: TF-IDF analysis enabled');
+    
     // Initialize pair service with games and tag dictionary for performance caching
     console.log('🎮 GamePickerPage: Initializing pair service...');
     this.pairService.initializeWithGames(games, tagDict);
@@ -225,6 +230,13 @@ export class GamePickerPageComponent implements OnInit {
    */
   getGames(): GameRecord[] {
     return this.games;
+  }
+
+  /**
+   * Get TF-IDF analysis for enhanced tag display.
+   */
+  getTagRarityAnalysis() {
+    return this.preferenceService.getTagRarityAnalysis();
   }
 
   /**

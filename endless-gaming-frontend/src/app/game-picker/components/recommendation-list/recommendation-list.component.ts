@@ -7,13 +7,15 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { GameRecommendation, GameRecord } from '../../../types/game.types';
+import { GameRecommendation, GameRecord, TagRarityAnalysis, EnhancedTag } from '../../../types/game.types';
 import { PreferenceService } from '../../services/preference.service';
 import { PairService } from '../../services/pair.service';
 import { AnimationService } from '../../services/animation.service';
 import { VotingDrawerService } from '../../services/voting-drawer.service';
 import { GameFilterService } from '../../services/game-filter.service';
 import { GameDetailsService } from '../../services/game-details.service';
+import { EnhancedTagService } from '../../services/enhanced-tag.service';
+import { TagRarityService } from '../../services/tag-rarity.service';
 import { getAgeBadge } from '../../../utils/game-age.utils';
 import { Subscription } from 'rxjs';
 
@@ -45,6 +47,8 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   private animationService = inject(AnimationService);
   private votingDrawerService = inject(VotingDrawerService);
   private gameDetailsService = inject(GameDetailsService);
+  private enhancedTagService = inject(EnhancedTagService);
+  private tagRarityService = inject(TagRarityService);
   private preferenceSummarySubscription?: Subscription;
   private filterSubscription?: Subscription;
   
@@ -53,6 +57,7 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   
   @Input() games: GameRecord[] = [];
   @Input() maxRecommendations: number = 100;
+  @Input() tagRarityAnalysis?: TagRarityAnalysis | null = null;
   
   recommendations: GameRecommendation[] = [];
   
@@ -346,7 +351,7 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get top tags for display in compact view.
+   * Get top tags for display in compact view (legacy method for backward compatibility).
    */
   getTopTags(game: GameRecord, maxTags: number = 3): Array<{tag: string, votes: number}> {
     if (!game?.tags) {
@@ -357,6 +362,43 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
       .map(([tag, votes]) => ({ tag, votes }))
       .sort((a, b) => b.votes - a.votes)
       .slice(0, maxTags);
+  }
+
+  /**
+   * Get enhanced tags with both popular and unique insights.
+   * Falls back to popular tags if TF-IDF analysis is not available.
+   */
+  getEnhancedTags(game: GameRecord, popularCount: number = 2, uniqueCount: number = 1): EnhancedTag[] {
+    if (!game) {
+      return [];
+    }
+
+    // If TF-IDF analysis is available, show enhanced display
+    if (this.tagRarityAnalysis) {
+      const display = this.enhancedTagService.getEnhancedTagDisplay(
+        game,
+        this.tagRarityAnalysis,
+        popularCount,
+        uniqueCount,
+        this.tagRarityService
+      );
+      return display.allTags;
+    }
+
+    // Fallback to popular tags only
+    return this.enhancedTagService.getPopularTags(game, popularCount + uniqueCount);
+  }
+
+  /**
+   * Get tooltip text for enhanced tags.
+   */
+  getTagTooltip(tag: EnhancedTag): string {
+    if (tag.type === 'popular') {
+      return `Popular tag: ${tag.votes.toLocaleString()} votes across many games`;
+    } else {
+      const multiplierText = tag.multiplier ? ` (${tag.multiplier.toFixed(1)}x learning impact)` : '';
+      return `Distinctive tag: Rare across the catalog${multiplierText}`;
+    }
   }
 
   /**

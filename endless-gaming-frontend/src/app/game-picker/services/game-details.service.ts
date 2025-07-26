@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { GameRecord } from '../../types/game.types';
+import { PreferenceService } from './preference.service';
 import { 
   GameDetailsModalComponent, 
   GameDetailsModalData 
@@ -17,6 +18,7 @@ import {
 })
 export class GameDetailsService {
   private dialog = inject(MatDialog);
+  private preferenceService = inject(PreferenceService);
 
   /**
    * Open game details modal for the specified game.
@@ -26,7 +28,10 @@ export class GameDetailsService {
    */
   public openGameDetails(game: GameRecord) {
     const config: MatDialogConfig<GameDetailsModalData> = {
-      data: { game },
+      data: { 
+        game,
+        tagRarityAnalysis: this.preferenceService.getTagRarityAnalysis()
+      },
       panelClass: 'game-details-dialog',
       maxWidth: '95vw',
       maxHeight: '95vh',

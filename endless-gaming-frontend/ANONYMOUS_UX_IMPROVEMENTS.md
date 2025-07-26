@@ -2,7 +2,7 @@
 
 ## Overview
 
-This plan outlines sophisticated preference learning improvements that enhance the recommendation experience for anonymous users (no Steam OAuth). These improvements extract maximum value from existing voting data and game metadata, significantly boosting recommendation quality without requiring user authentication.
+This plan outlines sophisticated preference learning improvements that enhance the recommendation experience. These improvements extract maximum value from existing voting data and game metadata, significantly boosting recommendation quality without requiring user authentication.
 
 ## Problem Statement
 

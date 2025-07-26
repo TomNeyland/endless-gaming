@@ -181,24 +181,70 @@
       }
     }
     
-    // Tags section with premium orange-themed chips
+    // Enhanced tags section with popular/unique differentiation
     .tags-section {
       margin-bottom: 16px;
       
       mat-chip-set {
         mat-chip {
-          background: rgba(255, 152, 0, 0.2) !important;
-          color: var(--gaming-accent) !important;
-          border: 1px solid rgba(255, 152, 0, 0.4) !important;
           font-size: 0.75rem !important;
           height: 28px !important;
           font-weight: 500 !important;
           transition: all 0.2s ease !important;
           
-          &:hover {
-            background: rgba(255, 152, 0, 0.3) !important;
-            border-color: rgba(255, 152, 0, 0.6) !important;
-            transform: translateY(-1px);
+          // Popular tags (blue theme for widespread appeal)
+          &.tag-popular {
+            background: rgba(33, 150, 243, 0.2) !important;
+            color: #2196F3 !important;
+            border: 1px solid rgba(33, 150, 243, 0.4) !important;
+            
+            &:hover {
+              background: rgba(33, 150, 243, 0.3) !important;
+              border-color: rgba(33, 150, 243, 0.6) !important;
+              transform: translateY(-1px);
+            }
+            
+            .mat-icon {
+              color: #2196F3 !important;
+            }
+          }
+          
+          // Unique tags (orange theme for distinctive characteristics)
+          &.tag-unique {
+            background: rgba(255, 152, 0, 0.2) !important;
+            color: var(--gaming-accent) !important;
+            border: 1px solid rgba(255, 152, 0, 0.4) !important;
+            
+            &:hover {
+              background: rgba(255, 152, 0, 0.3) !important;
+              border-color: rgba(255, 152, 0, 0.6) !important;
+              transform: translateY(-1px);
+            }
+            
+            .mat-icon {
+              color: var(--gaming-accent) !important;
+            }
+          }
+          
+          // Fallback for basic tag chips (backward compatibility)
+          &.tag-chip:not(.tag-popular):not(.tag-unique) {
+            background: rgba(255, 152, 0, 0.2) !important;
+            color: var(--gaming-accent) !important;
+            border: 1px solid rgba(255, 152, 0, 0.4) !important;
+            
+            &:hover {
+              background: rgba(255, 152, 0, 0.3) !important;
+              border-color: rgba(255, 152, 0, 0.6) !important;
+              transform: translateY(-1px);
+            }
+          }
+          
+          // Avatar icon styling
+          .mat-chip-avatar.mat-icon {
+            width: 18px !important;
+            height: 18px !important;
+            font-size: 14px !important;
+            margin-right: 4px !important;
           }
         }
       }

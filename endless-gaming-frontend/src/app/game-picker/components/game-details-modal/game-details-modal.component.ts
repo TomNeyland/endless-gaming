@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -8,12 +8,15 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
-import { GameRecord, Screenshot, Movie } from '../../../types/game.types';
+import { GameRecord, Screenshot, Movie, TagRarityAnalysis, EnhancedTag } from '../../../types/game.types';
 import { formatGameAge, getAgeBadge } from '../../../utils/game-age.utils';
 import { MediaGalleryComponent, MediaGalleryEvent } from '../../../shared/components/media-gallery/media-gallery.component';
+import { EnhancedTagService } from '../../services/enhanced-tag.service';
+import { TagRarityService } from '../../services/tag-rarity.service';
 
 export interface GameDetailsModalData {
   game: GameRecord;
+  tagRarityAnalysis?: TagRarityAnalysis | null;
 }
 
 /**
@@ -42,8 +45,11 @@ export interface GameDetailsModalData {
 })
 export class GameDetailsModalComponent implements OnInit {
   public game: GameRecord;
+  public tagRarityAnalysis?: TagRarityAnalysis | null = null;
   public selectedScreenshot: Screenshot | null = null;
   public selectedVideo: Movie | null = null;
+  private enhancedTagService = inject(EnhancedTagService);
+  private tagRarityService = inject(TagRarityService);
 
   constructor(
     private dialogRef: MatDialogRef<GameDetailsModalComponent>,
@@ -51,6 +57,7 @@ export class GameDetailsModalComponent implements OnInit {
     private sanitizer: DomSanitizer
   ) {
     this.game = data.game;
+    this.tagRarityAnalysis = data.tagRarityAnalysis;
   }
 
   ngOnInit(): void {
@@ -101,7 +108,44 @@ export class GameDetailsModalComponent implements OnInit {
   }
 
   /**
-   * Get top tags for display
+   * Get enhanced tags with both popular and unique insights.
+   * Falls back to popular tags if TF-IDF analysis is not available.
+   */
+  public getEnhancedTags(popularCount: number = 4, uniqueCount: number = 2): EnhancedTag[] {
+    if (!this.game) {
+      return [];
+    }
+
+    // If TF-IDF analysis is available, show enhanced display
+    if (this.tagRarityAnalysis) {
+      const display = this.enhancedTagService.getEnhancedTagDisplay(
+        this.game,
+        this.tagRarityAnalysis,
+        popularCount,
+        uniqueCount,
+        this.tagRarityService
+      );
+      return display.allTags;
+    }
+
+    // Fallback to popular tags only
+    return this.enhancedTagService.getPopularTags(this.game, popularCount + uniqueCount);
+  }
+
+  /**
+   * Get tooltip text for enhanced tags.
+   */
+  public getTagTooltip(tag: EnhancedTag): string {
+    if (tag.type === 'popular') {
+      return `Popular tag: ${tag.votes.toLocaleString()} votes across many games`;
+    } else {
+      const multiplierText = tag.multiplier ? ` (${tag.multiplier.toFixed(1)}x learning impact)` : '';
+      return `Distinctive tag: Rare across the catalog${multiplierText}`;
+    }
+  }
+
+  /**
+   * Get top tags for display (legacy method for backward compatibility)
    */
   public getTopTags(maxTags: number = 8): Array<{tag: string, votes: number}> {
     if (!this.game.tags) return [];

@@ -95,11 +95,65 @@
         margin-bottom: 16px;
 
         .tag-chip {
-          background: rgba(255, 255, 255, 0.15);
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
           padding: 4px 8px;
           border-radius: 12px;
           font-size: 11px;
           font-weight: 500;
+          transition: all 0.2s ease;
+          
+          // Popular tags (blue theme for widespread appeal)
+          &.tag-popular {
+            background: rgba(33, 150, 243, 0.25);
+            color: #64B5F6;
+            border: 1px solid rgba(33, 150, 243, 0.4);
+            
+            &:hover {
+              background: rgba(33, 150, 243, 0.35);
+              border-color: rgba(33, 150, 243, 0.6);
+              transform: scale(1.05);
+            }
+            
+            .tag-icon {
+              color: #64B5F6;
+            }
+          }
+          
+          // Unique tags (orange theme for distinctive characteristics)
+          &.tag-unique {
+            background: rgba(255, 152, 0, 0.25);
+            color: #FFB74D;
+            border: 1px solid rgba(255, 152, 0, 0.4);
+            
+            &:hover {
+              background: rgba(255, 152, 0, 0.35);
+              border-color: rgba(255, 152, 0, 0.6);
+              transform: scale(1.05);
+            }
+            
+            .tag-icon {
+              color: #FFB74D;
+            }
+          }
+          
+          // Fallback for basic tag chips (backward compatibility)
+          &:not(.tag-popular):not(.tag-unique) {
+            background: rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.9);
+            
+            &:hover {
+              transform: scale(1.05);
+            }
+          }
+          
+          // Tag icon styling
+          .tag-icon {
+            width: 14px;
+            height: 14px;
+            font-size: 12px;
+          }
         }
       }
 

@@ -55,11 +55,20 @@
         {{ getDeveloperText() }}
       </div>
 
-      <!-- Tags as Material Chips -->
+      <!-- Enhanced Tags with Popular and Unique indicators -->
       <div class="tags-section">
         <mat-chip-set>
-          @for (tagData of getTopTags(3); track tagData.tag) {
-            <mat-chip class="tag-chip">{{ tagData.tag }}</mat-chip>
+          @for (tag of getEnhancedTags(3, 2); track tag.tag) {
+            <mat-chip 
+              [class]="'tag-chip tag-' + tag.type"
+              [matTooltip]="getTagTooltip(tag)">
+              @if (tag.type === 'popular') {
+                <mat-icon matChipAvatar>trending_up</mat-icon>
+              } @else {
+                <mat-icon matChipAvatar>auto_awesome</mat-icon>
+              }
+              {{ tag.tag }}
+            </mat-chip>
           }
         </mat-chip-set>
       </div>

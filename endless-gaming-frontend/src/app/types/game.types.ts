@@ -157,3 +157,44 @@ export interface MLConfig {
   readonly TOP_RECOMMENDATIONS: number;   // Number of top games to show
   readonly MIN_TAG_VOTES: number;        // Minimum votes for tag to be included
 }
+
+/**
+ * TF-IDF tag rarity analysis results.
+ * Used to weight tag importance based on rarity across the game catalog.
+ */
+export interface TagRarityAnalysis {
+  tagFrequency: Map<string, number>;      // Number of games per tag
+  inverseFrequency: Map<string, number>;  // IDF values per tag
+  totalGames: number;                     // Total number of games analyzed
+}
+
+/**
+ * Configuration for TF-IDF tag weighting system.
+ */
+export interface TFIDFConfig {
+  readonly maxMultiplier: number;    // Maximum importance multiplier (default: 3.0)
+  readonly minMultiplier: number;    // Minimum importance multiplier (default: 0.5)
+  readonly smoothingEnabled: boolean; // Whether to apply smoothing to prevent extremes
+}
+
+/**
+ * Enhanced tag with both popularity and TF-IDF information.
+ * Used for displaying tags with rarity context in the UI.
+ */
+export interface EnhancedTag {
+  tag: string;                    // Tag name
+  votes: number;                  // Raw vote count from Steam
+  type: 'popular' | 'unique';     // Whether this is a popular or unique tag
+  tfidfScore?: number;            // TF-IDF importance score (0-n)
+  multiplier?: number;            // TF-IDF learning multiplier (0.5-3.0)
+}
+
+/**
+ * Complete enhanced tag display data for a game.
+ * Separates popular tags (high votes) from unique tags (high TF-IDF).
+ */
+export interface EnhancedTagDisplay {
+  popularTags: EnhancedTag[];     // Top tags by vote count
+  uniqueTags: EnhancedTag[];      // Top tags by TF-IDF score (deduplicated)
+  allTags: EnhancedTag[];         // Combined list for display
+}

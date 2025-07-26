@@ -256,9 +256,52 @@
             gap: 6px;
             
             mat-chip {
-              font-size: 0.75rem;
-              padding: 4px 8px;
-              border: none;
+              font-size: 0.75rem !important;
+              height: 28px !important;
+              font-weight: 500 !important;
+              transition: all 0.2s ease !important;
+              
+              // Popular tags (blue theme for widespread appeal)
+              &.tag-popular {
+                background: rgba(33, 150, 243, 0.2) !important;
+                color: #2196F3 !important;
+                border: 1px solid rgba(33, 150, 243, 0.4) !important;
+                
+                &:hover {
+                  background: rgba(33, 150, 243, 0.3) !important;
+                  border-color: rgba(33, 150, 243, 0.6) !important;
+                  transform: translateY(-1px);
+                }
+                
+                .mat-icon {
+                  color: #2196F3 !important;
+                }
+              }
+              
+              // Unique tags (orange theme for distinctive characteristics)
+              &.tag-unique {
+                background: rgba(255, 152, 0, 0.2) !important;
+                color: var(--gaming-accent) !important;
+                border: 1px solid rgba(255, 152, 0, 0.4) !important;
+                
+                &:hover {
+                  background: rgba(255, 152, 0, 0.3) !important;
+                  border-color: rgba(255, 152, 0, 0.6) !important;
+                  transform: translateY(-1px);
+                }
+                
+                .mat-icon {
+                  color: var(--gaming-accent) !important;
+                }
+              }
+              
+              // Avatar icon styling
+              .mat-chip-avatar.mat-icon {
+                width: 18px !important;
+                height: 18px !important;
+                font-size: 14px !important;
+                margin-right: 4px !important;
+              }
             }
           }
         }
@@ -488,18 +531,66 @@
               gap: 8px;
               
               .game-tag {
-                background: rgba(102, 126, 234, 0.15);
-                color: var(--gaming-accent);
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
                 padding: 4px 8px;
                 border-radius: 12px;
                 font-size: 0.75rem;
                 font-weight: 500;
-                border: 1px solid rgba(102, 126, 234, 0.3);
                 transition: all 0.2s ease;
                 
-                &:hover {
-                  background: rgba(102, 126, 234, 0.25);
-                  transform: scale(1.05);
+                // Popular tags (blue theme for widespread appeal)
+                &.tag-popular {
+                  background: rgba(33, 150, 243, 0.15);
+                  color: #2196F3;
+                  border: 1px solid rgba(33, 150, 243, 0.3);
+                  
+                  &:hover {
+                    background: rgba(33, 150, 243, 0.25);
+                    border-color: rgba(33, 150, 243, 0.5);
+                    transform: scale(1.05);
+                  }
+                  
+                  .tag-icon {
+                    color: #2196F3;
+                  }
+                }
+                
+                // Unique tags (orange theme for distinctive characteristics)
+                &.tag-unique {
+                  background: rgba(255, 152, 0, 0.15);
+                  color: var(--gaming-accent);
+                  border: 1px solid rgba(255, 152, 0, 0.3);
+                  
+                  &:hover {
+                    background: rgba(255, 152, 0, 0.25);
+                    border-color: rgba(255, 152, 0, 0.5);
+                    transform: scale(1.05);
+                  }
+                  
+                  .tag-icon {
+                    color: var(--gaming-accent);
+                  }
+                }
+                
+                // Fallback for basic tag chips (backward compatibility)
+                &:not(.tag-popular):not(.tag-unique) {
+                  background: rgba(102, 126, 234, 0.15);
+                  color: var(--gaming-accent);
+                  border: 1px solid rgba(102, 126, 234, 0.3);
+                  
+                  &:hover {
+                    background: rgba(102, 126, 234, 0.25);
+                    transform: scale(1.05);
+                  }
+                }
+                
+                // Tag icon styling
+                .tag-icon {
+                  width: 14px;
+                  height: 14px;
+                  font-size: 12px;
                 }
               }
               

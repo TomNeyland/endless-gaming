@@ -1,10 +1,12 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatIconModule } from '@angular/material/icon';
-import { PreferenceSummary } from '../../../types/game.types';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { PreferenceSummary, TagRarityAnalysis } from '../../../types/game.types';
 import { PreferenceService } from '../../services/preference.service';
+import { TagRarityService } from '../../services/tag-rarity.service';
 import { Subscription } from 'rxjs';
 
 /**
@@ -16,13 +18,16 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-preference-summary',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatProgressBarModule, MatIconModule],
+  imports: [CommonModule, MatCardModule, MatProgressBarModule, MatIconModule, MatTooltipModule],
   templateUrl: './preference-summary.component.html',
   styleUrl: './preference-summary.component.scss'
 })
 export class PreferenceSummaryComponent implements OnInit, OnDestroy {
   private preferenceService = inject(PreferenceService);
+  private tagRarityService = inject(TagRarityService);
   private subscription?: Subscription;
+  
+  @Input() tagRarityAnalysis?: TagRarityAnalysis | null = null;
   
   preferenceSummary: PreferenceSummary = { likedTags: [], dislikedTags: [] };
   maxTags: number = 5;
@@ -109,5 +114,76 @@ export class PreferenceSummaryComponent implements OnInit, OnDestroy {
    */
   getAbsWeight(weight: number): number {
     return Math.abs(weight);
+  }
+
+  /**
+   * Get TF-IDF multiplier for a tag if available.
+   */
+  getTFIDFMultiplier(tag: string): number | null {
+    if (!this.tagRarityAnalysis) {
+      return null;
+    }
+    return this.tagRarityService.getTagImportanceMultiplier(tag);
+  }
+
+  /**
+   * Check if TF-IDF analysis is available.
+   */
+  hasTFIDFAnalysis(): boolean {
+    return this.tagRarityAnalysis !== null && this.tagRarityAnalysis !== undefined;
+  }
+
+  /**
+   * Get enhanced tooltip text with TF-IDF information.
+   */
+  getEnhancedTooltip(tag: string, weight: number): string {
+    const baseText = `Preference weight: ${weight.toFixed(3)}`;
+    const multiplier = this.getTFIDFMultiplier(tag);
+    
+    if (multiplier !== null) {
+      const impactText = multiplier > 1.5 ? 'High impact' : 
+                        multiplier > 1.0 ? 'Medium impact' : 'Low impact';
+      return `${baseText}\nLearning multiplier: ${multiplier.toFixed(1)}x (${impactText})`;
+    }
+    
+    return baseText;
+  }
+
+  /**
+   * Get impact level class for styling based on TF-IDF multiplier.
+   */
+  getImpactLevelClass(tag: string): string {
+    const multiplier = this.getTFIDFMultiplier(tag);
+    
+    if (multiplier === null) {
+      return 'impact-unknown';
+    }
+    
+    if (multiplier >= 2.0) {
+      return 'impact-high';
+    } else if (multiplier >= 1.5) {
+      return 'impact-medium';
+    } else {
+      return 'impact-low';
+    }
+  }
+
+  /**
+   * Get impact icon based on TF-IDF multiplier.
+   */
+  getImpactIcon(tag: string): string {
+    const multiplier = this.getTFIDFMultiplier(tag);
+    
+    if (multiplier === null) {
+      return 'help_outline';
+    }
+    
+    if (multiplier >= 2.0) {
+      return 'auto_awesome'; // High impact - distinctive tag
+    } else if (multiplier >= 1.5) {
+      return 'trending_up'; // Medium impact
+    } else {
+      return 'show_chart'; // Low impact - common tag
+    }
   }
 }

@@ -1,6 +1,7 @@
 <app-voting-drawer 
   [isOpen]="isDrawerOpen()" 
   [games]="getGames()"
+  [tagRarityAnalysis]="getTagRarityAnalysis()"
   (voteCast)="onVoteCast($event)"
   (drawerClosed)="onDrawerClosed()">
 
@@ -45,7 +46,7 @@
         <!-- Sidebar with Progress and Preferences -->
         <div class="sidebar">
           <app-progress-bar></app-progress-bar>
-          <app-preference-summary></app-preference-summary>
+          <app-preference-summary [tagRarityAnalysis]="getTagRarityAnalysis()"></app-preference-summary>
         </div>
 
         <!-- Main Game Comparison -->
@@ -69,7 +70,7 @@
       </div>
 
       <!-- Recommendations List -->
-      <app-recommendation-list [games]="getGames()"></app-recommendation-list>
+      <app-recommendation-list [games]="getGames()" [tagRarityAnalysis]="getTagRarityAnalysis()"></app-recommendation-list>
       
       <!-- Action Buttons -->
       <div class="actions-section">

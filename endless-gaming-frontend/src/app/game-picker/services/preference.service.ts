@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { GameRecord, PreferenceSummary, UserPreferenceState, GameRecommendation, TagDictionary } from '../../types/game.types';
+import { GameRecord, PreferenceSummary, UserPreferenceState, GameRecommendation, TagDictionary, TagRarityAnalysis } from '../../types/game.types';
 import { VectorService } from './vector.service';
+import { TagRarityService } from './tag-rarity.service';
 
 /**
  * Service for managing user preferences and ML model.
@@ -30,6 +31,10 @@ export class PreferenceService {
     timestamp: number;
     weightUpdate: { winnerVec: any; loserVec: any; gradient: number; };
   }> = [];
+
+  // TF-IDF support for tag importance weighting
+  private tagRarityService: TagRarityService | null = null;
+  private tagRarityAnalysis: TagRarityAnalysis | null = null;
 
   /**
    * Record a skip (comparison made but no preference learned).
@@ -367,14 +372,24 @@ export class PreferenceService {
 
   /**
    * Update weights from a sparse vector.
-   * Helper method for SGD updates.
+   * Helper method for SGD updates with optional TF-IDF weighting.
    */
   private updateWeightsFromVector(sparseVec: any, factor: number): void {
     for (let i = 0; i < sparseVec.indices.length; i++) {
       const index = sparseVec.indices[i];
       const value = sparseVec.values[i];
       if (index < this.weightVector.length) {
-        this.weightVector[index] += factor * value;
+        // Apply TF-IDF multiplier if available
+        let adjustedFactor = factor;
+        if (this.tagRarityService && this.tagDict) {
+          const tag = this.tagDict.indexToTag[index];
+          if (tag) {
+            const tfidfMultiplier = this.tagRarityService.getTagImportanceMultiplier(tag);
+            adjustedFactor = factor * tfidfMultiplier;
+          }
+        }
+        
+        this.weightVector[index] += adjustedFactor * value;
       }
     }
   }
@@ -484,5 +499,46 @@ export class PreferenceService {
    */
   hasMinimumVotes(minVotes: number = 5): boolean {
     return this.actualVoteCount >= minVotes;
+  }
+
+  /**
+   * Set the TagRarityService for TF-IDF tag importance weighting.
+   * 
+   * @param service TagRarityService instance or null to disable TF-IDF
+   */
+  setTagRarityService(service: TagRarityService | null): void {
+    this.tagRarityService = service;
+    if (!service) {
+      this.tagRarityAnalysis = null;
+    }
+  }
+
+  /**
+   * Check if TF-IDF weighting is currently enabled.
+   * 
+   * @returns True if TagRarityService is set and analysis is available
+   */
+  hasTFIDFEnabled(): boolean {
+    return this.tagRarityService !== null;
+  }
+
+  /**
+   * Enable TF-IDF weighting by calculating tag rarity analysis for given games.
+   * 
+   * @param games Array of games to analyze for tag rarity
+   */
+  enableTFIDF(games: GameRecord[]): void {
+    if (this.tagRarityService) {
+      this.tagRarityAnalysis = this.tagRarityService.calculateTagRarity(games);
+    }
+  }
+
+  /**
+   * Get the current tag rarity analysis.
+   * 
+   * @returns TagRarityAnalysis if TF-IDF is enabled, null otherwise
+   */
+  getTagRarityAnalysis(): TagRarityAnalysis | null {
+    return this.tagRarityAnalysis;
   }
 }

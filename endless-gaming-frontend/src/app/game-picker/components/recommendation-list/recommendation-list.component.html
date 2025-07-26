@@ -81,8 +81,17 @@
 
                 <div class="game-tags">
                   <mat-chip-set>
-                    @for (tagData of getTopTags(recommendation.game, 3); track tagData.tag) {
-                      <mat-chip>{{ tagData.tag }}</mat-chip>
+                    @for (tag of getEnhancedTags(recommendation.game, 2, 1); track tag.tag) {
+                      <mat-chip 
+                        [class]="'tag-chip tag-' + tag.type"
+                        [matTooltip]="getTagTooltip(tag)">
+                        @if (tag.type === 'popular') {
+                          <mat-icon matChipAvatar>trending_up</mat-icon>
+                        } @else {
+                          <mat-icon matChipAvatar>auto_awesome</mat-icon>
+                        }
+                        {{ tag.tag }}
+                      </mat-chip>
                     }
                   </mat-chip-set>
                 </div>
@@ -167,11 +176,16 @@
                   </div>
 
                   <div class="game-tags-row">
-                    @for (tagData of getTopTags(recommendation.game, 4); track tagData.tag) {
-                      <span class="game-tag">{{ tagData.tag }}</span>
+                    @for (tag of getEnhancedTags(recommendation.game, 3, 1); track tag.tag) {
+                      <span class="game-tag" [class]="'tag-' + tag.type" [matTooltip]="getTagTooltip(tag)">
+                        @if (tag.type === 'unique') {
+                          <mat-icon class="tag-icon">auto_awesome</mat-icon>
+                        }
+                        {{ tag.tag }}
+                      </span>
                     }
-                    @if (getTopTags(recommendation.game).length > 4) {
-                      <span class="more-tags">+{{ getTopTags(recommendation.game).length - 4 }}</span>
+                    @if (getEnhancedTags(recommendation.game).length > 4) {
+                      <span class="more-tags">+{{ getEnhancedTags(recommendation.game).length - 4 }}</span>
                     }
                   </div>
                 </div>

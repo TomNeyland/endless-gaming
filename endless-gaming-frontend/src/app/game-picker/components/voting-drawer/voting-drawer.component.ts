@@ -10,10 +10,12 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { PreferenceSummaryComponent } from '../preference-summary/preference-summary.component';
 import { FilterPanelComponent } from '../filter-panel/filter-panel.component';
-import { GameRecord, GamePair } from '../../../types/game.types';
+import { GameRecord, GamePair, TagRarityAnalysis, EnhancedTag } from '../../../types/game.types';
 import { PairService } from '../../services/pair.service';
 import { AnimationService } from '../../services/animation.service';
 import { GameFilterService } from '../../services/game-filter.service';
+import { EnhancedTagService } from '../../services/enhanced-tag.service';
+import { TagRarityService } from '../../services/tag-rarity.service';
 
 /**
  * Slide-out drawer component for continuous voting with live recommendation updates.
@@ -44,9 +46,12 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
   private pairService = inject(PairService);
   private animationService = inject(AnimationService);
   public gameFilterService = inject(GameFilterService);
+  private enhancedTagService = inject(EnhancedTagService);
+  private tagRarityService = inject(TagRarityService);
   
   @Input() isOpen = false;
   @Input() games: GameRecord[] = [];
+  @Input() tagRarityAnalysis?: TagRarityAnalysis | null = null;
   
   // Tab management
   public readonly activeTabIndex = signal(0);
@@ -66,12 +71,12 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
   // Optimized tag computation using signals
   public readonly leftGameTags = computed(() => {
     const game = this.getLeftGame();
-    return game ? this.getGameTags(game) : [];
+    return game ? this.getEnhancedTags(game, 2, 1) : [];
   });
 
   public readonly rightGameTags = computed(() => {
     const game = this.getRightGame();
-    return game ? this.getGameTags(game) : [];
+    return game ? this.getEnhancedTags(game, 2, 1) : [];
   });
 
   ngOnInit(): void {
@@ -252,7 +257,44 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
   }
 
   /**
-   * Get game tags for display (top 3).
+   * Get enhanced tags with both popular and unique insights.
+   * Falls back to popular tags if TF-IDF analysis is not available.
+   */
+  getEnhancedTags(game: GameRecord, popularCount: number = 2, uniqueCount: number = 1): EnhancedTag[] {
+    if (!game) {
+      return [];
+    }
+
+    // If TF-IDF analysis is available, show enhanced display
+    if (this.tagRarityAnalysis) {
+      const display = this.enhancedTagService.getEnhancedTagDisplay(
+        game,
+        this.tagRarityAnalysis,
+        popularCount,
+        uniqueCount,
+        this.tagRarityService
+      );
+      return display.allTags;
+    }
+
+    // Fallback to popular tags only
+    return this.enhancedTagService.getPopularTags(game, popularCount + uniqueCount);
+  }
+
+  /**
+   * Get tooltip text for enhanced tags.
+   */
+  getTagTooltip(tag: EnhancedTag): string {
+    if (tag.type === 'popular') {
+      return `Popular tag: ${tag.votes.toLocaleString()} votes across many games`;
+    } else {
+      const multiplierText = tag.multiplier ? ` (${tag.multiplier.toFixed(1)}x learning impact)` : '';
+      return `Distinctive tag: Rare across the catalog${multiplierText}`;
+    }
+  }
+
+  /**
+   * Get game tags for display (top 3) - legacy method for backward compatibility.
    */
   getGameTags(game: GameRecord): string[] {
     if (!game.tags) return [];

@@ -46,11 +46,18 @@
           </div>
         }
         
-        <!-- Top Tags -->
-        @if (getTopTags(6).length > 0) {
+        <!-- Enhanced Tags -->
+        @if (getEnhancedTags(4, 2).length > 0) {
           <div class="quick-tags">
-            @for (tagInfo of getTopTags(6); track tagInfo.tag) {
-              <span class="tag-chip">{{ tagInfo.tag }}</span>
+            @for (tag of getEnhancedTags(4, 2); track tag.tag) {
+              <span class="tag-chip" [class]="'tag-' + tag.type" [matTooltip]="getTagTooltip(tag)">
+                @if (tag.type === 'popular') {
+                  <mat-icon class="tag-icon">trending_up</mat-icon>
+                } @else {
+                  <mat-icon class="tag-icon">auto_awesome</mat-icon>
+                }
+                {{ tag.tag }}
+              </span>
             }
           </div>
         }

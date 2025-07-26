@@ -6,8 +6,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
-import { GameRecord } from '../../../types/game.types';
+import { GameRecord, TagRarityAnalysis, EnhancedTag } from '../../../types/game.types';
 import { GameDetailsService } from '../../services/game-details.service';
+import { EnhancedTagService } from '../../services/enhanced-tag.service';
+import { TagRarityService } from '../../services/tag-rarity.service';
 import { getAgeBadge } from '../../../utils/game-age.utils';
 
 /**
@@ -25,12 +27,15 @@ import { getAgeBadge } from '../../../utils/game-age.utils';
 })
 export class GameCardComponent {
   private gameDetailsService = inject(GameDetailsService);
+  private enhancedTagService = inject(EnhancedTagService);
+  private tagRarityService = inject(TagRarityService);
   
   @Input() game: GameRecord | null = null;
   @Input() showScore = false;
   @Input() score?: number;
   @Input() rank?: number;
   @Input() highlightOnHover = false;
+  @Input() tagRarityAnalysis?: TagRarityAnalysis | null = null;
   
   imageLoading = true;
   imageError = false;
@@ -70,7 +75,7 @@ export class GameCardComponent {
   }
 
   /**
-   * Get top tags for display.
+   * Get top tags for display (legacy method for backward compatibility).
    */
   getTopTags(maxTags: number = 5): Array<{tag: string, votes: number}> {
     if (!this.game?.tags) {
@@ -81,6 +86,75 @@ export class GameCardComponent {
       .map(([tag, votes]) => ({ tag, votes }))
       .sort((a, b) => b.votes - a.votes)
       .slice(0, maxTags);
+  }
+
+  /**
+   * Get enhanced tags with both popular and unique insights.
+   * Falls back to popular tags if TF-IDF analysis is not available.
+   */
+  getEnhancedTags(popularCount: number = 3, uniqueCount: number = 2): EnhancedTag[] {
+    if (!this.game) {
+      return [];
+    }
+
+    // If TF-IDF analysis is available, show enhanced display
+    if (this.tagRarityAnalysis) {
+      const display = this.enhancedTagService.getEnhancedTagDisplay(
+        this.game,
+        this.tagRarityAnalysis,
+        popularCount,
+        uniqueCount,
+        this.tagRarityService
+      );
+      return display.allTags;
+    }
+
+    // Fallback to popular tags only
+    return this.enhancedTagService.getPopularTags(this.game, popularCount + uniqueCount);
+  }
+
+  /**
+   * Get just the popular tags with enhanced information.
+   */
+  getPopularTags(count: number = 3): EnhancedTag[] {
+    if (!this.game) {
+      return [];
+    }
+    return this.enhancedTagService.getPopularTags(this.game, count);
+  }
+
+  /**
+   * Get just the unique tags with TF-IDF information.
+   */
+  getUniqueTags(count: number = 2): EnhancedTag[] {
+    if (!this.game || !this.tagRarityAnalysis) {
+      return [];
+    }
+    return this.enhancedTagService.getUniqueTags(
+      this.game,
+      this.tagRarityAnalysis,
+      count,
+      this.tagRarityService
+    );
+  }
+
+  /**
+   * Check if TF-IDF analysis is available for enhanced display.
+   */
+  hasTFIDFAnalysis(): boolean {
+    return this.tagRarityAnalysis !== null && this.tagRarityAnalysis !== undefined;
+  }
+
+  /**
+   * Get tooltip text for tag type explanation.
+   */
+  getTagTooltip(tag: EnhancedTag): string {
+    if (tag.type === 'popular') {
+      return `Popular tag: ${tag.votes.toLocaleString()} votes across many games`;
+    } else {
+      const multiplierText = tag.multiplier ? ` (${tag.multiplier.toFixed(1)}x learning impact)` : '';
+      return `Distinctive tag: Rare across the catalog${multiplierText}`;
+    }
   }
 
   /**

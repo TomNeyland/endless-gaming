@@ -113,12 +113,66 @@
             flex-wrap: wrap;
             
             .tag-chip {
-              background: rgba(25, 118, 210, 0.2);
-              color: var(--gaming-primary);
+              display: inline-flex;
+              align-items: center;
+              gap: 3px;
               padding: 2px 6px;
               border-radius: 8px;
               font-size: 0.7rem;
+              font-weight: 500;
               white-space: nowrap;
+              transition: all 0.2s ease;
+              
+              // Popular tags (blue theme for widespread appeal)
+              &.tag-popular {
+                background: rgba(33, 150, 243, 0.2);
+                color: #2196F3;
+                border: 1px solid rgba(33, 150, 243, 0.4);
+                
+                &:hover {
+                  background: rgba(33, 150, 243, 0.3);
+                  border-color: rgba(33, 150, 243, 0.6);
+                  transform: scale(1.05);
+                }
+                
+                .tag-icon {
+                  color: #2196F3;
+                }
+              }
+              
+              // Unique tags (orange theme for distinctive characteristics) 
+              &.tag-unique {
+                background: rgba(255, 152, 0, 0.2);
+                color: var(--gaming-accent);
+                border: 1px solid rgba(255, 152, 0, 0.4);
+                
+                &:hover {
+                  background: rgba(255, 152, 0, 0.3);
+                  border-color: rgba(255, 152, 0, 0.6);
+                  transform: scale(1.05);
+                }
+                
+                .tag-icon {
+                  color: var(--gaming-accent);
+                }
+              }
+              
+              // Fallback for basic tag chips (backward compatibility)
+              &:not(.tag-popular):not(.tag-unique) {
+                background: rgba(25, 118, 210, 0.2);
+                color: var(--gaming-primary);
+                
+                &:hover {
+                  transform: scale(1.05);
+                }
+              }
+              
+              // Tag icon styling
+              .tag-icon {
+                width: 12px;
+                height: 12px;
+                font-size: 10px;
+              }
             }
           }
         }
