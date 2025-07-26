@@ -256,7 +256,39 @@ export class MediaCarouselComponent implements OnInit, OnDestroy {
    * Get video source URL with format fallbacks.
    */
   getVideoSource(video: Movie): string {
-    return video.webm.max || video.mp4.max || video.webm['480'] || video.mp4['480'];
+    return video.webm?.max || video.mp4?.max || video.webm?.['480'] || video.mp4?.['480'] || '';
+  }
+
+  /**
+   * Get current video WebM max source.
+   */
+  getCurrentVideoWebMMax(): string {
+    const video = this.getCurrentVideo();
+    return video?.webm?.max || '';
+  }
+
+  /**
+   * Get current video MP4 max source.
+   */
+  getCurrentVideoMP4Max(): string {
+    const video = this.getCurrentVideo();
+    return video?.mp4?.max || '';
+  }
+
+  /**
+   * Get current video WebM 480p source.
+   */
+  getCurrentVideoWebM480(): string {
+    const video = this.getCurrentVideo();
+    return video?.webm?.['480'] || '';
+  }
+
+  /**
+   * Get current video MP4 480p source.
+   */
+  getCurrentVideoMP4480(): string {
+    const video = this.getCurrentVideo();
+    return video?.mp4?.['480'] || '';
   }
 
   /**

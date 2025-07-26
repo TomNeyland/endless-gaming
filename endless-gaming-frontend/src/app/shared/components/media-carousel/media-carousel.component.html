@@ -52,10 +52,10 @@
             preload="metadata"
             class="main-video"
             (loadedmetadata)="onVideoLoad()">
-            <source [src]="getCurrentVideo()?.webm.max" type="video/webm">
-            <source [src]="getCurrentVideo()?.mp4.max" type="video/mp4">
-            <source [src]="getCurrentVideo()?.webm['480']" type="video/webm">
-            <source [src]="getCurrentVideo()?.mp4['480']" type="video/mp4">
+            <source [src]="getCurrentVideoWebMMax()" type="video/webm">
+            <source [src]="getCurrentVideoMP4Max()" type="video/mp4">
+            <source [src]="getCurrentVideoWebM480()" type="video/webm">
+            <source [src]="getCurrentVideoMP4480()" type="video/mp4">
             Your browser does not support video playback.
           </video>
         </div>
@@ -172,10 +172,10 @@
             controls
             preload="metadata"
             class="fullscreen-video">
-            <source [src]="getCurrentVideo()?.webm.max" type="video/webm">
-            <source [src]="getCurrentVideo()?.mp4.max" type="video/mp4">
-            <source [src]="getCurrentVideo()?.webm['480']" type="video/webm">
-            <source [src]="getCurrentVideo()?.mp4['480']" type="video/mp4">
+            <source [src]="getCurrentVideoWebMMax()" type="video/webm">
+            <source [src]="getCurrentVideoMP4Max()" type="video/mp4">
+            <source [src]="getCurrentVideoWebM480()" type="video/webm">
+            <source [src]="getCurrentVideoMP4480()" type="video/mp4">
           </video>
         }
         

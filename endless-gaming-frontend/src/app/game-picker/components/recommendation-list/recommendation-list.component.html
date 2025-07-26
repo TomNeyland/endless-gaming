@@ -73,7 +73,7 @@
                 </div>
 
                 <!-- Description Preview -->
-                @if (recommendation.game?.shortDescription) {
+                @if (recommendation.game.shortDescription) {
                   <div class="description-preview" [matTooltip]="getTruncatedDescription(recommendation.game, 200)">
                     {{ getTruncatedDescription(recommendation.game, 60) }}
                   </div>

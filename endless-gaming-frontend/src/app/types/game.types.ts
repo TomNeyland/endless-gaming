@@ -21,13 +21,13 @@ export interface Movie {
   id: number;
   name: string;
   thumbnail: string;       // Video thumbnail URL
-  webm: {                  // WebM video formats
-    480: string;           // 480p WebM URL
-    max: string;           // Max quality WebM URL
+  webm?: {                 // WebM video formats (optional)
+    480?: string;          // 480p WebM URL
+    max?: string;          // Max quality WebM URL
   };
-  mp4: {                   // MP4 video formats
-    480: string;           // 480p MP4 URL
-    max: string;           // Max quality MP4 URL
+  mp4?: {                  // MP4 video formats (optional)
+    480?: string;          // 480p MP4 URL
+    max?: string;          // Max quality MP4 URL
   };
   highlight: boolean;      // Whether this is a featured video
 }

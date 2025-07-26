@@ -238,7 +238,7 @@ export class GameDetailsModalComponent implements OnInit {
    */
   public getVideoSource(video: Movie): string {
     // Prefer max quality WebM, fallback to max quality MP4
-    return video.webm.max || video.mp4.max || video.webm['480'] || video.mp4['480'];
+    return video.webm?.max || video.mp4?.max || video.webm?.['480'] || video.mp4?.['480'] || '';
   }
 
   /**
