@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-import { GameRecord, GamePair } from '../../../types/game.types';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { GameRecord, GamePair, GameChoice } from '../../../types/game.types';
 import { PairService } from '../../services/pair.service';
 import { GameCardComponent } from '../game-card/game-card.component';
 
@@ -16,7 +17,7 @@ import { GameCardComponent } from '../game-card/game-card.component';
 @Component({
   selector: 'app-game-comparison',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatCardModule, GameCardComponent],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatCardModule, MatTooltipModule, GameCardComponent],
   templateUrl: './game-comparison.component.html',
   styleUrl: './game-comparison.component.scss'
 })
@@ -26,7 +27,7 @@ export class GameComparisonComponent implements OnInit {
   @Output() choiceMade = new EventEmitter<{
     leftGame: GameRecord;
     rightGame: GameRecord;
-    pick: 'left' | 'right' | 'skip';
+    pick: GameChoice;
   }>();
   
   @Output() comparisonsComplete = new EventEmitter<void>();
@@ -84,9 +85,27 @@ export class GameComparisonComponent implements OnInit {
   }
 
   /**
+   * Handle like both games action.
+   */
+  likeBoth(): void {
+    if (!this.currentPair) return;
+    
+    this.makeChoice('like_both');
+  }
+
+  /**
+   * Handle dislike both games action.
+   */
+  dislikeBoth(): void {
+    if (!this.currentPair) return;
+    
+    this.makeChoice('dislike_both');
+  }
+
+  /**
    * Process a user choice and load the next pair.
    */
-  private makeChoice(pick: 'left' | 'right' | 'skip'): void {
+  private makeChoice(pick: GameChoice): void {
     if (!this.currentPair) return;
 
     const leftGame = this.currentPair.left;

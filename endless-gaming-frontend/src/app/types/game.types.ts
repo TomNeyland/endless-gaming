@@ -198,3 +198,14 @@ export interface EnhancedTagDisplay {
   uniqueTags: EnhancedTag[];      // Top tags by TF-IDF score (deduplicated)
   allTags: EnhancedTag[];         // Combined list for display
 }
+
+/**
+ * User choice types for pairwise game comparisons.
+ * Enhanced system supports both preference and absolute judgments.
+ */
+export type GameChoice = 
+  | 'left'          // Prefer left game over right
+  | 'right'         // Prefer right game over left
+  | 'skip'          // Skip comparison (neutral)
+  | 'like_both'     // Like both games (positive signal for both)
+  | 'dislike_both'; // Dislike both games (negative signal for both)

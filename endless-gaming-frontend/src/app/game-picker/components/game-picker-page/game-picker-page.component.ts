@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
-import { GamePickerState, GameRecord } from '../../../types/game.types';
+import { GamePickerState, GameRecord, GameChoice } from '../../../types/game.types';
 import { GameDataService } from '../../services/game-data.service';
 import { VectorService } from '../../services/vector.service';
 import { PreferenceService } from '../../services/preference.service';
@@ -291,7 +291,7 @@ export class GamePickerPageComponent implements OnInit {
   onVoteCast(voteEvent: {
     leftGame: GameRecord;
     rightGame: GameRecord;
-    pick: 'left' | 'right' | 'skip';
+    pick: GameChoice;
   }): void {
     console.log('🗳️ Processing vote:', voteEvent.pick, 'between', voteEvent.leftGame.name, 'and', voteEvent.rightGame.name);
     // The refreshRecommendations() will be called automatically via the subscription

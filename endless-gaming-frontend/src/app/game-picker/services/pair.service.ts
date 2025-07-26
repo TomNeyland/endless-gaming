@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { GameRecord, GamePair, ProgressInfo, MLConfig, TagDictionary } from '../../types/game.types';
+import { GameRecord, GamePair, ProgressInfo, MLConfig, TagDictionary, GameChoice } from '../../types/game.types';
 import { PreferenceService } from './preference.service';
 import { VectorService } from './vector.service';
 
@@ -21,7 +21,7 @@ export class PairService {
   private choiceHistory: Array<{
     leftGame: GameRecord;
     rightGame: GameRecord;
-    pick: 'left' | 'right' | 'skip';
+    pick: GameChoice;
     timestamp: number;
   }> = [];
   
@@ -78,7 +78,7 @@ export class PairService {
    * Record a user choice between two games.
    * Updates internal state for pair selection algorithm.
    */
-  recordChoice(leftGame: GameRecord, rightGame: GameRecord, pick: 'left' | 'right' | 'skip'): void {
+  recordChoice(leftGame: GameRecord, rightGame: GameRecord, pick: GameChoice): void {
     const choice = {
       leftGame,
       rightGame,
@@ -92,7 +92,7 @@ export class PairService {
     const pairKey = this.createPairKey({ left: leftGame, right: rightGame });
     this.usedPairs.add(pairKey);
 
-    // Update preferences if not skipped
+    // Update preferences based on choice type
     if (pick === 'left') {
       this.actualVotes++;
       this.preferenceService.updatePreferences(leftGame, rightGame);
@@ -100,6 +100,14 @@ export class PairService {
     } else if (pick === 'right') {
       this.actualVotes++;
       this.preferenceService.updatePreferences(rightGame, leftGame);
+      this.invalidateCaches(); // Preference model changed
+    } else if (pick === 'like_both') {
+      this.actualVotes++;
+      this.preferenceService.updatePositivePreferences(leftGame, rightGame);
+      this.invalidateCaches(); // Preference model changed
+    } else if (pick === 'dislike_both') {
+      this.actualVotes++;
+      this.preferenceService.updateNegativePreferences(leftGame, rightGame);
       this.invalidateCaches(); // Preference model changed
     } else if (pick === 'skip') {
       // Record skip for proper counting (doesn't contribute to ML model)
@@ -201,7 +209,7 @@ export class PairService {
   getChoiceHistory(): Array<{
     leftGame: GameRecord;
     rightGame: GameRecord;
-    pick: 'left' | 'right' | 'skip';
+    pick: GameChoice;
     timestamp: number;
   }> {
     return [...this.choiceHistory];

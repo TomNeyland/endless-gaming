@@ -144,16 +144,38 @@
                 </div>
               </div>
 
-              <!-- Skip Option -->
-              <div class="skip-section">
-                <button 
-                  mat-stroked-button 
-                  class="skip-button vote-skip-btn"
-                  [disabled]="isVoting()"
-                  (click)="skip()">
-                  <mat-icon>skip_next</mat-icon>
-                  Skip This Comparison
-                </button>
+              <!-- Enhanced Voting Options (Compact) -->
+              <div class="voting-options-section">
+                <div class="voting-options-grid">
+                  <button 
+                    mat-flat-button 
+                    color="primary"
+                    class="vote-option vote-like-both-btn"
+                    [disabled]="isVoting()"
+                    (click)="likeBoth()">
+                    <mat-icon>thumb_up</mat-icon>
+                    Like Both
+                  </button>
+                  
+                  <button 
+                    mat-stroked-button 
+                    class="vote-option vote-skip-btn"
+                    [disabled]="isVoting()"
+                    (click)="skip()">
+                    <mat-icon>skip_next</mat-icon>
+                    Skip
+                  </button>
+                  
+                  <button 
+                    mat-flat-button 
+                    color="warn"
+                    class="vote-option vote-dislike-both-btn"
+                    [disabled]="isVoting()"
+                    (click)="dislikeBoth()">
+                    <mat-icon>thumb_down</mat-icon>
+                    Dislike Both
+                  </button>
+                </div>
               </div>
 
               <!-- Preference Summary -->

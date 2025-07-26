@@ -19,23 +19,44 @@
         </button>
       </div>
 
-      <!-- VS Section -->
-      <mat-card class="vs-section mat-elevation-z2">
-        <mat-card-content>
-          <div class="vs-content">
-            <div class="vs-text mat-headline-4">VS</div>
-            <button 
-              mat-stroked-button 
-              color="accent"
-              class="skip-btn" 
-              (click)="skip()"
-              [disabled]="isLoading">
-              <mat-icon>skip_next</mat-icon>
-              Skip Both
-            </button>
-          </div>
-        </mat-card-content>
-      </mat-card>
+      <!-- VS Section (Compact) -->
+      <div class="vs-section">
+        <div class="vs-header">
+          <div class="vs-text mat-headline-4">VS</div>
+        </div>
+        
+        <!-- Enhanced voting options (horizontal layout) -->
+        <div class="both-actions-horizontal">
+          <button 
+            mat-mini-fab 
+            color="primary"
+            class="like-both-btn" 
+            (click)="likeBoth()"
+            [disabled]="isLoading"
+            matTooltip="Like Both Games">
+            <mat-icon>thumb_up</mat-icon>
+          </button>
+          
+          <button 
+            mat-mini-fab 
+            class="skip-btn" 
+            (click)="skip()"
+            [disabled]="isLoading"
+            matTooltip="Skip This Comparison">
+            <mat-icon>skip_next</mat-icon>
+          </button>
+          
+          <button 
+            mat-mini-fab 
+            color="warn"
+            class="dislike-both-btn" 
+            (click)="dislikeBoth()"
+            [disabled]="isLoading"
+            matTooltip="Dislike Both Games">
+            <mat-icon>thumb_down</mat-icon>
+          </button>
+        </div>
+      </div>
 
       <!-- Right Game Section -->
       <div class="game-section right-game">

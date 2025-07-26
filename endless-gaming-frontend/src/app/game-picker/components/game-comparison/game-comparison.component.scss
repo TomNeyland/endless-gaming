@@ -97,112 +97,50 @@
       }
     }
     
-    // VS Section with premium sophistication
+    // VS Section (Compact)
     .vs-section {
-      min-width: 180px;
-      background: var(--gaming-surface) !important;
-      border: 1px solid rgba(255, 152, 0, 0.3) !important;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-      transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      min-width: 120px;
+      padding: 20px 16px;
       
-      // Subtle glow effect
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(255, 152, 0, 0.05) 0%, rgba(255, 152, 0, 0.02) 100%);
-        pointer-events: none;
+      .vs-header {
+        .vs-text {
+          color: var(--gaming-accent) !important;
+          font-weight: 900 !important;
+          text-align: center;
+          text-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+          letter-spacing: 2px;
+          font-size: 1.8rem !important;
+          background: linear-gradient(45deg, var(--gaming-accent), #ffa726);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin: 0;
+        }
       }
       
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
-        border-color: rgba(255, 152, 0, 0.5) !important;
-      }
-      
-      mat-card-content {
-        padding: 32px 24px !important;
-        position: relative;
-        z-index: 1;
+      .both-actions-horizontal {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
         
-        .vs-content {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 24px;
+        button {
+          width: 40px;
+          height: 40px;
+          transition: all 0.2s ease;
           
-          .vs-text {
-            color: var(--gaming-accent) !important;
-            font-weight: 900 !important;
-            text-align: center;
-            text-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
-            letter-spacing: 3px;
-            font-size: 2.5rem !important;
-            background: linear-gradient(45deg, var(--gaming-accent), #ffa726);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+          &:hover {
+            transform: scale(1.1);
           }
           
-          .skip-btn {
-            min-width: 140px;
-            height: 44px;
-            border-radius: 22px !important;
-            font-size: 0.95rem !important;
-            font-weight: 600 !important;
-            border: 2px solid var(--gaming-accent) !important;
-            color: var(--gaming-accent) !important;
-            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
-            position: relative;
-            overflow: hidden;
-            
-            // Subtle inner glow
-            &::before {
-              content: '';
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              width: 0;
-              height: 0;
-              border-radius: 50%;
-              background: rgba(255, 152, 0, 0.1);
-              transform: translate(-50%, -50%);
-              transition: width 0.4s ease, height 0.4s ease;
-              pointer-events: none;
-            }
-            
-            mat-icon {
-              margin-right: 8px;
-              font-size: 18px;
-              width: 18px;
-              height: 18px;
-              transition: transform 0.3s ease;
-            }
-            
-            &:hover {
-              background: rgba(255, 152, 0, 0.15) !important;
-              transform: translateY(-2px);
-              box-shadow: 0 6px 20px rgba(255, 152, 0, 0.3) !important;
-              
-              &::before {
-                width: 100px;
-                height: 100px;
-              }
-              
-              mat-icon {
-                transform: scale(1.1);
-              }
-            }
-            
-            &:active {
-              transform: translateY(0);
-              transition: all 0.1s ease;
-            }
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
           }
         }
       }
@@ -259,14 +197,16 @@
       }
       
       .vs-section {
-        min-width: 160px;
+        min-width: 100px;
+        padding: 16px 12px;
         
-        mat-card-content {
-          padding: 28px 20px !important;
+        .vs-header .vs-text {
+          font-size: 1.6rem !important;
         }
         
-        .vs-content .vs-text {
-          font-size: 2.2rem !important;
+        .both-actions-horizontal button {
+          width: 36px;
+          height: 36px;
         }
       }
     }

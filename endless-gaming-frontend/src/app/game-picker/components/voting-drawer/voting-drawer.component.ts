@@ -10,7 +10,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { PreferenceSummaryComponent } from '../preference-summary/preference-summary.component';
 import { FilterPanelComponent } from '../filter-panel/filter-panel.component';
-import { GameRecord, GamePair, TagRarityAnalysis, EnhancedTag } from '../../../types/game.types';
+import { GameRecord, GamePair, TagRarityAnalysis, EnhancedTag, GameChoice } from '../../../types/game.types';
 import { PairService } from '../../services/pair.service';
 import { AnimationService } from '../../services/animation.service';
 import { GameFilterService } from '../../services/game-filter.service';
@@ -59,7 +59,7 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
   @Output() voteCast = new EventEmitter<{
     leftGame: GameRecord;
     rightGame: GameRecord;
-    pick: 'left' | 'right' | 'skip';
+    pick: GameChoice;
   }>();
   
   @Output() drawerClosed = new EventEmitter<void>();
@@ -144,9 +144,23 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
   }
 
   /**
+   * Handle like both games action.
+   */
+  likeBoth(): void {
+    this.castVote('like_both');
+  }
+
+  /**
+   * Handle dislike both games action.
+   */
+  dislikeBoth(): void {
+    this.castVote('dislike_both');
+  }
+
+  /**
    * Process a vote and load next pair.
    */
-  private async castVote(pick: 'left' | 'right' | 'skip'): Promise<void> {
+  private async castVote(pick: GameChoice): Promise<void> {
     const pair = this.currentPair();
     if (!pair || this.isVoting()) return;
 
@@ -176,7 +190,7 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
   /**
    * Animate vote feedback on buttons (fire and forget).
    */
-  private animateVoteFeedback(pick: 'left' | 'right' | 'skip'): void {
+  private animateVoteFeedback(pick: GameChoice): void {
     try {
       let buttonElement: HTMLElement | null = null;
       
@@ -184,12 +198,23 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
         buttonElement = document.querySelector('.vote-left-btn') as HTMLElement;
       } else if (pick === 'right') {
         buttonElement = document.querySelector('.vote-right-btn') as HTMLElement;
-      } else {
+      } else if (pick === 'skip') {
         buttonElement = document.querySelector('.vote-skip-btn') as HTMLElement;
+      } else if (pick === 'like_both') {
+        buttonElement = document.querySelector('.vote-like-both-btn') as HTMLElement;
+      } else if (pick === 'dislike_both') {
+        buttonElement = document.querySelector('.vote-dislike-both-btn') as HTMLElement;
       }
 
       if (buttonElement) {
-        const feedbackType = pick === 'skip' ? 'skip' : 'success';
+        let feedbackType: 'success' | 'skip';
+        if (pick === 'skip') {
+          feedbackType = 'skip';
+        } else {
+          // Use 'success' for all other choices (left, right, like_both, dislike_both)
+          feedbackType = 'success';
+        }
+        
         // Fire and forget - don't await the animation
         this.animationService.animateVoteFeedback(buttonElement, feedbackType);
       }

@@ -49,6 +49,96 @@ export class PreferenceService {
   }
 
   /**
+   * Update preferences when user likes both games.
+   * Applies positive preference updates to both games equally.
+   */
+  updatePositivePreferences(game1: GameRecord, game2: GameRecord): void {
+    if (!this.tagDict) {
+      throw new Error('Model not initialized. Call initializeModel() first.');
+    }
+
+    // Apply sliding window decay before new updates
+    this.applySlidingWindowDecay();
+
+    // Convert games to sparse vectors
+    const game1Vec = this.vectorService.gameToSparseVector(game1, this.tagDict);
+    const game2Vec = this.vectorService.gameToSparseVector(game2, this.tagDict);
+
+    // For "like both", we want to increase the weights for both games
+    // Use a moderate learning rate (0.8x normal) since we're updating with both games
+    const positiveFactor = this.learningRate * 0.8;
+
+    // Apply positive updates to both games
+    this.updateWeightsFromVector(game1Vec, positiveFactor);
+    this.updateWeightsFromVector(game2Vec, positiveFactor);
+
+    // Store in preference history for confidence calculation
+    this.preferenceHistory.push({
+      winnerGame: game1, // Use game1 as "winner" for history tracking
+      loserGame: game2,  // Use game2 as "loser" but with positive update
+      timestamp: Date.now(),
+      weightUpdate: { 
+        winnerVec: game1Vec, 
+        loserVec: game2Vec,
+        gradient: 0.8 // Positive gradient for both
+      }
+    });
+
+    this.actualVoteCount++;
+    this.totalComparisonCount++;
+    this.updatePreferenceSummary();
+    this.saveToLocalStorage();
+    
+    console.log(`👍 Like both recorded - ${game1.name} & ${game2.name}`);
+    this.logPreferenceSummaryDebugInfo();
+  }
+
+  /**
+   * Update preferences when user dislikes both games.
+   * Applies negative preference updates to both games equally.
+   */
+  updateNegativePreferences(game1: GameRecord, game2: GameRecord): void {
+    if (!this.tagDict) {
+      throw new Error('Model not initialized. Call initializeModel() first.');
+    }
+
+    // Apply sliding window decay before new updates
+    this.applySlidingWindowDecay();
+
+    // Convert games to sparse vectors
+    const game1Vec = this.vectorService.gameToSparseVector(game1, this.tagDict);
+    const game2Vec = this.vectorService.gameToSparseVector(game2, this.tagDict);
+
+    // For "dislike both", we want to decrease the weights for both games
+    // Use a moderate learning rate (0.8x normal) since we're updating with both games
+    const negativeFactor = -this.learningRate * 0.8;
+
+    // Apply negative updates to both games
+    this.updateWeightsFromVector(game1Vec, negativeFactor);
+    this.updateWeightsFromVector(game2Vec, negativeFactor);
+
+    // Store in preference history for confidence calculation
+    this.preferenceHistory.push({
+      winnerGame: game1, // Use game1 as "winner" for history tracking
+      loserGame: game2,  // Use game2 as "loser" but with negative update
+      timestamp: Date.now(),
+      weightUpdate: { 
+        winnerVec: game1Vec, 
+        loserVec: game2Vec,
+        gradient: -0.8 // Negative gradient for both
+      }
+    });
+
+    this.actualVoteCount++;
+    this.totalComparisonCount++;
+    this.updatePreferenceSummary();
+    this.saveToLocalStorage();
+    
+    console.log(`👎 Dislike both recorded - ${game1.name} & ${game2.name}`);
+    this.logPreferenceSummaryDebugInfo();
+  }
+
+  /**
    * Update preferences based on a user choice.
    * Uses incremental SGD with sliding window decay to emphasize recent preferences.
    */

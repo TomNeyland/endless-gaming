@@ -290,18 +290,65 @@
         }
       }
       
-      .skip-section {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 32px;
+      .voting-options-section {
+        margin-bottom: 24px;
         
-        .skip-button {
-          color: var(--gaming-text-secondary);
-          border-color: rgba(255, 255, 255, 0.3);
+        .voting-options-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 8px;
           
-          &:hover {
-            color: var(--gaming-text-primary);
-            border-color: var(--gaming-accent);
+          .vote-option {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 6px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            
+            mat-icon {
+              font-size: 16px;
+              width: 16px;
+              height: 16px;
+              margin-right: 4px;
+            }
+            
+            &.vote-like-both-btn {
+              background: rgba(76, 175, 80, 0.2);
+              border: 1px solid rgba(76, 175, 80, 0.4);
+              color: #4caf50;
+              
+              &:hover {
+                background: rgba(76, 175, 80, 0.3);
+                border-color: #4caf50;
+              }
+            }
+            
+            &.vote-skip-btn {
+              background: rgba(255, 255, 255, 0.05);
+              border: 1px solid rgba(255, 255, 255, 0.2);
+              color: var(--gaming-text-secondary);
+              
+              &:hover {
+                background: rgba(255, 255, 255, 0.1);
+                color: var(--gaming-text-primary);
+                border-color: var(--gaming-accent);
+              }
+            }
+            
+            &.vote-dislike-both-btn {
+              background: rgba(244, 67, 54, 0.2);
+              border: 1px solid rgba(244, 67, 54, 0.4);
+              color: #f44336;
+              
+              &:hover {
+                background: rgba(244, 67, 54, 0.3);
+                border-color: #f44336;
+              }
+            }
           }
         }
       }

@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { GameRecord, GamePair, TagRarityAnalysis, EnhancedTag } from '../../../types/game.types';
+import { GameRecord, GamePair, TagRarityAnalysis, EnhancedTag, GameChoice } from '../../../types/game.types';
 import { PairService } from '../../services/pair.service';
 import { AnimationService } from '../../services/animation.service';
 import { EnhancedTagService } from '../../services/enhanced-tag.service';
@@ -44,7 +44,7 @@ export class VotingBottomSheetComponent implements OnInit {
   @Output() voteCast = new EventEmitter<{
     leftGame: GameRecord;
     rightGame: GameRecord;
-    pick: 'left' | 'right' | 'skip';
+    pick: GameChoice;
   }>();
   
   @Output() votingComplete = new EventEmitter<void>();
@@ -95,7 +95,7 @@ export class VotingBottomSheetComponent implements OnInit {
   /**
    * Process a vote and load next pair.
    */
-  private async castVote(pick: 'left' | 'right' | 'skip'): Promise<void> {
+  private async castVote(pick: GameChoice): Promise<void> {
     const pair = this.currentPair();
     if (!pair || this.isVoting()) return;
 
@@ -128,7 +128,7 @@ export class VotingBottomSheetComponent implements OnInit {
   /**
    * Animate vote feedback on buttons.
    */
-  private async animateVoteFeedback(pick: 'left' | 'right' | 'skip'): Promise<void> {
+  private async animateVoteFeedback(pick: GameChoice): Promise<void> {
     try {
       let buttonElement: HTMLElement | null = null;
       
