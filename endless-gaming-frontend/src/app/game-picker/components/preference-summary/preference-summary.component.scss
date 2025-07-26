@@ -22,68 +22,101 @@
     }
   }
 
-  // Side-by-side preferences grid
+  // Side-by-side preferences grid (improved balance)
   .preferences-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 24px;
+    gap: 20px;
+    align-items: start;
     
     .preference-section {
+      min-height: 200px; // Ensure consistent heights
+      
       .section-header {
         display: flex;
         align-items: center;
         gap: 8px;
         margin-bottom: 16px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
         
         .like-icon {
           color: #4caf50;
+          background: rgba(76, 175, 80, 0.2);
+          padding: 6px;
+          border-radius: 50%;
         }
         
         .dislike-icon {
           color: #f44336;
+          background: rgba(244, 67, 54, 0.2);
+          padding: 6px;
+          border-radius: 50%;
         }
         
         .section-title {
           margin: 0;
           color: var(--gaming-text-primary) !important;
           font-weight: 600 !important;
+          flex: 1;
         }
         
         .tag-count {
-          margin-left: auto;
-          opacity: 0.7;
+          background: rgba(255, 255, 255, 0.1);
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: 0.7rem;
+          opacity: 0.8;
         }
       }
       
       &.liked-section {
-        border-left: 3px solid #4caf50;
-        padding-left: 12px;
+        .section-header {
+          border-left: 3px solid #4caf50;
+        }
       }
       
       &.disliked-section {
-        border-left: 3px solid #f44336;
-        padding-left: 12px;
+        .section-header {
+          border-left: 3px solid #f44336;
+        }
       }
     }
   }
 
-  // Tag list styling
+  // Tag list styling (improved consistency)
   .tag-list {
+    height: 100%;
+    
     .tag-item {
-      margin-bottom: 16px;
-      padding: 12px;
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.15);
+      }
       
       &.liked-tag {
-        border-left: 3px solid #4caf50;
+        border-left: 2.5px solid #4caf50;
+        
+        &:hover {
+          background: rgba(76, 175, 80, 0.05);
+        }
       }
       
       &.disliked-tag {
-        border-left: 3px solid #f44336;
+        border-left: 2.5px solid #f44336;
+        
+        &:hover {
+          background: rgba(244, 67, 54, 0.05);
+        }
       }
       
       .tag-header {
@@ -95,48 +128,66 @@
         .tag-name {
           color: var(--gaming-text-primary) !important;
           font-weight: 500 !important;
+          font-size: 0.9rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 70%;
         }
         
         .tag-weight {
           color: var(--gaming-text-secondary) !important;
           font-family: 'Roboto Mono', monospace !important;
-          font-size: 0.75rem !important;
+          font-size: 0.7rem !important;
+          background: rgba(255, 255, 255, 0.1);
+          padding: 2px 6px;
+          border-radius: 10px;
+          min-width: 35px;
+          text-align: center;
         }
       }
       
       mat-progress-bar {
-        height: 6px;
-        border-radius: 3px;
+        height: 4px;
+        border-radius: 2px;
         overflow: hidden;
         
         &.preference-like {
           --mdc-linear-progress-active-indicator-color: #4caf50;
+          --mdc-linear-progress-track-color: rgba(76, 175, 80, 0.2);
         }
         
         &.preference-dislike {
           --mdc-linear-progress-active-indicator-color: #f44336;
+          --mdc-linear-progress-track-color: rgba(244, 67, 54, 0.2);
         }
       }
     }
   }
 
-  // Empty states
+  // Empty states (improved)
   .no-preferences {
     text-align: center;
-    padding: 24px;
+    padding: 20px 16px;
     color: var(--gaming-text-secondary) !important;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
     
     mat-icon {
-      font-size: 32px;
-      width: 32px;
-      height: 32px;
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
       margin-bottom: 8px;
-      opacity: 0.5;
+      opacity: 0.4;
+      color: var(--gaming-accent);
     }
     
     p {
       margin: 0;
       font-style: italic;
+      font-size: 0.85rem;
+      line-height: 1.4;
     }
   }
 
