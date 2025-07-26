@@ -253,7 +253,7 @@ export class MediaGalleryComponent implements OnInit {
    * Get video source URL with fallbacks.
    */
   public getVideoSource(video: Movie): string {
-    return video.webm?.max || video.mp4?.max || video.webm?.480 || video.mp4?.480 || '';
+    return video.webm?.max || video.mp4?.max || video.webm?.['480'] || video.mp4?.['480'] || '';
   }
 
   /**
