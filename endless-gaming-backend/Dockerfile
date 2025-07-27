@@ -25,8 +25,8 @@ RUN pip install gunicorn
 # Copy application code
 COPY . .
 
-# Expose port
+# Expose port (App Platform sets $PORT)
 EXPOSE 8080
 
-# Start the application
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "app:create_app()"]
+# Start the application (use $PORT from App Platform)
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-8080} --workers 2 'app:create_app()'"]
