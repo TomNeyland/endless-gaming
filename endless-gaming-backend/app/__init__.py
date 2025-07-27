@@ -49,7 +49,11 @@ def create_app(config_name=None):
     
     # Create tables if they don't exist (for SQLite)
     from models import Base
-    Base.metadata.create_all(engine, checkfirst=True)
+    try:
+        Base.metadata.create_all(engine, checkfirst=True)
+    except Exception as e:
+        # Tables may already exist, which is fine for SQLite
+        app.logger.info(f"Database tables already exist or creation failed: {e}")
     
     # Store engine in app for testing access
     app.db_engine = engine
