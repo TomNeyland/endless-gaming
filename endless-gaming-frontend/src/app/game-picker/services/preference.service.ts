@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { GameRecord, PreferenceSummary, UserPreferenceState, GameRecommendation, TagDictionary, TagRarityAnalysis } from '../../types/game.types';
+import { GameRecord, PreferenceSummary, UserPreferenceState, GameRecommendation, TagDictionary, TagRarityAnalysis, SteamPlayerLookupResponse } from '../../types/game.types';
 import { VectorService } from './vector.service';
 import { TagRarityService } from './tag-rarity.service';
+import { SteamIntegrationService, SteamPreferenceProfile } from './steam-integration.service';
 
 /**
  * Service for managing user preferences and ML model.
@@ -15,6 +16,7 @@ import { TagRarityService } from './tag-rarity.service';
 })
 export class PreferenceService {
   private vectorService = inject(VectorService);
+  private steamIntegrationService = inject(SteamIntegrationService);
   
   private preferenceSummary$ = new BehaviorSubject<PreferenceSummary>({ likedTags: [], dislikedTags: [] });
   private weightVector: Float32Array = new Float32Array(0);
@@ -262,6 +264,52 @@ export class PreferenceService {
     });
 
     return recommendations;
+  }
+
+  /**
+   * Rank games with Steam data integration.
+   * Enhances preference scores based on user's Steam library and playtime patterns.
+   */
+  rankGamesWithSteamData(
+    games: GameRecord[], 
+    steamData: SteamPlayerLookupResponse,
+    allGames?: GameRecord[]
+  ): GameRecommendation[] {
+    if (!this.tagDict) {
+      return games.map((game, index) => ({
+        game,
+        score: 0,
+        rank: index + 1
+      }));
+    }
+
+    // Generate Steam preference profile if we have the full game catalog
+    let steamProfile: SteamPreferenceProfile | undefined;
+    if (allGames && allGames.length > 0) {
+      steamProfile = this.steamIntegrationService.generatePreferenceProfile(steamData, allGames);
+    }
+
+    // Calculate base recommendations
+    const baseRecommendations = games.map(game => ({
+      game,
+      score: this.calculateGameScore(game),
+      rank: 0 // Will be set after sorting
+    }));
+
+    // Apply Steam enhancements if profile is available
+    const enhancedRecommendations = steamProfile 
+      ? this.steamIntegrationService.calculateSteamEnhancedScores(baseRecommendations, steamProfile)
+      : baseRecommendations;
+
+    // Sort by enhanced score descending
+    enhancedRecommendations.sort((a, b) => b.score - a.score);
+
+    // Set ranks
+    enhancedRecommendations.forEach((rec, index) => {
+      rec.rank = index + 1;
+    });
+
+    return enhancedRecommendations;
   }
 
   /**

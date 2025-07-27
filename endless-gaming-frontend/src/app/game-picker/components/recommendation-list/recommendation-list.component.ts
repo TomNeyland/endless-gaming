@@ -7,7 +7,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { GameRecommendation, GameRecord, TagRarityAnalysis, EnhancedTag } from '../../../types/game.types';
+import { GameRecommendation, GameRecord, TagRarityAnalysis, EnhancedTag, SteamPlayerLookupResponse } from '../../../types/game.types';
 import { PreferenceService } from '../../services/preference.service';
 import { PairService } from '../../services/pair.service';
 import { AnimationService } from '../../services/animation.service';
@@ -17,6 +17,7 @@ import { GameDetailsService } from '../../services/game-details.service';
 import { EnhancedTagService } from '../../services/enhanced-tag.service';
 import { TagRarityService } from '../../services/tag-rarity.service';
 import { RadialTagMenuService } from '../../services/radial-tag-menu.service';
+import { SteamIntegrationService } from '../../services/steam-integration.service';
 import { getAgeBadge } from '../../../utils/game-age.utils';
 import { Subscription } from 'rxjs';
 
@@ -51,6 +52,7 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   private enhancedTagService = inject(EnhancedTagService);
   private tagRarityService = inject(TagRarityService);
   private radialTagMenuService = inject(RadialTagMenuService);
+  private steamIntegrationService = inject(SteamIntegrationService);
   private preferenceSummarySubscription?: Subscription;
   private filterSubscription?: Subscription;
   
@@ -60,6 +62,8 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
   @Input() games: GameRecord[] = [];
   @Input() maxRecommendations: number = 100;
   @Input() tagRarityAnalysis?: TagRarityAnalysis | null = null;
+  @Input() steamPlayerData?: SteamPlayerLookupResponse | null = null;
+  @Input() enableSteamFeatures: boolean = false;
   
   recommendations: GameRecommendation[] = [];
   
@@ -124,7 +128,7 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
 
   /**
    * Generate recommendations from input games using ML model.
-   * NEW: Filter games BEFORE ranking to ensure full N recommendations that match criteria.
+   * Enhanced with Steam integration when available.
    */
   private generateRecommendations(): void {
     if (this.games.length === 0) {
@@ -132,12 +136,18 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // STEP 1: Apply filters to the full game dataset first
-    const filteredGames = this.gameFilterService.applyFilters(this.games);
+    // STEP 1: Apply filters to the full game dataset first (with Steam data if available)
+    const filteredGames = this.enableSteamFeatures && this.steamPlayerData 
+      ? this.gameFilterService.applyFilters(this.games, undefined, this.steamPlayerData)
+      : this.gameFilterService.applyFilters(this.games);
     
-    // STEP 2: Generate recommendations from the filtered games
-    this.recommendations = this.preferenceService.rankGames(filteredGames)
-      .slice(0, this.maxRecommendations);
+    // STEP 2: Generate recommendations from the filtered games (with Steam enhancement if available)
+    this.recommendations = this.enableSteamFeatures && this.steamPlayerData
+      ? this.preferenceService.rankGamesWithSteamData(filteredGames, this.steamPlayerData, this.games)
+      : this.preferenceService.rankGames(filteredGames);
+    
+    // STEP 3: Apply final limit
+    this.recommendations = this.recommendations.slice(0, this.maxRecommendations);
   }
 
   /**
@@ -155,9 +165,14 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
     const previousRecommendations = [...this.recommendations];
     const containerElement = document.querySelector('.recommendation-list') as HTMLElement;
     
-    // Generate new recommendations from filtered games
-    const filteredGames = this.gameFilterService.applyFilters(this.games);
-    this.recommendations = this.preferenceService.rankGames(filteredGames)
+    // Generate new recommendations from filtered games (with Steam enhancement if available)
+    const filteredGames = this.enableSteamFeatures && this.steamPlayerData 
+      ? this.gameFilterService.applyFilters(this.games, undefined, this.steamPlayerData)
+      : this.gameFilterService.applyFilters(this.games);
+    
+    this.recommendations = (this.enableSteamFeatures && this.steamPlayerData
+      ? this.preferenceService.rankGamesWithSteamData(filteredGames, this.steamPlayerData, this.games)
+      : this.preferenceService.rankGames(filteredGames))
       .slice(0, this.maxRecommendations);
     
     // Update timestamps
@@ -592,5 +607,99 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
     
     // Open radial menu at click location
     this.radialTagMenuService.openMenu(tagName, position);
+  }
+
+  // Steam Integration Methods
+
+  /**
+   * Check if Steam features are enabled and data is available.
+   */
+  hasSteamData(): boolean {
+    return this.enableSteamFeatures && !!this.steamPlayerData;
+  }
+
+  /**
+   * Check if a game is owned by the Steam user.
+   */
+  isGameOwned(game: GameRecord): boolean {
+    if (!this.hasSteamData()) return false;
+    return this.steamIntegrationService.isGameOwned(game, this.steamPlayerData!);
+  }
+
+  /**
+   * Get Steam insights for a game.
+   */
+  getSteamInsights(game: GameRecord): {
+    isOwned: boolean;
+    playtime?: any;
+    category?: any;
+    recommendation?: string;
+  } {
+    if (!this.hasSteamData()) {
+      return { isOwned: false };
+    }
+    return this.steamIntegrationService.getSteamInsights(game, this.steamPlayerData!);
+  }
+
+  /**
+   * Format playtime for display.
+   */
+  formatPlaytime(playtimeMinutes: number): string {
+    return this.steamIntegrationService.formatPlaytime(playtimeMinutes);
+  }
+
+  /**
+   * Format recent playtime for display.
+   */
+  formatRecentPlaytime(recentMinutes?: number): string {
+    return this.steamIntegrationService.formatRecentPlaytime(recentMinutes);
+  }
+
+  /**
+   * Get playtime category badge color.
+   */
+  getPlaytimeCategoryColor(category: string): string {
+    switch (category) {
+      case 'unplayed': return '#9e9e9e';
+      case 'light': return '#ff9800';
+      case 'moderate': return '#2196f3';
+      case 'heavy': return '#4caf50';
+      case 'obsessed': return '#9c27b0';
+      default: return '#9e9e9e';
+    }
+  }
+
+  /**
+   * Get owned game badge text.
+   */
+  getOwnedBadgeText(insights: any): string {
+    if (!insights.isOwned) return '';
+    
+    if (insights.playtime?.playtime_forever === 0) {
+      return 'OWNED • Never played';
+    }
+    
+    const totalTime = this.formatPlaytime(insights.playtime?.playtime_forever || 0);
+    const recentTime = this.formatRecentPlaytime(insights.playtime?.playtime_2weeks);
+    
+    if (recentTime) {
+      return `OWNED • ${totalTime} (${recentTime})`;
+    }
+    
+    return `OWNED • ${totalTime}`;
+  }
+
+  /**
+   * Get recommendation reason for owned games.
+   */
+  getRecommendationReason(insights: any): string {
+    return insights.recommendation || '';
+  }
+
+  /**
+   * Show Steam recommendation tooltip.
+   */
+  showSteamTooltip(insights: any): boolean {
+    return insights.isOwned && (insights.recommendation || insights.category);
   }
 }

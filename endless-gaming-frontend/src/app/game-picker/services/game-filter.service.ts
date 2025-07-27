@@ -1,9 +1,10 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { GameRecord, GameRecommendation } from '../../types/game.types';
+import { GameRecord, GameRecommendation, SteamPlayerLookupResponse } from '../../types/game.types';
 import Dexie, { Table } from 'dexie';
 import { AgeCategory, matchesAgeFilter } from '../../utils/game-age.utils';
+import { SteamIntegrationService } from './steam-integration.service';
 
 /**
  * Game filtering interfaces and types
@@ -39,6 +40,14 @@ export interface GameFilters {
   ageCategories: AgeCategory[];  // ['new', 'recent', 'established', 'classic']
   releaseYearRange: PriceRange;  // Min/max release year
   maxGameAge: number | null;     // Maximum age in years
+  
+  // Steam integration filters
+  showOwnedOnly: boolean;        // Only show games user owns
+  hideOwnedGames: boolean;       // Hide games user already owns
+  playtimeCategories: string[];  // ['unplayed', 'light', 'moderate', 'heavy', 'obsessed']
+  playtimeRange: PriceRange;     // Min/max playtime in hours
+  recentlyPlayedOnly: boolean;   // Only show games played in last 2 weeks
+  steamDataAvailable: boolean;   // Internal flag to track if Steam data is available
   
   // Search
   searchText: string;
@@ -100,6 +109,13 @@ const DEFAULT_FILTERS: GameFilters = {
   ageCategories: [],
   releaseYearRange: { min: 1970, max: new Date().getFullYear() }, // Will be updated dynamically
   maxGameAge: null,
+  // Steam filters
+  showOwnedOnly: false,
+  hideOwnedGames: false,
+  playtimeCategories: [],
+  playtimeRange: { min: 0, max: 1000 },  // 0 to 1000 hours
+  recentlyPlayedOnly: false,
+  steamDataAvailable: false,
   searchText: ''
 };
 
@@ -149,6 +165,7 @@ const FILTER_PRESETS: FilterPreset[] = [
 })
 export class GameFilterService {
   private db = new FilterDatabase();
+  private steamIntegrationService = inject(SteamIntegrationService);
   
   // Reactive filter state using BehaviorSubject for external subscription compatibility
   private filtersSubject = new BehaviorSubject<GameFilters>(DEFAULT_FILTERS);
@@ -469,7 +486,7 @@ export class GameFilterService {
   /**
    * Apply all filters to a list of games
    */
-  applyFilters(games: GameRecord[], currentFilters?: GameFilters): GameRecord[] {
+  applyFilters(games: GameRecord[], currentFilters?: GameFilters, steamData?: SteamPlayerLookupResponse): GameRecord[] {
     const filters = currentFilters || this.filters();
     
     let filteredGames = games.filter(game => {
@@ -560,6 +577,45 @@ export class GameFilterService {
         }
       }
       
+      // Steam-specific filters (only apply if Steam data is available)
+      if (steamData && filters.steamDataAvailable) {
+        const isOwned = this.steamIntegrationService.isGameOwned(game, steamData);
+        const playtime = this.steamIntegrationService.getGamePlaytime(game, steamData);
+        
+        // Show owned only filter
+        if (filters.showOwnedOnly && !isOwned) {
+          return false;
+        }
+        
+        // Hide owned games filter
+        if (filters.hideOwnedGames && isOwned) {
+          return false;
+        }
+        
+        // Playtime category filters
+        if (filters.playtimeCategories.length > 0 && isOwned && playtime) {
+          const category = this.steamIntegrationService.getPlaytimeCategory(playtime.playtime_forever);
+          if (!filters.playtimeCategories.includes(category.category)) {
+            return false;
+          }
+        }
+        
+        // Playtime range filter
+        if (isOwned && playtime && (filters.playtimeRange.min > 0 || filters.playtimeRange.max < 1000)) {
+          const playtimeHours = playtime.playtime_forever / 60;
+          if (playtimeHours < filters.playtimeRange.min || playtimeHours > filters.playtimeRange.max) {
+            return false;
+          }
+        }
+        
+        // Recently played only filter
+        if (filters.recentlyPlayedOnly) {
+          if (!isOwned || !playtime || !playtime.playtime_2weeks || playtime.playtime_2weeks === 0) {
+            return false;
+          }
+        }
+      }
+      
       return true;
     });
     
@@ -627,7 +683,14 @@ export class GameFilterService {
       filters.ageCategories.length > 0 ||
       filters.releaseYearRange.min > DEFAULT_FILTERS.releaseYearRange.min ||
       filters.releaseYearRange.max < DEFAULT_FILTERS.releaseYearRange.max ||
-      filters.maxGameAge !== null
+      filters.maxGameAge !== null ||
+      // Steam filters
+      filters.showOwnedOnly ||
+      filters.hideOwnedGames ||
+      filters.playtimeCategories.length > 0 ||
+      filters.playtimeRange.min > DEFAULT_FILTERS.playtimeRange.min ||
+      filters.playtimeRange.max < DEFAULT_FILTERS.playtimeRange.max ||
+      filters.recentlyPlayedOnly
     );
   }
   
@@ -659,6 +722,14 @@ export class GameFilterService {
     if (filters.releaseYearRange.min > DEFAULT_FILTERS.releaseYearRange.min ||
         filters.releaseYearRange.max < DEFAULT_FILTERS.releaseYearRange.max) count++;
     if (filters.maxGameAge !== null) count++;
+    
+    // Steam filters
+    if (filters.showOwnedOnly) count++;
+    if (filters.hideOwnedGames) count++;
+    if (filters.playtimeCategories.length > 0) count++;
+    if (filters.playtimeRange.min > DEFAULT_FILTERS.playtimeRange.min ||
+        filters.playtimeRange.max < DEFAULT_FILTERS.playtimeRange.max) count++;
+    if (filters.recentlyPlayedOnly) count++;
     
     return count;
   }
@@ -883,5 +954,125 @@ export class GameFilterService {
     } catch (error) {
       console.warn('Failed to load persisted filter state:', error);
     }
+  }
+
+  // Steam Integration Methods
+
+  /**
+   * Set Steam data availability and update filters accordingly.
+   */
+  setSteamDataAvailable(available: boolean): void {
+    this.updateFilters({ steamDataAvailable: available });
+  }
+
+  /**
+   * Get available playtime categories for filtering.
+   */
+  getPlaytimeCategories(): Array<{ id: string; label: string; description: string }> {
+    return [
+      { id: 'unplayed', label: 'Unplayed', description: 'Never played (0 hours)' },
+      { id: 'light', label: 'Light', description: 'Briefly tried (< 2 hours)' },
+      { id: 'moderate', label: 'Moderate', description: 'Casually played (2-20 hours)' },
+      { id: 'heavy', label: 'Heavy', description: 'Heavily played (20-100 hours)' },
+      { id: 'obsessed', label: 'Obsessed', description: 'Obsessively played (100+ hours)' }
+    ];
+  }
+
+  /**
+   * Apply Steam-enhanced filters to recommendations.
+   */
+  applyFiltersToRecommendationsWithSteam(
+    recommendations: GameRecommendation[], 
+    steamData?: SteamPlayerLookupResponse,
+    currentFilters?: GameFilters
+  ): GameRecommendation[] {
+    const filters = currentFilters || this.filters();
+    
+    let filteredRecs = recommendations.filter(rec => {
+      // Apply standard filtering logic but to the game within the recommendation
+      const gameArray = [rec.game];
+      const filtered = this.applyFilters(gameArray, filters, steamData);
+      return filtered.length > 0;
+    });
+    
+    // Apply score range filter to recommendations
+    if (filters.scoreRange) {
+      filteredRecs = filteredRecs.filter(rec => 
+        rec.score >= filters.scoreRange.min && rec.score <= filters.scoreRange.max
+      );
+    }
+    
+    // Apply top N limit
+    if (filters.topNOnly && filters.topNOnly > 0) {
+      filteredRecs = filteredRecs.slice(0, filters.topNOnly);
+    }
+    
+    return filteredRecs;
+  }
+
+  /**
+   * Toggle between "show owned only" and "hide owned games" modes.
+   */
+  toggleOwnedGamesFilter(): void {
+    const current = this.filters();
+    
+    if (current.showOwnedOnly) {
+      // Switch to hide owned
+      this.updateFilters({ showOwnedOnly: false, hideOwnedGames: true });
+    } else if (current.hideOwnedGames) {
+      // Clear both filters
+      this.updateFilters({ showOwnedOnly: false, hideOwnedGames: false });
+    } else {
+      // Switch to show owned only
+      this.updateFilters({ showOwnedOnly: true, hideOwnedGames: false });
+    }
+  }
+
+  /**
+   * Reset Steam-specific filters only.
+   */
+  resetSteamFilters(): void {
+    this.updateFilters({
+      showOwnedOnly: false,
+      hideOwnedGames: false,
+      playtimeCategories: [],
+      playtimeRange: { min: 0, max: 1000 },
+      recentlyPlayedOnly: false
+    });
+  }
+
+  /**
+   * Get Steam filter statistics.
+   */
+  getSteamFilterStats(games: GameRecord[], steamData?: SteamPlayerLookupResponse): {
+    totalGames: number;
+    ownedGames: number;
+    recentlyPlayed: number;
+    neverPlayed: number;
+  } {
+    if (!steamData) {
+      return { totalGames: games.length, ownedGames: 0, recentlyPlayed: 0, neverPlayed: 0 };
+    }
+
+    const ownedGames = games.filter(game => 
+      this.steamIntegrationService.isGameOwned(game, steamData)
+    );
+    
+    const recentlyPlayed = ownedGames.filter(game => {
+      const playtime = this.steamIntegrationService.getGamePlaytime(game, steamData);
+      return playtime && playtime.playtime_2weeks && playtime.playtime_2weeks > 0;
+    });
+    
+    const neverPlayed = ownedGames.filter(game => {
+      const playtime = this.steamIntegrationService.getGamePlaytime(game, steamData);
+      return playtime && playtime.playtime_forever === 0;
+    });
+
+    return {
+      totalGames: games.length,
+      ownedGames: ownedGames.length,
+      recentlyPlayed: recentlyPlayed.length,
+      neverPlayed: neverPlayed.length
+    };
   }
 }
