@@ -68,7 +68,7 @@ def create_app(config_name=None):
     app.register_blueprint(discovery_bp, url_prefix='/discovery')
     
     from app.steam import bp as steam_bp
-    app.register_blueprint(steam_bp, url_prefix='/api/steam')
+    app.register_blueprint(steam_bp, url_prefix='/steam')
     
     # Health check endpoint for DigitalOcean App Platform
     @app.route('/health')
