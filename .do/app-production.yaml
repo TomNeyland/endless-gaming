@@ -8,6 +8,7 @@ services:
     github:
       repo: tomneyland/endless-gaming
       branch: master
+      deploy_on_push: true
     environment_slug: python
     
     build_command: |
