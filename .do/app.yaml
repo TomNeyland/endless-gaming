@@ -40,7 +40,6 @@ services:
     
     routes:
       - path: /api
-        preserve_path_prefix: false
 
 # Static site configuration for Angular frontend
 static_sites:
