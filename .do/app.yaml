@@ -40,6 +40,7 @@ services:
     
     routes:
       - path: /api
+        preserve_path_prefix: false
 
 # Static site configuration for Angular frontend
 static_sites:
@@ -55,7 +56,7 @@ static_sites:
       chmod +x .do/build.sh
       .do/build.sh
     
-    output_dir: dist/endless-gaming-frontend/browser
+    output_dir: dist
     index_document: index.html
     catchall_document: index.html
     

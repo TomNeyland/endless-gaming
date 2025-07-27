@@ -36,4 +36,9 @@ if [ ! -f "dist/endless-gaming-frontend/browser/index.html" ]; then
     exit 1
 fi
 
+# Copy built files to App Platform expected location
+echo "📦 Copying files for App Platform deployment..."
+cp -r dist/endless-gaming-frontend/browser/* dist/
+echo "✅ Files copied to dist/ directory"
+
 echo "🎉 Angular build completed successfully for deployment!"
