@@ -25,11 +25,11 @@ RUN pip install gunicorn
 # Copy application code
 COPY . .
 
-# Initialize SQLite database
-RUN python scripts/setup_db.py
+# Create empty SQLite database (will be initialized at runtime)
+RUN touch app.db
 
 # Expose port
 EXPOSE 8080
 
 # Start the application
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "app:create_app()"]
+CMD ["sh", "-c", "python scripts/setup_db.py && gunicorn --bind 0.0.0.0:8080 --workers 2 'app:create_app()'"]

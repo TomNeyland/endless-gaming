@@ -53,8 +53,8 @@ static_sites:
     environment_slug: node-js
     
     build_command: |
-      chmod +x /app/endless-gaming-frontend/.do/build.sh
-      /app/endless-gaming-frontend/.do/build.sh
+      chmod +x .do/build.sh
+      .do/build.sh
     
     output_dir: /dist
     index_document: index.html
