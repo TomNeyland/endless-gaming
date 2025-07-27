@@ -56,7 +56,7 @@ static_sites:
       chmod +x .do/build.sh
       .do/build.sh
     
-    output_dir: /dist
+    output_dir: /dist/endless-gaming-frontend/browser
     index_document: index.html
     catchall_document: index.html
     
