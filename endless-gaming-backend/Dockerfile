@@ -16,8 +16,8 @@ RUN poetry config virtualenvs.create false
 # Copy Poetry files
 COPY pyproject.toml poetry.lock ./
 
-# Install dependencies
-RUN poetry install --only=main
+# Install dependencies only (don't install the project itself)
+RUN poetry install --only=main --no-root
 
 # Install gunicorn
 RUN pip install gunicorn
