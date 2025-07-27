@@ -31,7 +31,7 @@ else
 fi
 
 # Verify required files exist
-if [ ! -f "dist/index.html" ]; then
+if [ ! -f "dist/endless-gaming-frontend/browser/index.html" ]; then
     echo "❌ Missing index.html in build output"
     exit 1
 fi
