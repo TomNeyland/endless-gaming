@@ -47,6 +47,10 @@ def create_app(config_name=None):
     engine = create_engine(app.config['DATABASE_URL'])
     SessionLocal = sessionmaker(bind=engine)
     
+    # Create tables if they don't exist (for SQLite)
+    from models import Base
+    Base.metadata.create_all(engine)
+    
     # Store engine in app for testing access
     app.db_engine = engine
     app.db_session_factory = SessionLocal
