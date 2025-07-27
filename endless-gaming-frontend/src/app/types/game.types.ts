@@ -209,3 +209,25 @@ export type GameChoice =
   | 'skip'          // Skip comparison (neutral)
   | 'like_both'     // Like both games (positive signal for both)
   | 'dislike_both'; // Dislike both games (negative signal for both)
+
+/**
+ * Individual game data from Steam player lookup API.
+ * Represents a single game in a user's Steam library.
+ */
+export interface SteamPlayerGame {
+  appid: number;                    // Steam app ID
+  name: string;                     // Game name
+  playtime_forever: number;         // Total playtime in minutes
+  playtime_2weeks?: number;         // Playtime in last 2 weeks (optional)
+  img_icon_url: string;            // Game icon URL
+  img_logo_url: string;            // Game logo URL
+}
+
+/**
+ * Response from /api/steam/lookup-player endpoint.
+ * Contains user's Steam library data with playtime information.
+ */
+export interface SteamPlayerLookupResponse {
+  game_count: number;               // Total number of games owned
+  games: SteamPlayerGame[];         // Array of owned games with playtime
+}
