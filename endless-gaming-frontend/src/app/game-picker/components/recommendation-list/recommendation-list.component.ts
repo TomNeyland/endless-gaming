@@ -202,8 +202,9 @@ export class RecommendationListComponent implements OnInit, OnDestroy, OnChanges
       // Don't block the UI - run animations in the background
       setTimeout(async () => {
         try {
-          // Animate reordering
-          await this.animationService.animateReorder(containerElement);
+          // PERFORMANCE: Only animate visible items (top 3 premium + first 15 compact)
+          const visibleSelector = '.premium-card, .compact-item:nth-child(-n+15)';
+          await this.animationService.animateReorder(containerElement, visibleSelector);
           
           // Highlight changed cards
           await this.highlightChangedCards(changes);
@@ -223,6 +224,7 @@ export class RecommendationListComponent implements OnInit, OnDestroy, OnChanges
 
   /**
    * Highlight cards that changed position.
+   * Only highlights visible elements to improve performance.
    */
   private async highlightChangedCards(changes: Array<{appId: number, oldRank: number, newRank: number}>): Promise<void> {
     if (changes.length === 0) return;
@@ -231,6 +233,9 @@ export class RecommendationListComponent implements OnInit, OnDestroy, OnChanges
       const changedElements: HTMLElement[] = [];
       
       changes.forEach(change => {
+        // PERFORMANCE: Only highlight visible items
+        if (change.newRank > 18) return; // Skip items beyond visible range
+        
         // Find elements with data attributes or by content
         const cardSelectors = [
           `[data-app-id="${change.appId}"]`,
@@ -241,13 +246,20 @@ export class RecommendationListComponent implements OnInit, OnDestroy, OnChanges
         for (const selector of cardSelectors) {
           const element = document.querySelector(selector) as HTMLElement;
           if (element) {
-            changedElements.push(element);
+            // Additional check: only highlight if element is in viewport
+            const rect = element.getBoundingClientRect();
+            const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
+            
+            if (isInViewport) {
+              changedElements.push(element);
+            }
             break;
           }
         }
       });
       
       if (changedElements.length > 0) {
+        console.log(`🎬 Highlighting ${changedElements.length} visible changed cards (of ${changes.length} total changes)`);
         await this.animationService.animateHighlight(changedElements);
       }
     } catch (error) {
@@ -273,6 +285,7 @@ export class RecommendationListComponent implements OnInit, OnDestroy, OnChanges
 
   /**
    * Calculate which games changed positions for animation purposes.
+   * Only tracks changes in visible items (top 3 premium + first 15 compact = 18 total).
    */
   private calculateRankingChanges(
     previous: GameRecommendation[], 
@@ -280,16 +293,23 @@ export class RecommendationListComponent implements OnInit, OnDestroy, OnChanges
   ): Array<{appId: number, oldRank: number, newRank: number}> {
     const changes: Array<{appId: number, oldRank: number, newRank: number}> = [];
     
+    // PERFORMANCE: Only track changes for visible items
+    const VISIBLE_ITEMS_LIMIT = 18;
+    const visibleCurrent = current.slice(0, VISIBLE_ITEMS_LIMIT);
+    
     const previousMap = new Map(previous.map(r => [r.game.appId, r.rank]));
     
-    current.forEach(currentRec => {
+    visibleCurrent.forEach(currentRec => {
       const previousRank = previousMap.get(currentRec.game.appId);
       if (previousRank && previousRank !== currentRec.rank) {
-        changes.push({
-          appId: currentRec.game.appId,
-          oldRank: previousRank,
-          newRank: currentRec.rank
-        });
+        // Only track if the change involves visible positions
+        if (previousRank <= VISIBLE_ITEMS_LIMIT || currentRec.rank <= VISIBLE_ITEMS_LIMIT) {
+          changes.push({
+            appId: currentRec.game.appId,
+            oldRank: previousRank,
+            newRank: currentRec.rank
+          });
+        }
       }
     });
     
