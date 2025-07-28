@@ -219,7 +219,20 @@
             <span class="tab-label">Filters</span>
           </ng-template>
           <div class="tab-content filters-tab-content">
-            <app-filter-panel [games]="games"></app-filter-panel>
+            <!-- Steam Integration Section -->
+            <div class="steam-integration-section">
+              <app-steam-input
+                (steamDataLoaded)="onSteamDataLoaded($event)"
+                (steamDataCleared)="onSteamDataCleared()">
+              </app-steam-input>
+            </div>
+            
+            <!-- Filter Panel -->
+            <app-filter-panel 
+              [games]="games"
+              [steamPlayerData]="steamPlayerData"
+              [enableSteamFeatures]="enableSteamFeatures">
+            </app-filter-panel>
           </div>
         </mat-tab>
 

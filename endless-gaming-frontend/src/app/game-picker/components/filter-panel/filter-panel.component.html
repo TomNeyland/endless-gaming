@@ -257,6 +257,119 @@
       </mat-form-field>
     </div>
 
+    <!-- Steam Integration Filters -->
+    @if (hasSteamData()) {
+      <div class="filter-section steam-section">
+        <h4 class="section-title steam-title">
+          <mat-icon>sports_esports</mat-icon>
+          Steam Library
+          @if (getSteamFilterStats().ownedGames > 0) {
+            <span class="steam-stats">({{ getSteamFilterStats().ownedGames }} owned)</span>
+          }
+        </h4>
+
+        <!-- Steam Quick Filters -->
+        <div class="steam-quick-filters">
+          <button 
+            mat-stroked-button 
+            [color]="showOwnedOnly ? 'primary' : ''"
+            (click)="onShowOwnedOnlyChange(!showOwnedOnly)"
+            class="quick-filter-button">
+            <mat-icon>library_books</mat-icon>
+            Show Owned Only
+          </button>
+          
+          <button 
+            mat-stroked-button 
+            [color]="hideOwnedGames ? 'accent' : ''"
+            (click)="onHideOwnedGamesChange(!hideOwnedGames)"
+            class="quick-filter-button">
+            <mat-icon>visibility_off</mat-icon>
+            Hide Owned
+          </button>
+          
+          <button 
+            mat-stroked-button 
+            [color]="recentlyPlayedOnly ? 'primary' : ''"
+            (click)="onRecentlyPlayedOnlyChange(!recentlyPlayedOnly)"
+            class="quick-filter-button">
+            <mat-icon>schedule</mat-icon>
+            Recently Played
+          </button>
+        </div>
+
+        <!-- Playtime Categories -->
+        <div class="steam-filter-group">
+          <h5 class="filter-group-title">Playtime Categories</h5>
+          <div class="playtime-categories">
+            @for (category of getPlaytimeCategories(); track category.id) {
+              <mat-slide-toggle
+                [checked]="playtimeCategories.includes(category.id)"
+                (change)="onPlaytimeCategoryToggle(category.id, $event.checked)"
+                [matTooltip]="category.description"
+                class="playtime-toggle">
+                {{ category.label }}
+              </mat-slide-toggle>
+            }
+          </div>
+        </div>
+
+        <!-- Playtime Range -->
+        <div class="steam-filter-group">
+          <h5 class="filter-group-title">
+            Playtime Range: {{ formatPlaytimeHours(playtimeRange.min) }} - {{ formatPlaytimeHours(playtimeRange.max) }}
+          </h5>
+          <div class="playtime-range-container">
+            <mat-slider 
+              [min]="0" 
+              [max]="1000" 
+              [step]="10"
+              [displayWith]="formatPlaytimeHours"
+              class="playtime-slider">
+              <input 
+                matSliderStartThumb
+                [(ngModel)]="playtimeRange.min"
+                (ngModelChange)="onPlaytimeRangeChange(playtimeRange)">
+              <input 
+                matSliderEndThumb
+                [(ngModel)]="playtimeRange.max"
+                (ngModelChange)="onPlaytimeRangeChange(playtimeRange)">
+            </mat-slider>
+          </div>
+        </div>
+
+        <!-- Steam Stats -->
+        @let steamStats = getSteamFilterStats();
+        @if (steamStats.ownedGames > 0) {
+          <div class="steam-stats-display">
+            <div class="stat-item">
+              <span class="stat-value">{{ steamStats.ownedGames }}</span>
+              <span class="stat-label">Owned</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ steamStats.recentlyPlayed }}</span>
+              <span class="stat-label">Recent</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ steamStats.neverPlayed }}</span>
+              <span class="stat-label">Unplayed</span>
+            </div>
+          </div>
+        }
+
+        <!-- Reset Steam Filters -->
+        @if (showOwnedOnly || hideOwnedGames || playtimeCategories.length > 0 || recentlyPlayedOnly || playtimeRange.min > 0 || playtimeRange.max < 1000) {
+          <button 
+            mat-button 
+            (click)="resetSteamFilters()"
+            class="reset-steam-button">
+            <mat-icon>refresh</mat-icon>
+            Reset Steam Filters
+          </button>
+        }
+      </div>
+    }
+
   </div>
 
   <!-- Filter Stats Footer -->

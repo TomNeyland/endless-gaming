@@ -131,7 +131,7 @@ export class SteamPlayerService {
     const url = `${this.API_BASE_URL}/lookup-player`;
     
     return this.http.get<SteamPlayerLookupResponse>(url, {
-      params: { steamId }
+      params: { player_id: steamId }
     }).pipe(
       catchError(this.handleError)
     );

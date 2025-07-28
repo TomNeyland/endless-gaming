@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
-import { GamePickerState, GameRecord, GameChoice } from '../../../types/game.types';
+import { GamePickerState, GameRecord, GameChoice, SteamPlayerLookupResponse } from '../../../types/game.types';
 import { GameDataService } from '../../services/game-data.service';
 import { VectorService } from '../../services/vector.service';
 import { PreferenceService } from '../../services/preference.service';
@@ -58,6 +58,10 @@ export class GamePickerPageComponent implements OnInit {
   public readonly isDrawerOpen = signal(false);
   private games: GameRecord[] = [];
   private errorMessage = '';
+  
+  // Steam integration state
+  public readonly steamPlayerData = signal<SteamPlayerLookupResponse | null>(null);
+  public readonly enableSteamFeatures = signal<boolean>(false);
   
   ngOnInit(): void {
     this.startGamePicker();
@@ -237,6 +241,39 @@ export class GamePickerPageComponent implements OnInit {
    */
   getTagRarityAnalysis() {
     return this.preferenceService.getTagRarityAnalysis();
+  }
+
+  // Steam Integration Methods
+
+  /**
+   * Handle Steam data loaded from Steam input component.
+   */
+  onSteamDataLoaded(steamData: SteamPlayerLookupResponse): void {
+    console.log('🎮 Steam data loaded:', steamData.game_count, 'games');
+    this.steamPlayerData.set(steamData);
+    this.enableSteamFeatures.set(true);
+    
+    // Notify filter service that Steam data is available
+    this.gameFilterService.setSteamDataAvailable(true);
+  }
+
+  /**
+   * Handle Steam data cleared from Steam input component.
+   */
+  onSteamDataCleared(): void {
+    console.log('🎮 Steam data cleared');
+    this.steamPlayerData.set(null);
+    this.enableSteamFeatures.set(false);
+    
+    // Notify filter service that Steam data is no longer available
+    this.gameFilterService.setSteamDataAvailable(false);
+  }
+
+  /**
+   * Check if Steam features are currently enabled.
+   */
+  hasSteamFeatures(): boolean {
+    return this.enableSteamFeatures() && !!this.steamPlayerData();
   }
 
   /**

@@ -34,6 +34,22 @@
                 <span class="rank-number">{{ recommendation.rank }}</span>
               </div>
 
+              <!-- Steam Owned Badge (Premium Cards) -->
+              @if (hasSteamData()) {
+                @let steamInsights = getSteamInsights(recommendation.game);
+                @if (steamInsights.isOwned) {
+                  <div class="steam-owned-badge premium" 
+                       [style.background-color]="getPlaytimeCategoryColor(steamInsights.category?.category || 'unplayed')"
+                       [matTooltip]="getOwnedBadgeText(steamInsights)">
+                    <mat-icon>steam</mat-icon>
+                    <span class="owned-text">OWNED</span>
+                    @if (steamInsights.playtime?.playtime_2weeks) {
+                      <mat-icon class="recently-played-icon">play_arrow</mat-icon>
+                    }
+                  </div>
+                }
+              }
+
               <!-- Game Image -->
               <div class="game-image-container">
                 <img 
@@ -55,6 +71,20 @@
                     <mat-icon>analytics</mat-icon>
                     {{ formatScore(recommendation.score) }}
                   </span>
+                  
+                  <!-- Steam Playtime Info (Premium Cards) -->
+                  @if (hasSteamData()) {
+                    @let steamInsights = getSteamInsights(recommendation.game);
+                    @if (steamInsights.isOwned && steamInsights.playtime) {
+                      <span class="steam-playtime" [matTooltip]="getRecommendationReason(steamInsights)">
+                        <mat-icon>schedule</mat-icon>
+                        {{ formatPlaytime(steamInsights.playtime.playtime_forever) }}
+                        @if (steamInsights.playtime.playtime_2weeks) {
+                          <span class="recent-time">({{ formatRecentPlaytime(steamInsights.playtime.playtime_2weeks) }})</span>
+                        }
+                      </span>
+                    }
+                  }
                 </div>
 
                 <!-- Content Indicators -->
@@ -135,6 +165,21 @@
                   <span class="rank-number">#{{ recommendation.rank }}</span>
                 </div>
 
+                <!-- Steam Owned Badge (Compact Items) -->
+                @if (hasSteamData()) {
+                  @let steamInsights = getSteamInsights(recommendation.game);
+                  @if (steamInsights.isOwned) {
+                    <div class="steam-owned-badge compact" 
+                         [style.background-color]="getPlaytimeCategoryColor(steamInsights.category?.category || 'unplayed')"
+                         [matTooltip]="getOwnedBadgeText(steamInsights)">
+                      <mat-icon>steam</mat-icon>
+                      @if (steamInsights.playtime?.playtime_2weeks) {
+                        <mat-icon class="recently-played-icon">play_arrow</mat-icon>
+                      }
+                    </div>
+                  }
+                }
+
                 <!-- Game Image -->
                 <div class="game-image-container">
                   <img 
@@ -148,8 +193,24 @@
                 <div class="game-details">
                   <div class="game-header">
                     <h3 class="game-title">{{ recommendation.game.name }}</h3>
-                    <div class="game-price" [class.free]="!recommendation.game.price || recommendation.game.price === 'Free'">
-                      {{ recommendation.game.price || 'FREE' }}
+                    <div class="price-playtime-container">
+                      <div class="game-price" [class.free]="!recommendation.game.price || recommendation.game.price === 'Free'">
+                        {{ recommendation.game.price || 'FREE' }}
+                      </div>
+                      
+                      <!-- Steam Playtime Info (Compact Items) -->
+                      @if (hasSteamData()) {
+                        @let steamInsights = getSteamInsights(recommendation.game);
+                        @if (steamInsights.isOwned && steamInsights.playtime) {
+                          <div class="steam-playtime-compact" [matTooltip]="getRecommendationReason(steamInsights)">
+                            <mat-icon>schedule</mat-icon>
+                            <span>{{ formatPlaytime(steamInsights.playtime.playtime_forever) }}</span>
+                            @if (steamInsights.playtime.playtime_2weeks) {
+                              <span class="recent-indicator">●</span>
+                            }
+                          </div>
+                        }
+                      }
                     </div>
                   </div>
 

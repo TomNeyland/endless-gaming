@@ -10,7 +10,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { PreferenceSummaryComponent } from '../preference-summary/preference-summary.component';
 import { FilterPanelComponent } from '../filter-panel/filter-panel.component';
-import { GameRecord, GamePair, TagRarityAnalysis, EnhancedTag, GameChoice } from '../../../types/game.types';
+import { SteamInputComponent } from '../steam-input/steam-input.component';
+import { GameRecord, GamePair, TagRarityAnalysis, EnhancedTag, GameChoice, SteamPlayerLookupResponse } from '../../../types/game.types';
 import { PairService } from '../../services/pair.service';
 import { AnimationService } from '../../services/animation.service';
 import { GameFilterService } from '../../services/game-filter.service';
@@ -38,7 +39,8 @@ import { RadialTagMenuService } from '../../services/radial-tag-menu.service';
     MatToolbarModule,
     MatTabsModule,
     PreferenceSummaryComponent,
-    FilterPanelComponent
+    FilterPanelComponent,
+    SteamInputComponent
   ],
   templateUrl: './voting-drawer.component.html',
   styleUrl: './voting-drawer.component.scss'
@@ -54,6 +56,8 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
   @Input() isOpen = false;
   @Input() games: GameRecord[] = [];
   @Input() tagRarityAnalysis?: TagRarityAnalysis | null = null;
+  @Input() steamPlayerData?: SteamPlayerLookupResponse | null = null;
+  @Input() enableSteamFeatures: boolean = false;
   
   // Tab management
   public readonly activeTabIndex = signal(0);
@@ -65,6 +69,8 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
   }>();
   
   @Output() drawerClosed = new EventEmitter<void>();
+  @Output() steamDataLoaded = new EventEmitter<SteamPlayerLookupResponse>();
+  @Output() steamDataCleared = new EventEmitter<void>();
 
   public readonly currentPair = signal<GamePair | null>(null);
   public readonly isVoting = signal(false);
@@ -240,6 +246,20 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
    */
   onDrawerClose(): void {
     this.drawerClosed.emit();
+  }
+
+  /**
+   * Handle Steam data loaded event.
+   */
+  onSteamDataLoaded(steamData: SteamPlayerLookupResponse): void {
+    this.steamDataLoaded.emit(steamData);
+  }
+
+  /**
+   * Handle Steam data cleared event.
+   */
+  onSteamDataCleared(): void {
+    this.steamDataCleared.emit();
   }
 
   /**

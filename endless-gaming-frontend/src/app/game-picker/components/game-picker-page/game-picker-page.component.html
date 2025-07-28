@@ -2,8 +2,12 @@
   [isOpen]="isDrawerOpen()" 
   [games]="getGames()"
   [tagRarityAnalysis]="getTagRarityAnalysis()"
+  [steamPlayerData]="steamPlayerData()"
+  [enableSteamFeatures]="enableSteamFeatures()"
   (voteCast)="onVoteCast($event)"
-  (drawerClosed)="onDrawerClosed()">
+  (drawerClosed)="onDrawerClosed()"
+  (steamDataLoaded)="onSteamDataLoaded($event)"
+  (steamDataCleared)="onSteamDataCleared()">
 
 <div class="game-picker-page">
   <!-- Material Toolbar Header -->
@@ -65,12 +69,31 @@
     <div class="recommendations-state">
       <!-- Header Section -->
       <div class="header-section">
-        <h1 class="mat-headline-3">Your Personalized Game Recommendations</h1>
-        <p class="mat-headline-6">Based on your preferences, here are games you might love</p>
+        <h1 class="mat-headline-3">
+          Your Personalized Game Recommendations
+          @if (hasSteamFeatures()) {
+            <mat-icon class="steam-enhanced-icon" matTooltip="Enhanced with Steam data">auto_awesome</mat-icon>
+          }
+        </h1>
+        <p class="mat-headline-6">
+          @if (hasSteamFeatures()) {
+            Based on your preferences and Steam library, here are games you might love
+          } @else {
+            Based on your preferences, here are games you might love
+          }
+        </p>
       </div>
 
-      <!-- Recommendations List -->
-      <app-recommendation-list [games]="getGames()" [tagRarityAnalysis]="getTagRarityAnalysis()"></app-recommendation-list>
+
+      <!-- Main Recommendations -->
+      <div class="recommendations-main">
+        <app-recommendation-list 
+          [games]="getGames()" 
+          [tagRarityAnalysis]="getTagRarityAnalysis()"
+          [steamPlayerData]="steamPlayerData()"
+          [enableSteamFeatures]="enableSteamFeatures()">
+        </app-recommendation-list>
+      </div>
       
       <!-- Action Buttons -->
       <div class="actions-section">

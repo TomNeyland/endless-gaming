@@ -14,7 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
 
 import { GameFilterService, FilterStats } from '../../services/game-filter.service';
-import { GameRecord } from '../../../types/game.types';
+import { GameRecord, SteamPlayerLookupResponse } from '../../../types/game.types';
 import { AgeCategory } from '../../../utils/game-age.utils';
 
 /**
@@ -46,6 +46,8 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   
   @Input() games: GameRecord[] = [];
+  @Input() steamPlayerData?: SteamPlayerLookupResponse | null = null;
+  @Input() enableSteamFeatures: boolean = false;
   
   // Reactive state
   public readonly filters = this.gameFilterService.filters;
@@ -74,6 +76,13 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
   public releaseYearRange = { min: 1970, max: new Date().getFullYear() };
   public maxGameAge: number | null = null;
   
+  // Steam filter form models
+  public showOwnedOnly = false;
+  public hideOwnedGames = false;
+  public playtimeCategories: string[] = [];
+  public playtimeRange = { min: 0, max: 1000 };
+  public recentlyPlayedOnly = false;
+  
   // Top N options
   public readonly topNOptions = [
     { value: null, label: 'Show All' },
@@ -100,6 +109,9 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
     if (this.games.length > 0) {
       this.gameFilterService.initializeOptions(this.games);
     }
+    
+    // Initialize Steam data availability
+    this.initializeSteamData();
     
     // Load available options
     this.availableTags = this.gameFilterService.getAvailableTags();
@@ -137,6 +149,9 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
     this.ageCategories = [...filters.ageCategories];
     this.releaseYearRange = { ...filters.releaseYearRange };
     this.maxGameAge = filters.maxGameAge;
+    
+    // Sync Steam filter models
+    this.syncSteamFiltersFromService();
   }
   
   /**
@@ -158,6 +173,14 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
    */
   public resetAllFilters(): void {
     this.gameFilterService.resetFilters();
+  }
+
+  /**
+   * Reset only Steam-specific filters
+   */
+  public resetSteamFilters(): void {
+    this.gameFilterService.resetSteamFilters();
+    this.syncSteamFiltersFromService();
   }
   
   // Instant filter change handlers - no apply button needed
@@ -287,6 +310,78 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
     this.maxGameAge = maxAge;
     this.gameFilterService.updateFilters({ maxGameAge: maxAge });
   }
+
+  // Steam filter change handlers
+
+  /**
+   * Handle show owned only toggle (instant)
+   */
+  public onShowOwnedOnlyChange(value: boolean): void {
+    this.showOwnedOnly = value;
+    if (value) {
+      this.hideOwnedGames = false; // Mutually exclusive
+    }
+    this.gameFilterService.updateFilters({ 
+      showOwnedOnly: value,
+      hideOwnedGames: this.hideOwnedGames
+    });
+  }
+
+  /**
+   * Handle hide owned games toggle (instant)
+   */
+  public onHideOwnedGamesChange(value: boolean): void {
+    this.hideOwnedGames = value;
+    if (value) {
+      this.showOwnedOnly = false; // Mutually exclusive
+    }
+    this.gameFilterService.updateFilters({ 
+      hideOwnedGames: value,
+      showOwnedOnly: this.showOwnedOnly
+    });
+  }
+
+  /**
+   * Handle playtime categories change (instant)
+   */
+  public onPlaytimeCategoriesChange(categories: string[]): void {
+    this.playtimeCategories = categories;
+    this.gameFilterService.updateFilters({ playtimeCategories: [...categories] });
+  }
+
+  /**
+   * Handle individual playtime category toggle (instant)
+   */
+  public onPlaytimeCategoryToggle(categoryId: string, checked: boolean): void {
+    const updatedCategories = checked 
+      ? [...this.playtimeCategories, categoryId]
+      : this.playtimeCategories.filter(c => c !== categoryId);
+    this.onPlaytimeCategoriesChange(updatedCategories);
+  }
+
+  /**
+   * Handle playtime range change (instant)
+   */
+  public onPlaytimeRangeChange(range: { min: number, max: number }): void {
+    this.playtimeRange = range;
+    this.gameFilterService.updateFilters({ playtimeRange: { ...range } });
+  }
+
+  /**
+   * Handle recently played only toggle (instant)
+   */
+  public onRecentlyPlayedOnlyChange(value: boolean): void {
+    this.recentlyPlayedOnly = value;
+    this.gameFilterService.updateFilters({ recentlyPlayedOnly: value });
+  }
+
+  /**
+   * Toggle owned games filter (cycles through modes)
+   */
+  public toggleOwnedGamesFilter(): void {
+    this.gameFilterService.toggleOwnedGamesFilter();
+    this.syncSteamFiltersFromService();
+  }
   
   /**
    * Get filtered tags for autocomplete with frequency information
@@ -357,5 +452,63 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
    */
   public getDataYearRange(): { min: number, max: number } {
     return this.gameFilterService.getDataYearRange();
+  }
+
+  // Steam utility methods
+
+  /**
+   * Check if Steam features are enabled and data is available
+   */
+  public hasSteamData(): boolean {
+    return this.enableSteamFeatures && !!this.steamPlayerData;
+  }
+
+  /**
+   * Get available playtime categories for filtering
+   */
+  public getPlaytimeCategories(): Array<{ id: string; label: string; description: string }> {
+    return this.gameFilterService.getPlaytimeCategories();
+  }
+
+  /**
+   * Get Steam filter statistics
+   */
+  public getSteamFilterStats(): {
+    totalGames: number;
+    ownedGames: number;
+    recentlyPlayed: number;
+    neverPlayed: number;
+  } {
+    return this.gameFilterService.getSteamFilterStats(this.games, this.steamPlayerData || undefined);
+  }
+
+  /**
+   * Format playtime hours for display
+   */
+  public formatPlaytimeHours(hours: number): string {
+    if (hours === 0) return '0h';
+    if (hours >= 1000) return `${Math.round(hours / 100) / 10}k h`;
+    return `${hours}h`;
+  }
+
+  /**
+   * Sync Steam filter UI state from service
+   */
+  private syncSteamFiltersFromService(): void {
+    const currentFilters = this.filters();
+    this.showOwnedOnly = currentFilters.showOwnedOnly;
+    this.hideOwnedGames = currentFilters.hideOwnedGames;
+    this.playtimeCategories = [...currentFilters.playtimeCategories];
+    this.playtimeRange = { ...currentFilters.playtimeRange };
+    this.recentlyPlayedOnly = currentFilters.recentlyPlayedOnly;
+  }
+
+  /**
+   * Initialize Steam data availability
+   */
+  private initializeSteamData(): void {
+    if (this.hasSteamData()) {
+      this.gameFilterService.setSteamDataAvailable(true);
+    }
   }
 }
