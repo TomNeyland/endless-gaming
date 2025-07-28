@@ -59,7 +59,13 @@ def lookup_player():
         try:
             # Run async function in sync context
             steam_response = asyncio.run(fetch_games())
-            return jsonify(SteamAPIResponse.format_success(steam_response))
+            
+            # Extract the inner response data (Steam API returns {"response": {...}})
+            if 'response' in steam_response:
+                return jsonify(SteamAPIResponse.format_success(steam_response['response']))
+            else:
+                # Fallback if response format is different
+                return jsonify(SteamAPIResponse.format_success(steam_response))
             
         except httpx.HTTPStatusError as e:
             current_app.logger.error(f"Steam API HTTP error: {e}")
