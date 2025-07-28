@@ -294,16 +294,9 @@ export class GamePickerPageComponent implements OnInit {
         console.log('🎮 Steam tag preferences populated - check preference summary!');
       }
       
-      // Set Steam auto-focus flag for drawer if it's open
-      if (this.isDrawerOpen()) {
-        console.log('🎮 Setting Steam auto-focus flag for voting drawer');
-        this.steamAutoFocus.set(true);
-        
-        // Reset the flag after a brief delay to allow the drawer to react
-        setTimeout(() => {
-          this.steamAutoFocus.set(false);
-        }, 100);
-      }
+      // Set Steam auto-focus flag for voting drawer (will trigger when drawer opens)
+      console.log('🎮 Setting Steam auto-focus flag for voting drawer');
+      this.steamAutoFocus.set(true);
       
       // Auto-navigate to recommendations immediately (only if we're currently on game picker)
       if (this.state() === 'comparing') {
@@ -325,6 +318,14 @@ export class GamePickerPageComponent implements OnInit {
     // Notify filter service that Steam data is no longer available and reset interaction state
     this.gameFilterService.setSteamDataAvailable(false);
     this.gameFilterService.updateFilters({ steamTogglesInteracted: false });
+  }
+
+  /**
+   * Handle Steam auto-focus completion from voting drawer.
+   */
+  onSteamAutoFocusCompleted(): void {
+    console.log('🎮 Steam auto-focus completed, resetting flag');
+    this.steamAutoFocus.set(false);
   }
 
   /**

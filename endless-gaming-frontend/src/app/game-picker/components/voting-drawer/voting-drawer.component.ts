@@ -74,6 +74,7 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
   @Output() drawerClosed = new EventEmitter<void>();
   @Output() steamDataLoaded = new EventEmitter<SteamPlayerLookupResponse>();
   @Output() steamDataCleared = new EventEmitter<void>();
+  @Output() steamAutoFocusCompleted = new EventEmitter<void>();
 
   public readonly currentPair = signal<GamePair | null>(null);
   public readonly isVoting = signal(false);
@@ -108,10 +109,21 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
       this.initializeFilters();
     }
     
-    // Auto-focus Steam tab when Steam data loads and drawer is open
-    if (changes['steamAutoFocus'] && changes['steamAutoFocus'].currentValue === true && this.isOpen) {
-      console.log('🎮 VotingDrawer: Auto-focusing Steam tab');
-      this.activeTabIndex.set(2); // Steam tab is index 2 (Vote=0, Filters=1, Steam=2)
+    // Auto-focus Steam tab when Steam data loads
+    if (changes['steamAutoFocus'] && changes['steamAutoFocus'].currentValue === true) {
+      console.log('🎮 VotingDrawer: Auto-focusing Steam tab (isOpen:', this.isOpen, ')');
+      
+      // Use setTimeout to ensure drawer is fully opened and tabs are rendered
+      setTimeout(() => {
+        console.log('🎮 VotingDrawer: Setting active tab to Steam (index 2)');
+        this.activeTabIndex.set(2); // Steam tab is index 2 (Vote=0, Filters=1, Steam=2)
+        
+        // Reset the auto-focus flag after successful focus
+        setTimeout(() => {
+          console.log('🎮 VotingDrawer: Steam tab auto-focus complete, notifying parent');
+          this.steamAutoFocusCompleted.emit();
+        }, 50);
+      }, 100);
     }
   }
   

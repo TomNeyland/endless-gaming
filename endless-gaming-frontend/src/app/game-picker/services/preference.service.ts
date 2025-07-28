@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { GameRecord, PreferenceSummary, UserPreferenceState, GameRecommendation, TagDictionary, TagRarityAnalysis, SteamPlayerLookupResponse } from '../../types/game.types';
 import { VectorService } from './vector.service';
 import { TagRarityService } from './tag-rarity.service';
-import { SteamIntegrationService, SteamPreferenceProfile } from './steam-integration.service';
+import { SteamIntegrationService } from './steam-integration.service';
 
 /**
  * Service for managing user preferences and ML model.
@@ -187,6 +187,23 @@ export class PreferenceService {
     
     // Debug logging to track preference summary health
     this.logPreferenceSummaryDebugInfo();
+    
+    // Debug: Show actual weight values after voting for comparison with Steam
+    if (this.actualVoteCount === 5 || this.actualVoteCount === 10 || this.actualVoteCount === 15) {
+      const topWeights = Array.from(this.weightVector)
+        .map((weight, index) => ({ weight, tag: this.tagDict!.indexToTag[index] }))
+        .filter(w => Math.abs(w.weight) > 0.01)
+        .sort((a, b) => Math.abs(b.weight) - Math.abs(a.weight))
+        .slice(0, 10);
+      
+      console.log(`🗳️ Weight values after ${this.actualVoteCount} votes:`);
+      topWeights.forEach(w => {
+        console.log(`    ${w.tag}: ${w.weight.toFixed(4)}`);
+      });
+      
+      const magnitude = Math.sqrt(this.weightVector.reduce((sum, w) => sum + w * w, 0));
+      console.log(`🗳️ Vote weight vector magnitude: ${magnitude.toFixed(3)}`);
+    }
   }
 
   /**
@@ -268,71 +285,18 @@ export class PreferenceService {
 
   /**
    * Rank games with Steam data integration.
-   * Enhances preference scores based on user's Steam library and playtime patterns.
+   * Steam preferences are now integrated into the weight vector, so this just uses standard ranking.
    */
   rankGamesWithSteamData(
     games: GameRecord[], 
     steamData: SteamPlayerLookupResponse,
     allGames?: GameRecord[]
   ): GameRecommendation[] {
-    console.log('🎮 PreferenceService: rankGamesWithSteamData called with:', {
-      gamesCount: games.length,
-      steamGamesCount: steamData.game_count,
-      allGamesCount: allGames?.length || 0,
-      hasTagDict: !!this.tagDict
-    });
+    console.log('🎮 PreferenceService: rankGamesWithSteamData called - using unified weight vector approach');
     
-    if (!this.tagDict) {
-      console.log('🎮 PreferenceService: No tag dictionary, returning default scores');
-      return games.map((game, index) => ({
-        game,
-        score: 0,
-        rank: index + 1
-      }));
-    }
-
-    // Generate Steam preference profile if we have the full game catalog
-    let steamProfile: SteamPreferenceProfile | undefined;
-    if (allGames && allGames.length > 0) {
-      console.log('🎮 PreferenceService: Generating Steam preference profile...');
-      steamProfile = this.steamIntegrationService.generatePreferenceProfile(steamData, allGames);
-    } else {
-      console.log('🎮 PreferenceService: No full game catalog provided, Steam enhancement limited');
-    }
-
-    // Calculate base recommendations
-    console.log('🎮 PreferenceService: Calculating base preference scores...');
-    const baseRecommendations = games.map(game => ({
-      game,
-      score: this.calculateGameScore(game),
-      rank: 0 // Will be set after sorting
-    }));
-
-    const baseScoreStats = {
-      min: Math.min(...baseRecommendations.map(r => r.score)),
-      max: Math.max(...baseRecommendations.map(r => r.score)),
-      avg: baseRecommendations.reduce((sum, r) => sum + r.score, 0) / baseRecommendations.length
-    };
-    console.log('🎮 PreferenceService: Base score stats:', baseScoreStats);
-
-    // Apply Steam enhancements if profile is available
-    const enhancedRecommendations = steamProfile 
-      ? this.steamIntegrationService.calculateSteamEnhancedScores(baseRecommendations, steamProfile)
-      : baseRecommendations;
-
-    // Sort by enhanced score descending
-    enhancedRecommendations.sort((a, b) => b.score - a.score);
-
-    // Set ranks
-    enhancedRecommendations.forEach((rec, index) => {
-      rec.rank = index + 1;
-    });
-
-    console.log('🎮 PreferenceService: Steam-enhanced ranking complete. Top 5 games:', 
-      enhancedRecommendations.slice(0, 5).map(r => `${r.game.name}: ${r.score.toFixed(3)}`)
-    );
-
-    return enhancedRecommendations;
+    // Steam preferences are already integrated into the weight vector via populateWeightVectorFromSteam()
+    // No need for separate Steam enhancement - just use standard ranking
+    return this.rankGames(games);
   }
 
   /**
@@ -408,7 +372,34 @@ export class PreferenceService {
     }
 
     const gameVector = this.vectorService.gameToSparseVector(game, this.tagDict);
-    return this.vectorService.dotProduct(gameVector, this.weightVector);
+    const score = this.vectorService.dotProduct(gameVector, this.weightVector);
+    
+    // Debug: Log score breakdown for a few games to understand the scaling issue
+    if (Math.random() < 0.01) { // Log ~1% of score calculations
+      console.log(`🎯 Score calculation for "${game.name}": ${score.toFixed(3)}`);
+      
+      // Show top contributing tags
+      const contributions: Array<{ tag: string; weight: number; gameValue: number; contribution: number }> = [];
+      for (let i = 0; i < gameVector.indices.length; i++) {
+        const index = gameVector.indices[i];
+        const gameValue = gameVector.values[i];
+        const weight = this.weightVector[index];
+        const contribution = gameValue * weight;
+        const tag = this.tagDict.indexToTag[index];
+        
+        if (Math.abs(contribution) > 0.001) {
+          contributions.push({ tag, weight, gameValue, contribution });
+        }
+      }
+      
+      contributions.sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution));
+      console.log('  Top contributors:');
+      contributions.slice(0, 5).forEach(c => {
+        console.log(`    ${c.tag}: ${c.gameValue.toFixed(3)} × ${c.weight.toFixed(3)} = ${c.contribution.toFixed(3)}`);
+      });
+    }
+    
+    return score;
   }
 
   /**
@@ -699,17 +690,33 @@ export class PreferenceService {
     console.log('  - Available games:', allGames.length);
     console.log('  - Tag dictionary size:', this.tagDict.size);
 
-    // Generate Steam preference profile for analysis
-    const steamProfile = this.steamIntegrationService.generatePreferenceProfile(steamData, allGames);
-    
-    // Steam learning parameters
-    const steamLearningRate = 0.05; // Moderate learning rate for Steam preferences
+    // Fixed budget approach: Treat Steam library as equivalent to N votes TOTAL
+    const STEAM_EQUIVALENT_VOTES = 3; // Steam library worth 3 votes of influence (reduced from 15)
     const minimumPlaytime = 30; // Minimum 30 minutes to be considered "played"
+    
+    // First pass: Analyze playtime distribution for normalization
+    const playtimes = steamData.games.map(g => g.playtime_forever).filter(p => p >= minimumPlaytime);
+    if (playtimes.length === 0) {
+      console.log('🎮 No eligible playtime found in Steam library');
+      return;
+    }
+    
+    playtimes.sort((a, b) => a - b); // Sort ascending
+    const maxPlaytime = playtimes[playtimes.length - 1];
+    const bottom10PercentThreshold = playtimes[Math.floor(playtimes.length * 0.1)];
+    
+    console.log(`🎮 Playtime analysis:`);
+    console.log(`  - Max playtime: ${this.steamIntegrationService.formatPlaytime(maxPlaytime)}`);
+    console.log(`  - Bottom 10% threshold: ${this.steamIntegrationService.formatPlaytime(bottom10PercentThreshold)}`);
+    console.log(`  - Eligible games: ${playtimes.length}`);
+    
+    // Create temporary weight vector to accumulate Steam preferences
+    const steamWeights = new Float32Array(this.tagDict.size);
     
     let steamVotesApplied = 0;
     let steamTagsWeighted = 0;
-
-    // Process each Steam game to build preferences
+    
+    // Second pass: Accumulate all Steam preferences into temporary vector
     steamData.games.forEach(steamGame => {
       // Only consider games with meaningful playtime
       if (steamGame.playtime_forever < minimumPlaytime) {
@@ -722,28 +729,62 @@ export class PreferenceService {
         return;
       }
 
-      // Calculate preference strength based on playtime
-      const playtimeCategory = this.steamIntegrationService.getPlaytimeCategory(steamGame.playtime_forever);
-      const preferenceStrength = playtimeCategory.multiplier; // 0.8 to 2.0
-
-      // Convert to learning factor (positive for games we played)
-      // Use normalized strength: (strength - 1.0) to get range from -0.2 to +1.0
-      const learningFactor = (preferenceStrength - 1.0) * steamLearningRate;
-
-      // Convert game to sparse vector and apply weight updates
+      // Determine preference type based on playtime percentile
+      let preferenceStrength: number;
+      
+      if (steamGame.playtime_forever <= bottom10PercentThreshold) {
+        // Bottom 10% = negative preference (games they tried but didn't like)
+        // Scale from -0.5 to -0.1 based on position within bottom 10%
+        const bottom10Position = steamGame.playtime_forever / bottom10PercentThreshold;
+        preferenceStrength = -0.5 + (bottom10Position * 0.4); // -0.5 to -0.1 range
+      } else {
+        // Top 90% = positive preferences scaled by relative playtime
+        const normalizedPlaytime = steamGame.playtime_forever / maxPlaytime;
+        preferenceStrength = 0.1 + (normalizedPlaytime * 0.9); // 0.1 to 1.0 range
+      }
+      
+      // Convert game to sparse vector
       const gameVec = this.vectorService.gameToSparseVector(masterGame, this.tagDict!);
       
-      // Apply the weight update using the same mechanism as voting
-      this.updateWeightsFromVector(gameVec, learningFactor);
+      // Accumulate into temporary Steam weights vector
+      for (let i = 0; i < gameVec.indices.length; i++) {
+        const index = gameVec.indices[i];
+        const value = gameVec.values[i];
+        if (index < steamWeights.length) {
+          steamWeights[index] += preferenceStrength * value;
+        }
+      }
       
       steamVotesApplied++;
       steamTagsWeighted += Object.keys(masterGame.tags).length;
 
-      // Debug logging for significant games
-      if (steamGame.playtime_forever > 60) { // More than 1 hour
-        console.log(`  🎮 Steam preference: ${masterGame.name} (${this.steamIntegrationService.formatPlaytime(steamGame.playtime_forever)}) -> ${playtimeCategory.category} (${learningFactor.toFixed(3)})`);
-      }
+      // Debug logging for all games
+      const isNegative = steamGame.playtime_forever <= bottom10PercentThreshold;
+      const percentileType = isNegative ? 'bottom 10%' : 'top 90%';
+      console.log(`  🎮 Steam: ${masterGame.name} (${this.steamIntegrationService.formatPlaytime(steamGame.playtime_forever)}) -> ${percentileType} (${preferenceStrength.toFixed(3)})`);
     });
+    
+    // Calculate current magnitude of accumulated Steam weights
+    const currentMagnitude = Math.sqrt(steamWeights.reduce((sum, w) => sum + w * w, 0));
+    
+    if (currentMagnitude === 0) {
+      console.log('🎮 No Steam preferences to apply (zero magnitude)');
+      return;
+    }
+    
+    // Calculate target magnitude (equivalent to N votes worth of learning)
+    const votingLearningRate = this.learningRate; // 0.1
+    const targetMagnitude = STEAM_EQUIVALENT_VOTES * votingLearningRate; // 15 * 0.1 = 1.5
+    
+    // Normalize Steam weights to target magnitude
+    const normalizer = targetMagnitude / currentMagnitude;
+    
+    console.log(`🎮 Steam normalization: current magnitude ${currentMagnitude.toFixed(3)}, target ${targetMagnitude.toFixed(3)}, normalizer ${normalizer.toFixed(4)}`);
+    
+    // Apply normalized Steam weights to actual weight vector
+    for (let i = 0; i < steamWeights.length; i++) {
+      this.weightVector[i] += steamWeights[i] * normalizer;
+    }
 
     // Update preference summary to show Steam-derived preferences
     this.updatePreferenceSummary();
@@ -751,9 +792,22 @@ export class PreferenceService {
     // Save to localStorage (Steam preferences persist like votes)
     this.saveToLocalStorage();
 
+    // Debug: Show actual weight values for comparison
+    const topWeights = Array.from(this.weightVector)
+      .map((weight, index) => ({ weight, tag: this.tagDict!.indexToTag[index] }))
+      .filter(w => Math.abs(w.weight) > 0.01)
+      .sort((a, b) => Math.abs(b.weight) - Math.abs(a.weight))
+      .slice(0, 10);
+    
     console.log('🎮 PreferenceService: Steam weight vector population complete:');
     console.log(`  - Games processed: ${steamVotesApplied}`);
     console.log(`  - Tags weighted: ${steamTagsWeighted}`);
+    console.log(`  - Equivalent to ${STEAM_EQUIVALENT_VOTES} votes worth of influence`);
+    console.log(`  - Total magnitude: ${currentMagnitude.toFixed(3)} -> ${targetMagnitude.toFixed(3)} (${normalizer.toFixed(4)}x)`);
+    console.log('  - Top 10 tag weights after Steam:');
+    topWeights.forEach(w => {
+      console.log(`    ${w.tag}: ${w.weight.toFixed(4)}`);
+    });
     console.log('  - Preference summary updated with Steam-derived tag preferences');
     
     // Log top preferences for debugging
