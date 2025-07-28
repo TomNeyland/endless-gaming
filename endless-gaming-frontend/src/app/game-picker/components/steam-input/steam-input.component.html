@@ -1,0 +1,164 @@
+<div class="steam-input-container">
+  <!-- Steam Input Section -->
+  @if (!hasSteamData()) {
+    <div class="steam-input-section">
+      <div class="steam-header">
+        <div class="steam-icon-title">
+          <mat-icon class="steam-icon">sports_esports</mat-icon>
+          <h3 class="steam-title">Connect Steam Library</h3>
+        </div>
+        <p class="steam-description">
+          Connect your Steam account to get personalized recommendations based on your gaming history and preferences.
+        </p>
+      </div>
+
+      <div class="steam-input-form">
+        <mat-form-field appearance="outline" class="steam-id-field">
+          <mat-label>Steam ID or Custom URL</mat-label>
+          <input 
+            matInput 
+            [value]="steamId()"
+            (input)="onSteamIdChange($event.target.value)"
+            (keydown.enter)="onEnterPressed()"
+            placeholder="e.g., 76561198000000000 or mycustomurl"
+            [disabled]="isLoading()">
+          <mat-icon matSuffix>person</mat-icon>
+          <mat-hint>Enter your Steam64 ID or custom profile URL</mat-hint>
+          @if (hasError()) {
+            <mat-error>{{ getStateMessage() }}</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="steam-actions">
+          <button 
+            mat-raised-button 
+            color="primary"
+            (click)="fetchSteamData()"
+            [disabled]="!steamId() || isLoading()"
+            class="fetch-button">
+            @if (isLoading()) {
+              <mat-spinner diameter="20" strokeWidth="3"></mat-spinner>
+              <span>{{ getStateMessage() }}</span>
+            } @else {
+              <ng-container>
+                <mat-icon>download</mat-icon>
+                <span>Load Steam Library</span>
+              </ng-container>
+            }
+          </button>
+        </div>
+      </div>
+
+      <!-- Help Section -->
+      <div class="steam-help">
+        <details class="help-details">
+          <summary>How to find your Steam ID</summary>
+          <div class="help-content">
+            <h4>Option 1: Steam64 ID</h4>
+            <ol>
+              <li>Go to your Steam profile</li>
+              <li>Right-click and "Copy page URL"</li>
+              <li>Look for the 17-digit number in the URL</li>
+              <li>Example: <code>76561198000000000</code></li>
+            </ol>
+            
+            <h4>Option 2: Custom URL</h4>
+            <ol>
+              <li>Go to your Steam profile</li>
+              <li>If you have a custom URL, use the part after "/id/"</li>
+              <li>Example: If your profile is <code>steamcommunity.com/id/mycustomurl</code></li>
+              <li>Enter: <code>mycustomurl</code></li>
+            </ol>
+            
+            <p class="privacy-note">
+              <mat-icon>info</mat-icon>
+              <strong>Privacy:</strong> Your Steam profile must be public for this to work. 
+              No data is stored on our servers.
+            </p>
+          </div>
+        </details>
+      </div>
+    </div>
+  } @else {
+    <!-- Steam Data Loaded Section -->
+    <div class="steam-loaded-section">
+      <div class="steam-status-header">
+        <div class="status-info">
+          <mat-icon class="steam-connected-icon">check_circle</mat-icon>
+          <div class="status-text">
+            <h3 class="connected-title">Steam Library Connected</h3>
+            <p class="connected-subtitle">{{ getStateMessage() }}</p>
+          </div>
+        </div>
+        
+        <div class="steam-actions-loaded">
+          <button 
+            mat-icon-button 
+            (click)="refreshSteamData()"
+            [disabled]="isLoading()"
+            matTooltip="Refresh Steam data"
+            class="refresh-button">
+            <mat-icon>refresh</mat-icon>
+          </button>
+          
+          <button 
+            mat-icon-button 
+            (click)="clearSteamData()"
+            matTooltip="Disconnect Steam library"
+            class="disconnect-button">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Library Statistics -->
+      @let stats = getLibraryStats();
+      @if (stats) {
+        <div class="library-stats">
+          <div class="stat-card">
+            <div class="stat-value">{{ stats.totalGames }}</div>
+            <div class="stat-label">Total Games</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-value">{{ stats.recentlyPlayed }}</div>
+            <div class="stat-label">Recently Played</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-value">{{ stats.neverPlayed }}</div>
+            <div class="stat-label">Never Played</div>
+          </div>
+        </div>
+      }
+
+      <!-- Top Played Games -->
+      @let topGames = getTopPlayedGames(3);
+      @if (topGames.length > 0) {
+        <div class="top-games">
+          <h4 class="top-games-title">
+            <mat-icon>trending_up</mat-icon>
+            Your Most Played Games
+          </h4>
+          <div class="top-games-list">
+            @for (game of topGames; track game.name) {
+              <div class="top-game-item">
+                <span class="game-name">{{ game.name }}</span>
+                <span class="game-playtime">{{ game.playtime }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Enhancement Notice -->
+      <div class="enhancement-notice">
+        <mat-icon>auto_awesome</mat-icon>
+        <div class="notice-text">
+          <strong>Recommendations Enhanced!</strong>
+          <p>Game suggestions are now personalized based on your Steam library and playtime patterns.</p>
+        </div>
+      </div>
+    </div>
+  }
+</div>
