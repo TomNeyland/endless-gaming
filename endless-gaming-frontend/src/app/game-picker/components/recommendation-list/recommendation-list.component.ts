@@ -1,4 +1,4 @@
-import { Component, Input, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, Input, inject, OnInit, OnDestroy, OnChanges, SimpleChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -43,7 +43,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './recommendation-list.component.html',
   styleUrl: './recommendation-list.component.scss'
 })
-export class RecommendationListComponent implements OnInit, OnDestroy {
+export class RecommendationListComponent implements OnInit, OnDestroy, OnChanges {
   private preferenceService = inject(PreferenceService);
   private pairService = inject(PairService);
   private animationService = inject(AnimationService);
@@ -87,6 +87,22 @@ export class RecommendationListComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.votingDrawerService.openDrawer();
     }, 500); // Small delay for better UX
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Refresh recommendations when Steam data or features change
+    if (changes['steamPlayerData'] || changes['enableSteamFeatures'] || changes['games']) {
+      console.log('🎮 RecommendationList: Input changed, refreshing recommendations', {
+        steamPlayerData: !!changes['steamPlayerData'],
+        enableSteamFeatures: !!changes['enableSteamFeatures'],
+        games: !!changes['games']
+      });
+      
+      // Use setTimeout to ensure change detection cycle is complete
+      setTimeout(() => {
+        this.generateRecommendations();
+      }, 0);
+    }
   }
 
   ngOnDestroy(): void {

@@ -51,6 +51,12 @@
         <div class="sidebar">
           <app-progress-bar></app-progress-bar>
           <app-preference-summary [tagRarityAnalysis]="getTagRarityAnalysis()"></app-preference-summary>
+          
+          <!-- Steam Integration -->
+          <app-steam-input
+            (steamDataLoaded)="onSteamDataLoaded($event)"
+            (steamDataCleared)="onSteamDataCleared()">
+          </app-steam-input>
         </div>
 
         <!-- Main Game Comparison -->

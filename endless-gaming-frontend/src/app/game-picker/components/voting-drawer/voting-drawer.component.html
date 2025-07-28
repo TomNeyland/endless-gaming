@@ -38,8 +38,8 @@
         <!-- Voting Tab -->
         <mat-tab>
           <ng-template mat-tab-label>
-            <mat-icon>compare</mat-icon>
-            <span class="tab-label">Compare</span>
+            <mat-icon>how_to_vote</mat-icon>
+            <span class="tab-label">Vote</span>
           </ng-template>
           <div class="tab-content voting-tab-content">
             @if (hasValidPair()) {
@@ -219,20 +219,152 @@
             <span class="tab-label">Filters</span>
           </ng-template>
           <div class="tab-content filters-tab-content">
-            <!-- Steam Integration Section -->
-            <div class="steam-integration-section">
-              <app-steam-input
-                (steamDataLoaded)="onSteamDataLoaded($event)"
-                (steamDataCleared)="onSteamDataCleared()">
-              </app-steam-input>
-            </div>
-            
             <!-- Filter Panel -->
             <app-filter-panel 
               [games]="games"
               [steamPlayerData]="steamPlayerData"
               [enableSteamFeatures]="enableSteamFeatures">
             </app-filter-panel>
+          </div>
+        </mat-tab>
+
+        <!-- Steam Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>videogame_asset</mat-icon>
+            <span class="tab-label">Steam</span>
+          </ng-template>
+          <div class="tab-content steam-tab-content">
+            <!-- Steam Input Section -->
+            <div class="steam-input-section">
+              <app-steam-input
+                (steamDataLoaded)="onSteamDataLoaded($event)"
+                (steamDataCleared)="onSteamDataCleared()">
+              </app-steam-input>
+            </div>
+            
+            <!-- Steam Owned/Unowned Toggles (when data is loaded) -->
+            @if (hasSteamData()) {
+              <div class="steam-toggles-section">
+                <mat-card appearance="outlined" class="owned-toggles-card">
+                  <mat-card-content>
+                    <h4 class="toggles-title">
+                      <mat-icon>visibility</mat-icon>
+                      Show Games
+                    </h4>
+                    <div class="toggles-grid">
+                      <div class="toggle-item">
+                        <mat-slide-toggle
+                          [checked]="getShowOwnedOnly()"
+                          (change)="onShowOwnedOnlyChange($event.checked)"
+                          color="accent"
+                          class="owned-toggle">
+                          <span class="toggle-label">
+                            <mat-icon class="toggle-icon owned-icon">check_circle</mat-icon>
+                            Owned Games Only
+                          </span>
+                        </mat-slide-toggle>
+                      </div>
+                      
+                      <div class="toggle-item">
+                        <mat-slide-toggle
+                          [checked]="getHideOwnedGames()"
+                          (change)="onHideOwnedGamesChange($event.checked)"
+                          color="accent"
+                          class="unowned-toggle">
+                          <span class="toggle-label">
+                            <mat-icon class="toggle-icon unowned-icon">add_shopping_cart</mat-icon>
+                            Hide Owned Games
+                          </span>
+                        </mat-slide-toggle>
+                      </div>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+
+              <!-- Steam Data Display (when data is loaded) -->
+              <div class="steam-data-section">
+                <mat-card appearance="outlined" class="steam-info-card">
+                  <mat-card-header>
+                    <mat-icon mat-card-avatar class="steam-avatar-icon">auto_awesome</mat-icon>
+                    <mat-card-title>Steam Library Loaded</mat-card-title>
+                    <mat-card-subtitle>{{ getSteamLibraryStats() }}</mat-card-subtitle>
+                  </mat-card-header>
+                  
+                  <mat-card-content>
+                    <div class="steam-stats">
+                      <div class="stat-item">
+                        <mat-icon class="stat-icon">videogame_asset</mat-icon>
+                        <span class="stat-label">Total Games:</span>
+                        <span class="stat-value">{{ steamPlayerData?.game_count || 0 }}</span>
+                      </div>
+                      
+                      @if (getRecentlyPlayedCount() > 0) {
+                        <div class="stat-item">
+                          <mat-icon class="stat-icon">schedule</mat-icon>
+                          <span class="stat-label">Recently Played:</span>
+                          <span class="stat-value">{{ getRecentlyPlayedCount() }}</span>
+                        </div>
+                      }
+                      
+                      @if (getTopPlayedGames().length > 0) {
+                        <div class="top-games-section">
+                          <h4 class="section-title">
+                            <mat-icon>trending_up</mat-icon>
+                            Most Played Games
+                          </h4>
+                          <div class="top-games-list">
+                            @for (game of getTopPlayedGames(); track game.name) {
+                              <div class="top-game-item">
+                                <span class="game-name">{{ game.name }}</span>
+                                <span class="game-playtime">{{ game.playtime }}</span>
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </mat-card-content>
+                  
+                  <mat-card-actions>
+                    <button 
+                      mat-button 
+                      color="primary"
+                      (click)="refreshSteamData()">
+                      <mat-icon>refresh</mat-icon>
+                      Refresh Library
+                    </button>
+                    <button 
+                      mat-button 
+                      color="warn"
+                      (click)="clearSteamData()">
+                      <mat-icon>clear</mat-icon>
+                      Clear Data
+                    </button>
+                  </mat-card-actions>
+                </mat-card>
+              </div>
+            }
+            
+            <!-- Steam Help Section -->
+            <div class="steam-help-section">
+              <mat-card appearance="outlined" class="help-card">
+                <mat-card-content>
+                  <h4 class="help-title">
+                    <mat-icon>help_outline</mat-icon>
+                    How Steam Integration Works
+                  </h4>
+                  <ul class="help-list">
+                    <li>Enter your Steam ID or profile URL above</li>
+                    <li>We analyze your library and playtime patterns</li>
+                    <li>Recommendations are enhanced based on games you love</li>
+                    <li>Games you own get special badges and insights</li>
+                    <li>Use filters to show only owned/unowned games</li>
+                  </ul>
+                </mat-card-content>
+              </mat-card>
+            </div>
           </div>
         </mat-tab>
 

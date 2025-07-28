@@ -275,7 +275,15 @@ export class PreferenceService {
     steamData: SteamPlayerLookupResponse,
     allGames?: GameRecord[]
   ): GameRecommendation[] {
+    console.log('🎮 PreferenceService: rankGamesWithSteamData called with:', {
+      gamesCount: games.length,
+      steamGamesCount: steamData.game_count,
+      allGamesCount: allGames?.length || 0,
+      hasTagDict: !!this.tagDict
+    });
+    
     if (!this.tagDict) {
+      console.log('🎮 PreferenceService: No tag dictionary, returning default scores');
       return games.map((game, index) => ({
         game,
         score: 0,
@@ -286,15 +294,26 @@ export class PreferenceService {
     // Generate Steam preference profile if we have the full game catalog
     let steamProfile: SteamPreferenceProfile | undefined;
     if (allGames && allGames.length > 0) {
+      console.log('🎮 PreferenceService: Generating Steam preference profile...');
       steamProfile = this.steamIntegrationService.generatePreferenceProfile(steamData, allGames);
+    } else {
+      console.log('🎮 PreferenceService: No full game catalog provided, Steam enhancement limited');
     }
 
     // Calculate base recommendations
+    console.log('🎮 PreferenceService: Calculating base preference scores...');
     const baseRecommendations = games.map(game => ({
       game,
       score: this.calculateGameScore(game),
       rank: 0 // Will be set after sorting
     }));
+
+    const baseScoreStats = {
+      min: Math.min(...baseRecommendations.map(r => r.score)),
+      max: Math.max(...baseRecommendations.map(r => r.score)),
+      avg: baseRecommendations.reduce((sum, r) => sum + r.score, 0) / baseRecommendations.length
+    };
+    console.log('🎮 PreferenceService: Base score stats:', baseScoreStats);
 
     // Apply Steam enhancements if profile is available
     const enhancedRecommendations = steamProfile 
@@ -308,6 +327,10 @@ export class PreferenceService {
     enhancedRecommendations.forEach((rec, index) => {
       rec.rank = index + 1;
     });
+
+    console.log('🎮 PreferenceService: Steam-enhanced ranking complete. Top 5 games:', 
+      enhancedRecommendations.slice(0, 5).map(r => `${r.game.name}: ${r.score.toFixed(3)}`)
+    );
 
     return enhancedRecommendations;
   }

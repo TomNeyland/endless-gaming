@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -18,6 +18,7 @@ import { ProgressBarComponent } from '../progress-bar/progress-bar.component';
 import { PreferenceSummaryComponent } from '../preference-summary/preference-summary.component';
 import { RecommendationListComponent } from '../recommendation-list/recommendation-list.component';
 import { VotingDrawerComponent } from '../voting-drawer/voting-drawer.component';
+import { SteamInputComponent } from '../steam-input/steam-input.component';
 
 /**
  * Main container component for the game picker feature.
@@ -39,7 +40,8 @@ import { VotingDrawerComponent } from '../voting-drawer/voting-drawer.component'
     ProgressBarComponent,
     PreferenceSummaryComponent,
     RecommendationListComponent,
-    VotingDrawerComponent
+    VotingDrawerComponent,
+    SteamInputComponent
   ],
   templateUrl: './game-picker-page.component.html',
   styleUrl: './game-picker-page.component.scss'
@@ -47,12 +49,14 @@ import { VotingDrawerComponent } from '../voting-drawer/voting-drawer.component'
 export class GamePickerPageComponent implements OnInit {
   private gameDataService = inject(GameDataService);
   private vectorService = inject(VectorService);
-  private preferenceService = inject(PreferenceService);
+  public preferenceService = inject(PreferenceService); // Public for template access
   private pairService = inject(PairService);
   private votingDrawerService = inject(VotingDrawerService);
   private gameFilterService = inject(GameFilterService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  
+  @ViewChild(SteamInputComponent) steamInputComponent?: SteamInputComponent;
   
   public readonly state = signal<GamePickerState>('loading');
   public readonly isDrawerOpen = signal(false);
@@ -148,30 +152,36 @@ export class GamePickerPageComponent implements OnInit {
   }
 
   /**
-   * Handle auto-navigation based on votes and current route.
+   * Handle auto-navigation based on votes, Steam data, and current route.
    */
   private handleAutoNavigation(): void {
     const currentUrl = this.router.url;
     const comparisonCount = this.preferenceService.getComparisonCount();
     const hasMinimumVotes = this.preferenceService.hasMinimumVotes(5);
+    const hasSteamFeatures = this.hasSteamFeatures();
+    const canShowRecommendations = hasMinimumVotes || hasSteamFeatures;
     
     console.log('🎮 GamePickerPage: Auto-navigation check:');
     console.log('  - Current URL:', currentUrl);
     console.log('  - Comparison count:', comparisonCount);
     console.log('  - Has minimum votes (5+):', hasMinimumVotes);
+    console.log('  - Has Steam features:', hasSteamFeatures);
+    console.log('  - Can show recommendations:', canShowRecommendations);
     
-    if (currentUrl === '/game-picker' && hasMinimumVotes) {
-      // User accessed /game-picker but has enough votes, redirect to recommendations
-      console.log('🎮 GamePickerPage: Auto-navigating to recommendations due to existing votes');
+    if (currentUrl === '/game-picker' && canShowRecommendations) {
+      // User accessed /game-picker but has enough votes OR Steam data, redirect to recommendations
+      const reason = hasMinimumVotes ? 'existing votes' : 'Steam data';
+      console.log(`🎮 GamePickerPage: Auto-navigating to recommendations due to ${reason}`);
       this.router.navigate(['/recommendations']);
       this.state.set('recommendations');
-    } else if (currentUrl === '/recommendations' && hasMinimumVotes) {
-      // User accessed /recommendations directly and has votes, show recommendations
-      console.log('🎮 GamePickerPage: Showing recommendations from direct navigation');
+    } else if (currentUrl === '/recommendations' && canShowRecommendations) {
+      // User accessed /recommendations directly and has votes OR Steam data, show recommendations
+      const source = hasMinimumVotes ? 'vote-based' : 'Steam-based';
+      console.log(`🎮 GamePickerPage: Showing ${source} recommendations from direct navigation`);
       this.state.set('recommendations');
-    } else if (currentUrl === '/recommendations' && !hasMinimumVotes) {
-      // User accessed /recommendations but doesn't have enough votes, redirect to picker
-      console.log('🎮 GamePickerPage: Redirecting to game picker - insufficient votes');
+    } else if (currentUrl === '/recommendations' && !canShowRecommendations) {
+      // User accessed /recommendations but doesn't have enough data, redirect to picker
+      console.log('🎮 GamePickerPage: Redirecting to game picker - insufficient data (no votes or Steam)');
       this.router.navigate(['/game-picker']);
       this.state.set('comparing');
     } else {
@@ -206,8 +216,19 @@ export class GamePickerPageComponent implements OnInit {
     // Close voting drawer if open
     this.votingDrawerService.closeDrawer();
     
-    // Clear localStorage
+    // Clear localStorage (preferences and Steam data) FIRST
     localStorage.removeItem('endless-gaming-preferences');
+    localStorage.removeItem('endless-gaming-steam-data');
+    
+    // Reset Steam state immediately to prevent auto-navigation
+    this.steamPlayerData.set(null);
+    this.enableSteamFeatures.set(false);
+    this.gameFilterService.setSteamDataAvailable(false);
+    
+    // Clear Steam data via component UI (but localStorage is already cleared)
+    if (this.steamInputComponent) {
+      this.steamInputComponent.clearPersistedSteamData();
+    }
     
     // Reset all services to their default states
     this.pairService.resetProgress();
@@ -216,9 +237,13 @@ export class GamePickerPageComponent implements OnInit {
     
     console.log('🔄 All services reset to defaults');
     
-    // Navigate back to game picker
-    this.router.navigate(['/game-picker']);
+    // Use a more forceful navigation approach
     this.state.set('comparing');
+    
+    // Navigate with a small delay to ensure all state is cleared
+    setTimeout(() => {
+      this.router.navigate(['/game-picker'], { replaceUrl: true });
+    }, 0);
   }
 
   /**
@@ -250,11 +275,22 @@ export class GamePickerPageComponent implements OnInit {
    */
   onSteamDataLoaded(steamData: SteamPlayerLookupResponse): void {
     console.log('🎮 Steam data loaded:', steamData.game_count, 'games');
-    this.steamPlayerData.set(steamData);
-    this.enableSteamFeatures.set(true);
     
-    // Notify filter service that Steam data is available
-    this.gameFilterService.setSteamDataAvailable(true);
+    // Only proceed if we're not in a reset state and data is valid
+    if (steamData && steamData.game_count > 0) {
+      this.steamPlayerData.set(steamData);
+      this.enableSteamFeatures.set(true);
+      
+      // Notify filter service that Steam data is available
+      this.gameFilterService.setSteamDataAvailable(true);
+      
+      // Auto-navigate to recommendations immediately (only if we're currently on game picker)
+      if (this.state() === 'comparing') {
+        console.log('🚀 Auto-navigating to Steam recommendations');
+        this.router.navigate(['/recommendations']);
+        this.state.set('recommendations');
+      }
+    }
   }
 
   /**

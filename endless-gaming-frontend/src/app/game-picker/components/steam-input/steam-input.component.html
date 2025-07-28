@@ -79,8 +79,9 @@
         </details>
       </div>
     </div>
-  } @else {
-    <!-- Steam Data Loaded Section -->
+  } 
+  <!--@else {
+    Steam Data Loaded Section - COMMENTED OUT: Redundant with Steam tab display
     <div class="steam-loaded-section">
       <div class="steam-status-header">
         <div class="status-info">
@@ -111,7 +112,7 @@
         </div>
       </div>
 
-      <!-- Library Statistics -->
+      Library Statistics
       @let stats = getLibraryStats();
       @if (stats) {
         <div class="library-stats">
@@ -132,7 +133,7 @@
         </div>
       }
 
-      <!-- Top Played Games -->
+      Top Played Games
       @let topGames = getTopPlayedGames(3);
       @if (topGames.length > 0) {
         <div class="top-games">
@@ -151,7 +152,7 @@
         </div>
       }
 
-      <!-- Enhancement Notice -->
+      Enhancement Notice
       <div class="enhancement-notice">
         <mat-icon>auto_awesome</mat-icon>
         <div class="notice-text">
@@ -160,5 +161,5 @@
         </div>
       </div>
     </div>
-  }
+  -->
 </div>

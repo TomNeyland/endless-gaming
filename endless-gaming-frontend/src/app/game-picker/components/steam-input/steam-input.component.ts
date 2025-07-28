@@ -42,6 +42,8 @@ interface SteamInputState {
 export class SteamInputComponent {
   private steamPlayerService = inject(SteamPlayerService);
   private snackBar = inject(MatSnackBar);
+  private readonly STORAGE_KEY = 'endless-gaming-steam-data';
+  private isClearing = false; // Flag to prevent emission during clearing
 
   @Output() steamDataLoaded = new EventEmitter<SteamPlayerLookupResponse>();
   @Output() steamDataCleared = new EventEmitter<void>();
@@ -49,6 +51,11 @@ export class SteamInputComponent {
   public readonly steamId = signal<string>('');
   public readonly state = signal<SteamInputState>({ type: 'idle' });
   public readonly steamData = signal<SteamPlayerLookupResponse | null>(null);
+
+  constructor() {
+    // Load persisted Steam data on component initialization
+    this.loadPersistedData();
+  }
 
   /**
    * Fetch Steam library data for the entered Steam ID.
@@ -78,6 +85,10 @@ export class SteamInputComponent {
             type: 'success', 
             message: `Loaded ${data.game_count} games from Steam library` 
           });
+          
+          // Persist to localStorage
+          this.persistSteamData(extractedId, data);
+          
           this.steamDataLoaded.emit(data);
           
           this.snackBar.open(
@@ -101,12 +112,20 @@ export class SteamInputComponent {
    * Clear Steam data and reset component.
    */
   clearSteamData(): void {
+    this.isClearing = true;
+    
     this.steamData.set(null);
     this.steamId.set('');
     this.state.set({ type: 'idle' });
+    
+    // Clear from localStorage
+    this.clearPersistedData();
+    
     this.steamDataCleared.emit();
     
     this.snackBar.open('Steam data cleared', 'Close', { duration: 3000 });
+    
+    this.isClearing = false;
   }
 
   /**
@@ -273,5 +292,84 @@ export class SteamInputComponent {
    */
   getStateMessage(): string {
     return this.state().message || '';
+  }
+
+  /**
+   * Load persisted Steam data from localStorage.
+   */
+  private loadPersistedData(): void {
+    // Don't load if we're in the middle of clearing
+    if (this.isClearing) {
+      return;
+    }
+    
+    try {
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      if (stored && !this.isClearing) {
+        const persistedData = JSON.parse(stored);
+        console.log('🔄 Loading persisted Steam data:', persistedData.steamId);
+        
+        this.steamId.set(persistedData.steamId);
+        this.steamData.set(persistedData.steamData);
+        this.state.set({ 
+          type: 'success', 
+          message: `Loaded ${persistedData.steamData.game_count} games from Steam library` 
+        });
+        
+        // Emit the loaded data to parent component (but not if clearing)
+        setTimeout(() => {
+          if (!this.isClearing) {
+            this.steamDataLoaded.emit(persistedData.steamData);
+          }
+        }, 0);
+      }
+    } catch (error) {
+      console.warn('Failed to load persisted Steam data:', error);
+      this.clearPersistedData();
+    }
+  }
+
+  /**
+   * Persist Steam data to localStorage.
+   */
+  private persistSteamData(steamId: string, steamData: SteamPlayerLookupResponse): void {
+    try {
+      const dataToStore = {
+        steamId,
+        steamData,
+        timestamp: Date.now()
+      };
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(dataToStore));
+      console.log('💾 Steam data persisted to localStorage');
+    } catch (error) {
+      console.warn('Failed to persist Steam data:', error);
+    }
+  }
+
+  /**
+   * Clear persisted Steam data from localStorage.
+   */
+  private clearPersistedData(): void {
+    try {
+      localStorage.removeItem(this.STORAGE_KEY);
+      console.log('🗑️ Steam data cleared from localStorage');
+    } catch (error) {
+      console.warn('Failed to clear persisted Steam data:', error);
+    }
+  }
+
+  /**
+   * Clear persisted data (called from parent on restart).
+   */
+  public clearPersistedSteamData(): void {
+    this.isClearing = true;
+    this.clearPersistedData();
+    
+    // Clear UI state but don't emit events during restart
+    this.steamData.set(null);
+    this.steamId.set('');
+    this.state.set({ type: 'idle' });
+    
+    this.isClearing = false;
   }
 }

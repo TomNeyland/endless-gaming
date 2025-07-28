@@ -8,6 +8,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { PreferenceSummaryComponent } from '../preference-summary/preference-summary.component';
 import { FilterPanelComponent } from '../filter-panel/filter-panel.component';
 import { SteamInputComponent } from '../steam-input/steam-input.component';
@@ -38,6 +39,7 @@ import { RadialTagMenuService } from '../../services/radial-tag-menu.service';
     MatProgressSpinnerModule,
     MatToolbarModule,
     MatTabsModule,
+    MatSlideToggleModule,
     PreferenceSummaryComponent,
     FilterPanelComponent,
     SteamInputComponent
@@ -375,5 +377,130 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
     const tags = this.getGameTags(game).join(', ');
     const price = this.getGamePrice(game);
     return tags ? `${tags} • ${price}` : price;
+  }
+
+  // Steam Tab Methods
+
+  /**
+   * Check if Steam data is available.
+   */
+  hasSteamData(): boolean {
+    return this.enableSteamFeatures && !!this.steamPlayerData;
+  }
+
+  /**
+   * Get Steam library statistics summary.
+   */
+  getSteamLibraryStats(): string {
+    const data = this.steamPlayerData;
+    if (!data) return '';
+    
+    const recentCount = this.getRecentlyPlayedCount();
+    if (recentCount > 0) {
+      return `${data.game_count} games • ${recentCount} recently played`;
+    }
+    
+    return `${data.game_count} games in library`;
+  }
+
+  /**
+   * Get count of recently played games.
+   */
+  getRecentlyPlayedCount(): number {
+    const data = this.steamPlayerData;
+    if (!data) return 0;
+    
+    return data.games.filter(game => 
+      game.playtime_2weeks && game.playtime_2weeks > 0
+    ).length;
+  }
+
+  /**
+   * Get top played games for display.
+   */
+  getTopPlayedGames(): Array<{ name: string; playtime: string }> {
+    const data = this.steamPlayerData;
+    if (!data) return [];
+
+    return data.games
+      .sort((a, b) => b.playtime_forever - a.playtime_forever)
+      .slice(0, 3)
+      .map(game => ({
+        name: game.name,
+        playtime: this.formatPlaytime(game.playtime_forever)
+      }));
+  }
+
+  /**
+   * Format playtime for display.
+   */
+  private formatPlaytime(playtimeMinutes: number): string {
+    if (playtimeMinutes === 0) return 'Never played';
+    
+    const hours = Math.floor(playtimeMinutes / 60);
+    if (hours === 0) {
+      return `${playtimeMinutes}m`;
+    } else if (hours < 10) {
+      const minutes = playtimeMinutes % 60;
+      return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+    } else {
+      return `${hours}h`;
+    }
+  }
+
+  /**
+   * Refresh Steam data.
+   */
+  refreshSteamData(): void {
+    // This will be handled by the Steam input component
+    // We could add a method to trigger refresh if needed
+    console.log('🔄 Steam data refresh requested');
+  }
+
+  /**
+   * Clear Steam data.
+   */
+  clearSteamData(): void {
+    this.steamDataCleared.emit();
+  }
+
+  // Steam Filter Toggle Methods
+
+  /**
+   * Get current show owned only state.
+   */
+  getShowOwnedOnly(): boolean {
+    return this.gameFilterService.filters().showOwnedOnly;
+  }
+
+  /**
+   * Get current hide owned games state.
+   */
+  getHideOwnedGames(): boolean {
+    return this.gameFilterService.filters().hideOwnedGames;
+  }
+
+  /**
+   * Toggle show owned only filter.
+   */
+  onShowOwnedOnlyChange(value: boolean): void {
+    const currentFilters = this.gameFilterService.filters();
+    this.gameFilterService.updateFilters({
+      ...currentFilters,
+      showOwnedOnly: value,
+      hideOwnedGames: value ? false : currentFilters.hideOwnedGames // Mutually exclusive
+    });
+  }
+
+  /**
+   * Toggle hide owned games filter.
+   */
+  onHideOwnedGamesChange(value: boolean): void {
+    const currentFilters = this.gameFilterService.filters();
+    this.gameFilterService.updateFilters({
+      ...currentFilters,
+      hideOwnedGames: value,
+      showOwnedOnly: value ? false : currentFilters.showOwnedOnly // Mutually exclusive
+    });
   }
 }

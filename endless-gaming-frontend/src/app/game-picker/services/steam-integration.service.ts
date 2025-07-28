@@ -43,8 +43,18 @@ export class SteamIntegrationService {
    * Analyzes playtime patterns to understand user preferences.
    */
   generatePreferenceProfile(steamData: SteamPlayerLookupResponse, masterGames: GameRecord[]): SteamPreferenceProfile {
+    console.log('🎮 SteamIntegration: Generating preference profile for', steamData.game_count, 'Steam games');
+    
     const playtimeInsights = this.analyzePlaytimePatterns(steamData.games);
     const preferenceMultipliers = this.calculateTagPreferences(playtimeInsights, masterGames);
+    
+    console.log('🎮 SteamIntegration: Generated preference multipliers for', preferenceMultipliers.size, 'tags');
+    console.log('🎮 SteamIntegration: Top preference multipliers:', 
+      Array.from(preferenceMultipliers.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([tag, mult]) => `${tag}: ${mult.toFixed(2)}x`)
+    );
     
     const totalPlaytime = steamData.games.reduce((sum, game) => sum + game.playtime_forever, 0);
     const averagePlaytime = steamData.games.length > 0 ? totalPlaytime / steamData.games.length : 0;
@@ -81,10 +91,37 @@ export class SteamIntegrationService {
     recommendations: GameRecommendation[],
     steamProfile: SteamPreferenceProfile
   ): GameRecommendation[] {
-    return recommendations.map(rec => ({
-      ...rec,
-      score: this.enhanceGameScore(rec.game, rec.score, steamProfile)
-    }));
+    console.log('🎮 SteamIntegration: Enhancing scores for', recommendations.length, 'games');
+    
+    const enhanced = recommendations.map(rec => {
+      const originalScore = rec.score;
+      const enhancedScore = this.enhanceGameScore(rec.game, rec.score, steamProfile);
+      const boost = enhancedScore - originalScore;
+      
+      return {
+        ...rec,
+        score: enhancedScore,
+        _steamBoost: boost // Debug info
+      };
+    });
+    
+    // Log some examples of score changes
+    const significantChanges = enhanced
+      .filter((rec: any) => Math.abs(rec._steamBoost) > 0.1)
+      .sort((a: any, b: any) => Math.abs(b._steamBoost) - Math.abs(a._steamBoost))
+      .slice(0, 5);
+      
+    if (significantChanges.length > 0) {
+      console.log('🎮 SteamIntegration: Top score changes:', 
+        significantChanges.map((rec: any) => 
+          `${rec.game.name}: ${rec._steamBoost > 0 ? '+' : ''}${rec._steamBoost.toFixed(2)}`
+        )
+      );
+    } else {
+      console.log('🎮 SteamIntegration: No significant score changes detected');
+    }
+    
+    return enhanced;
   }
 
   /**
