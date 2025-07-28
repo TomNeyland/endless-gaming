@@ -49,6 +49,9 @@ export interface GameFilters {
   recentlyPlayedOnly: boolean;   // Only show games played in last 2 weeks
   steamDataAvailable: boolean;   // Internal flag to track if Steam data is available
   
+  // Interaction tracking for UX hints
+  steamTogglesInteracted: boolean; // Whether user has interacted with Steam toggles
+  
   // Search
   searchText: string;
 }
@@ -111,11 +114,13 @@ const DEFAULT_FILTERS: GameFilters = {
   maxGameAge: null,
   // Steam filters
   showOwnedOnly: false,
-  hideOwnedGames: false,
+  hideOwnedGames: true, // Default to hiding owned games
   playtimeCategories: [],
   playtimeRange: { min: 0, max: 1000 },  // 0 to 1000 hours
   recentlyPlayedOnly: false,
   steamDataAvailable: false,
+  // Interaction tracking
+  steamTogglesInteracted: false,
   searchText: ''
 };
 
@@ -1074,5 +1079,20 @@ export class GameFilterService {
       recentlyPlayed: recentlyPlayed.length,
       neverPlayed: neverPlayed.length
     };
+  }
+
+  /**
+   * Mark Steam toggles as interacted to remove visual hints.
+   */
+  markSteamTogglesInteracted(): void {
+    this.updateFilters({ steamTogglesInteracted: true });
+  }
+
+  /**
+   * Check if Steam toggles should show interaction hints.
+   */
+  shouldShowSteamToggleHints(): boolean {
+    const filters = this.filters();
+    return filters.steamDataAvailable && !filters.steamTogglesInteracted;
   }
 }

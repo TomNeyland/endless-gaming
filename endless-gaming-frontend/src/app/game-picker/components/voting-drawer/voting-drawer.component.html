@@ -253,7 +253,7 @@
                       Show Games
                     </h4>
                     <div class="toggles-grid">
-                      <div class="toggle-item">
+                      <div class="toggle-item" [class.uninteracted-hint]="shouldShowSteamToggleHints()">
                         <mat-slide-toggle
                           [checked]="getShowOwnedOnly()"
                           (change)="onShowOwnedOnlyChange($event.checked)"
@@ -266,7 +266,7 @@
                         </mat-slide-toggle>
                       </div>
                       
-                      <div class="toggle-item">
+                      <div class="toggle-item" [class.uninteracted-hint]="shouldShowSteamToggleHints()">
                         <mat-slide-toggle
                           [checked]="getHideOwnedGames()"
                           (change)="onHideOwnedGamesChange($event.checked)"

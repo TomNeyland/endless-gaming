@@ -684,6 +684,109 @@ export class PreferenceService {
   }
 
   /**
+   * Populate weight vector from Steam playtime analysis.
+   * Converts Steam library analysis into preference weights that show up in preference summary.
+   * This makes Steam data work like "synthetic votes" based on playtime patterns.
+   */
+  populateWeightVectorFromSteam(steamData: SteamPlayerLookupResponse, allGames: GameRecord[]): void {
+    if (!this.tagDict || !steamData || !allGames) {
+      console.log('🎮 PreferenceService: Cannot populate Steam weights - missing requirements');
+      return;
+    }
+
+    console.log('🎮 PreferenceService: Populating weight vector from Steam data...');
+    console.log('  - Steam games:', steamData.game_count);
+    console.log('  - Available games:', allGames.length);
+    console.log('  - Tag dictionary size:', this.tagDict.size);
+
+    // Generate Steam preference profile for analysis
+    const steamProfile = this.steamIntegrationService.generatePreferenceProfile(steamData, allGames);
+    
+    // Steam learning parameters
+    const steamLearningRate = 0.05; // Moderate learning rate for Steam preferences
+    const minimumPlaytime = 30; // Minimum 30 minutes to be considered "played"
+    
+    let steamVotesApplied = 0;
+    let steamTagsWeighted = 0;
+
+    // Process each Steam game to build preferences
+    steamData.games.forEach(steamGame => {
+      // Only consider games with meaningful playtime
+      if (steamGame.playtime_forever < minimumPlaytime) {
+        return;
+      }
+
+      // Find the corresponding game in our dataset
+      const masterGame = allGames.find(g => g.appId === steamGame.appid);
+      if (!masterGame || !masterGame.tags) {
+        return;
+      }
+
+      // Calculate preference strength based on playtime
+      const playtimeCategory = this.steamIntegrationService.getPlaytimeCategory(steamGame.playtime_forever);
+      const preferenceStrength = playtimeCategory.multiplier; // 0.8 to 2.0
+
+      // Convert to learning factor (positive for games we played)
+      // Use normalized strength: (strength - 1.0) to get range from -0.2 to +1.0
+      const learningFactor = (preferenceStrength - 1.0) * steamLearningRate;
+
+      // Convert game to sparse vector and apply weight updates
+      const gameVec = this.vectorService.gameToSparseVector(masterGame, this.tagDict!);
+      
+      // Apply the weight update using the same mechanism as voting
+      this.updateWeightsFromVector(gameVec, learningFactor);
+      
+      steamVotesApplied++;
+      steamTagsWeighted += Object.keys(masterGame.tags).length;
+
+      // Debug logging for significant games
+      if (steamGame.playtime_forever > 60) { // More than 1 hour
+        console.log(`  🎮 Steam preference: ${masterGame.name} (${this.steamIntegrationService.formatPlaytime(steamGame.playtime_forever)}) -> ${playtimeCategory.category} (${learningFactor.toFixed(3)})`);
+      }
+    });
+
+    // Update preference summary to show Steam-derived preferences
+    this.updatePreferenceSummary();
+
+    // Save to localStorage (Steam preferences persist like votes)
+    this.saveToLocalStorage();
+
+    console.log('🎮 PreferenceService: Steam weight vector population complete:');
+    console.log(`  - Games processed: ${steamVotesApplied}`);
+    console.log(`  - Tags weighted: ${steamTagsWeighted}`);
+    console.log('  - Preference summary updated with Steam-derived tag preferences');
+    
+    // Log top preferences for debugging
+    this.logSteamPreferenceSummary();
+  }
+
+  /**
+   * Log Steam-derived preference summary for debugging.
+   */
+  private logSteamPreferenceSummary(): void {
+    const summary = this.preferenceSummary$.value;
+    console.log('🎮 Steam Preferences Summary:');
+    
+    if (summary.likedTags.length > 0) {
+      console.log('  👍 Liked tags (from Steam playtime):');
+      summary.likedTags.slice(0, 10).forEach(tag => {
+        console.log(`    - ${tag.tag}: ${tag.weight.toFixed(3)}`);
+      });
+    }
+    
+    if (summary.dislikedTags.length > 0) {
+      console.log('  👎 Disliked tags (from Steam playtime):');
+      summary.dislikedTags.slice(0, 5).forEach(tag => {
+        console.log(`    - ${tag.tag}: ${tag.weight.toFixed(3)}`);
+      });
+    }
+    
+    if (summary.likedTags.length === 0 && summary.dislikedTags.length === 0) {
+      console.log('  - No significant preferences detected from Steam data');
+    }
+  }
+
+  /**
    * Enable TF-IDF weighting by calculating tag rarity analysis for given games.
    * 
    * @param games Array of games to analyze for tag rarity

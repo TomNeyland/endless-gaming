@@ -60,6 +60,7 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
   @Input() tagRarityAnalysis?: TagRarityAnalysis | null = null;
   @Input() steamPlayerData?: SteamPlayerLookupResponse | null = null;
   @Input() enableSteamFeatures: boolean = false;
+  @Input() steamAutoFocus: boolean = false; // Auto-focus Steam tab when Steam data loaded
   
   // Tab management
   public readonly activeTabIndex = signal(0);
@@ -105,6 +106,12 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
     
     if (changes['games'] && changes['games'].currentValue) {
       this.initializeFilters();
+    }
+    
+    // Auto-focus Steam tab when Steam data loads and drawer is open
+    if (changes['steamAutoFocus'] && changes['steamAutoFocus'].currentValue === true && this.isOpen) {
+      console.log('🎮 VotingDrawer: Auto-focusing Steam tab');
+      this.activeTabIndex.set(2); // Steam tab is index 2 (Vote=0, Filters=1, Steam=2)
     }
   }
   
@@ -484,6 +491,9 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
    * Toggle show owned only filter.
    */
   onShowOwnedOnlyChange(value: boolean): void {
+    // Mark Steam toggles as interacted to remove hints
+    this.gameFilterService.markSteamTogglesInteracted();
+    
     const currentFilters = this.gameFilterService.filters();
     this.gameFilterService.updateFilters({
       ...currentFilters,
@@ -496,11 +506,21 @@ export class VotingDrawerComponent implements OnInit, OnChanges {
    * Toggle hide owned games filter.
    */
   onHideOwnedGamesChange(value: boolean): void {
+    // Mark Steam toggles as interacted to remove hints
+    this.gameFilterService.markSteamTogglesInteracted();
+    
     const currentFilters = this.gameFilterService.filters();
     this.gameFilterService.updateFilters({
       ...currentFilters,
       hideOwnedGames: value,
       showOwnedOnly: value ? false : currentFilters.showOwnedOnly // Mutually exclusive
     });
+  }
+
+  /**
+   * Check if Steam toggle hints should be shown.
+   */
+  shouldShowSteamToggleHints(): boolean {
+    return this.gameFilterService.shouldShowSteamToggleHints();
   }
 }

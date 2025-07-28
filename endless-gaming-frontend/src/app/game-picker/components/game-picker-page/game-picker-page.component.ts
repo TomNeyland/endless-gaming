@@ -66,6 +66,7 @@ export class GamePickerPageComponent implements OnInit {
   // Steam integration state
   public readonly steamPlayerData = signal<SteamPlayerLookupResponse | null>(null);
   public readonly enableSteamFeatures = signal<boolean>(false);
+  public readonly steamAutoFocus = signal<boolean>(false);
   
   ngOnInit(): void {
     this.startGamePicker();
@@ -223,6 +224,7 @@ export class GamePickerPageComponent implements OnInit {
     // Reset Steam state immediately to prevent auto-navigation
     this.steamPlayerData.set(null);
     this.enableSteamFeatures.set(false);
+    this.steamAutoFocus.set(false);
     this.gameFilterService.setSteamDataAvailable(false);
     
     // Clear Steam data via component UI (but localStorage is already cleared)
@@ -284,6 +286,25 @@ export class GamePickerPageComponent implements OnInit {
       // Notify filter service that Steam data is available
       this.gameFilterService.setSteamDataAvailable(true);
       
+      // NEW: Populate preference weights from Steam data
+      // This makes Steam playtime show up as tag preferences in the preference summary
+      if (this.games.length > 0) {
+        console.log('🎮 Populating preference weights from Steam playtime analysis...');
+        this.preferenceService.populateWeightVectorFromSteam(steamData, this.games);
+        console.log('🎮 Steam tag preferences populated - check preference summary!');
+      }
+      
+      // Set Steam auto-focus flag for drawer if it's open
+      if (this.isDrawerOpen()) {
+        console.log('🎮 Setting Steam auto-focus flag for voting drawer');
+        this.steamAutoFocus.set(true);
+        
+        // Reset the flag after a brief delay to allow the drawer to react
+        setTimeout(() => {
+          this.steamAutoFocus.set(false);
+        }, 100);
+      }
+      
       // Auto-navigate to recommendations immediately (only if we're currently on game picker)
       if (this.state() === 'comparing') {
         console.log('🚀 Auto-navigating to Steam recommendations');
@@ -301,8 +322,9 @@ export class GamePickerPageComponent implements OnInit {
     this.steamPlayerData.set(null);
     this.enableSteamFeatures.set(false);
     
-    // Notify filter service that Steam data is no longer available
+    // Notify filter service that Steam data is no longer available and reset interaction state
     this.gameFilterService.setSteamDataAvailable(false);
+    this.gameFilterService.updateFilters({ steamTogglesInteracted: false });
   }
 
   /**

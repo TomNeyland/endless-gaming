@@ -504,6 +504,26 @@
           gap: 12px;
 
           .toggle-item {
+            &.uninteracted-hint {
+              position: relative;
+              
+              // Subtle glow animation on uninteracted toggles
+              &::before {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                background: linear-gradient(45deg, 
+                  rgba(102, 126, 234, 0.3),
+                  rgba(102, 126, 234, 0.1),
+                  rgba(102, 126, 234, 0.3)
+                );
+                border-radius: 6px;
+                opacity: 0;
+                animation: hintGlow 3s ease-in-out infinite;
+                z-index: -1;
+              }
+            }
+            
             .toggle-label {
               display: flex;
               align-items: center;
@@ -709,5 +729,15 @@
         }
       }
     }
+  }
+}
+
+// Keyframe animation for uninteracted toggle hints
+@keyframes hintGlow {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.8;
   }
 }
