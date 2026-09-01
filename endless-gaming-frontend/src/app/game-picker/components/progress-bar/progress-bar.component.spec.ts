@@ -4,6 +4,8 @@ import { By } from '@angular/platform-browser';
 import { ProgressBarComponent } from './progress-bar.component';
 import { ProgressInfo } from '../../../types/game.types';
 import { PairService } from '../../services/pair.service';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('ProgressBarComponent', () => {
   let component: ProgressBarComponent;
@@ -38,6 +40,7 @@ describe('ProgressBarComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ProgressBarComponent],
       providers: [
+        provideHttpClient(), provideHttpClientTesting(),
         { provide: PairService, useValue: mockPairService }
       ],
       schemas: [NO_ERRORS_SCHEMA]
@@ -108,13 +111,15 @@ describe('ProgressBarComponent', () => {
     });
 
     it('should display progress bar elements', () => {
-      const progressBar = fixture.debugElement.query(By.css('.progress-bar'));
-      const progressTrack = fixture.debugElement.query(By.css('.progress-track'));
-      const progressFill = fixture.debugElement.query(By.css('.progress-fill'));
+      // Progress is now rendered via Angular Material's <mat-progress-bar>
+      // rather than hand-rolled .progress-bar/.progress-track/.progress-fill
+      // divs, so assert the Material element is present and correctly bound.
+      const progressBar = fixture.debugElement.query(By.css('mat-progress-bar'));
 
       expect(progressBar).toBeTruthy();
-      expect(progressTrack).toBeTruthy();
-      expect(progressFill).toBeTruthy();
+      expect(progressBar.componentInstance.mode).toBe('determinate');
+      expect(progressBar.componentInstance.value).toBe(component.getProgressPercentage());
+      expect(progressBar.nativeElement.classList.contains(component.getProgressClass())).toBe(true);
     });
 
     it('should display percentage when showPercentage is true', () => {
@@ -160,7 +165,7 @@ describe('ProgressBarComponent', () => {
 
     it('should implement getProgressText method', () => {
       component.progress = mockProgressMidway;
-      expect(component.getProgressText()).toBe('10 / 20 comparisons');
+      expect(component.getProgressText()).toBe('10 / 20 votes');
       
       component.progress = null;
       expect(component.getProgressText()).toBe('No progress data');

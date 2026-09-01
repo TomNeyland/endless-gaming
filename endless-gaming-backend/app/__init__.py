@@ -12,7 +12,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 from datetime import datetime
-from app.config import Config, config
+# Import the config mapping under a distinct name so that the `app.config`
+# submodule stays reachable as an attribute of this package instead of
+# being shadowed by the mapping.
+from app.config import Config, config as config_by_name
 
 # Initialize extensions
 cache = Cache()
@@ -37,7 +40,7 @@ def create_app(config_name=None):
     if config_name is None:
         config_name = os.environ.get('FLASK_ENV', 'default')
     
-    config_class = config.get(config_name, config['default'])
+    config_class = config_by_name.get(config_name, config_by_name['default'])
     
     app = Flask(__name__)
     app.config.from_object(config_class)

@@ -5,11 +5,13 @@ on:
     branches: [ main, master, develop ]
     paths: 
       - 'endless-gaming-frontend/**'
+      - '!endless-gaming-frontend/master.json'
       - '.github/workflows/frontend-ci.yml'
   pull_request:
     branches: [ main, master ]
     paths: 
       - 'endless-gaming-frontend/**'
+      - '!endless-gaming-frontend/master.json'
 
 env:
   NODE_VERSION: "22.x"

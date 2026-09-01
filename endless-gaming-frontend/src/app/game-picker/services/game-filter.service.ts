@@ -676,7 +676,7 @@ export class GameFilterService {
       filters.priceTiers.length > 0 ||
       filters.requiredTags.length > 0 ||
       filters.excludedTags.length > 0 ||
-      filters.minReviewScore > 0 ||
+      filters.minReviewScore !== DEFAULT_FILTERS.minReviewScore ||
       filters.minReviewCount > 0 ||
       filters.includedDevelopers.length > 0 ||
       filters.excludedPublishers.length > 0 ||
@@ -691,7 +691,7 @@ export class GameFilterService {
       filters.maxGameAge !== null ||
       // Steam filters
       filters.showOwnedOnly ||
-      filters.hideOwnedGames ||
+      filters.hideOwnedGames !== DEFAULT_FILTERS.hideOwnedGames ||
       filters.playtimeCategories.length > 0 ||
       filters.playtimeRange.min > DEFAULT_FILTERS.playtimeRange.min ||
       filters.playtimeRange.max < DEFAULT_FILTERS.playtimeRange.max ||
@@ -710,7 +710,7 @@ export class GameFilterService {
     if (filters.priceTiers.length > 0) count++;
     if (filters.requiredTags.length > 0) count++;
     if (filters.excludedTags.length > 0) count++;
-    if (filters.minReviewScore > 0) count++;
+    if (filters.minReviewScore !== DEFAULT_FILTERS.minReviewScore) count++;
     if (filters.minReviewCount > 0) count++;
     if (filters.includedDevelopers.length > 0) count++;
     if (filters.excludedPublishers.length > 0) count++;
@@ -730,7 +730,7 @@ export class GameFilterService {
     
     // Steam filters
     if (filters.showOwnedOnly) count++;
-    if (filters.hideOwnedGames) count++;
+    if (filters.hideOwnedGames !== DEFAULT_FILTERS.hideOwnedGames) count++;
     if (filters.playtimeCategories.length > 0) count++;
     if (filters.playtimeRange.min > DEFAULT_FILTERS.playtimeRange.min ||
         filters.playtimeRange.max < DEFAULT_FILTERS.playtimeRange.max) count++;

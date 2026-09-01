@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { VectorService } from './vector.service';
 import { GameRecord, TagDictionary, SparseVector } from '../../types/game.types';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('VectorService', () => {
   let service: VectorService;
@@ -45,7 +47,9 @@ describe('VectorService', () => {
   ];
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()]
+    });
     service = TestBed.inject(VectorService);
   });
 

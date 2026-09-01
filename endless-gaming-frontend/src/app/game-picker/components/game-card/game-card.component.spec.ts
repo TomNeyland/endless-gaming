@@ -3,6 +3,8 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { GameCardComponent } from './game-card.component';
 import { GameRecord } from '../../../types/game.types';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('GameCardComponent', () => {
   let component: GameCardComponent;
@@ -31,6 +33,7 @@ describe('GameCardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
       imports: [GameCardComponent],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
@@ -81,15 +84,19 @@ describe('GameCardComponent', () => {
     });
 
     it('should display game title', () => {
-      const titleElement = fixture.debugElement.query(By.css('.game-title'));
+      // Material migration: title is now rendered via <mat-card-title>
+      // rather than a custom ".game-title" class.
+      const titleElement = fixture.debugElement.query(By.css('mat-card-title'));
       expect(titleElement).toBeTruthy();
       expect(titleElement.nativeElement.textContent).toBe('Counter-Strike: Global Offensive');
     });
 
     it('should display game price', () => {
-      const priceElement = fixture.debugElement.query(By.css('.price'));
+      // Material migration: price now lives in a <mat-card-subtitle class="price-tag">
+      // alongside a mat-icon, so the text also contains the icon ligature.
+      const priceElement = fixture.debugElement.query(By.css('.price-tag'));
       expect(priceElement).toBeTruthy();
-      expect(priceElement.nativeElement.textContent.trim()).toBe('Free');
+      expect(priceElement.nativeElement.textContent.trim()).toContain('Free');
     });
 
     it('should display developer information', () => {
@@ -109,15 +116,20 @@ describe('GameCardComponent', () => {
     });
 
     it('should display tag chips', () => {
-      const tagChips = fixture.debugElement.queryAll(By.css('.tag'));
+      // Material migration: tags now render as <mat-chip class="tag-chip tag-<type>">
+      // via getEnhancedTags(2, 3), which falls back (no tagRarityAnalysis input here)
+      // to up to 5 popular tags (2 + 3) when no TF-IDF analysis is supplied.
+      const tagChips = fixture.debugElement.queryAll(By.css('.tag-chip'));
       expect(tagChips.length).toBeGreaterThan(0);
-      expect(tagChips.length).toBeLessThanOrEqual(3); // Should limit to top 3 tags as per template
+      expect(tagChips.length).toBeLessThanOrEqual(5); // getEnhancedTags(2, 3) fallback caps at 5 tags
     });
 
     it('should display genre information', () => {
-      const genreElement = fixture.debugElement.query(By.css('.genre'));
+      // Material migration: genre now lives in a <mat-card-subtitle class="genre-tag">
+      // alongside a mat-icon, so the text also contains the icon ligature.
+      const genreElement = fixture.debugElement.query(By.css('.genre-tag'));
       expect(genreElement).toBeTruthy();
-      expect(genreElement.nativeElement.textContent.trim()).toBe('Action'); // Primary genre only
+      expect(genreElement.nativeElement.textContent.trim()).toContain('Action'); // Primary genre only
     });
 
     it('should display review information', () => {
@@ -145,9 +157,14 @@ describe('GameCardComponent', () => {
 
   describe('cover image handling', () => {
     it('should use fallback image when no cover URL', () => {
+      // getCoverImage() no longer falls back to a static placeholder asset;
+      // it now derives a Steam CDN header image from the game's appId
+      // (see GameCardComponent.getCoverImage), which is a richer fallback
+      // than a generic placeholder. A canvas-generated placeholder is used
+      // only as a last resort when appId is also unavailable.
       component.game = { ...mockGame, coverUrl: null };
       const coverUrl = component.getCoverImage();
-      expect(coverUrl).toBe('/assets/images/game-placeholder.png');
+      expect(coverUrl).toBe('https://cdn.akamai.steamstatic.com/steam/apps/730/header.jpg');
     });
   });
 
@@ -161,13 +178,22 @@ describe('GameCardComponent', () => {
     });
 
     it('should display rank badge when showScore is true and rank provided', () => {
+      // Material migration: the rank badge now pairs a <mat-icon>star</mat-icon>
+      // with the rank number instead of rendering "#3" as plain text. Still
+      // assert the actual rank number is shown, plus the icon used.
       const rankBadge = fixture.debugElement.query(By.css('.rank-badge'));
       expect(rankBadge).toBeTruthy();
-      expect(rankBadge.nativeElement.textContent.trim()).toBe('#3');
+      expect(rankBadge.nativeElement.textContent.trim()).toContain('3');
+
+      const rankIcon = rankBadge.query(By.css('mat-icon'));
+      expect(rankIcon).toBeTruthy();
+      expect(rankIcon.nativeElement.textContent.trim()).toBe('star');
     });
 
     it('should display preference score when showScore is true and score provided', () => {
-      const scoreElement = fixture.debugElement.query(By.css('.score'));
+      // Material migration: score now lives in a ".score-section" div
+      // (with a mat-icon) rather than a ".score" element.
+      const scoreElement = fixture.debugElement.query(By.css('.score-section'));
       expect(scoreElement).toBeTruthy();
       expect(scoreElement.nativeElement.textContent).toContain('0.87');
     });

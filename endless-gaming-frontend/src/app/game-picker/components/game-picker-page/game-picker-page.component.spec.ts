@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { NO_ERRORS_SCHEMA, Component } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
@@ -85,6 +86,7 @@ describe('GamePickerPageComponent', () => {
       ],
       providers: [
         { provide: GameDataService, useValue: mockGameDataService },
+        provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting()
       ],
@@ -112,7 +114,7 @@ describe('GamePickerPageComponent', () => {
       fixture.detectChanges();
 
       const loadingElement = fixture.debugElement.query(By.css('.loading-state'));
-      const spinner = fixture.debugElement.query(By.css('.spinner'));
+      const spinner = fixture.debugElement.query(By.css('.loading-spinner'));
       
       expect(loadingElement).toBeTruthy();
       expect(spinner).toBeTruthy();

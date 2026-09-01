@@ -4,6 +4,8 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { GameComparisonComponent } from './game-comparison.component';
 import { GameRecord, GamePair } from '../../../types/game.types';
 import { PairService } from '../../services/pair.service';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('GameComparisonComponent', () => {
   let component: GameComparisonComponent;
@@ -43,6 +45,7 @@ describe('GameComparisonComponent', () => {
     await TestBed.configureTestingModule({
       imports: [GameComparisonComponent],
       providers: [
+        provideHttpClient(), provideHttpClientTesting(),
         { provide: PairService, useValue: pairServiceSpy }
       ],
       schemas: [NO_ERRORS_SCHEMA]
@@ -136,9 +139,14 @@ describe('GameComparisonComponent', () => {
       expect(rightButton).toBeTruthy();
       expect(skipButton).toBeTruthy();
 
-      expect(leftButton.nativeElement.textContent.trim()).toBe('I Prefer This Game');
-      expect(rightButton.nativeElement.textContent.trim()).toBe('I Prefer This Game');
-      expect(skipButton.nativeElement.textContent.trim()).toBe('Skip Both');
+      // Material migration: the prefer buttons now prefix a <mat-icon>thumb_up</mat-icon>
+      // before the label, so check the label is contained rather than an exact match.
+      expect(leftButton.nativeElement.textContent.trim()).toContain('I Prefer This Game');
+      expect(rightButton.nativeElement.textContent.trim()).toContain('I Prefer This Game');
+      // The skip control was redesigned from a labeled "Skip Both" button into an
+      // icon-only mat-mini-fab (with a "Skip This Comparison" matTooltip for hover
+      // context), so assert the icon it now renders instead of the old label text.
+      expect(skipButton.nativeElement.textContent.trim()).toBe('skip_next');
     });
 
     it('should render VS section', () => {

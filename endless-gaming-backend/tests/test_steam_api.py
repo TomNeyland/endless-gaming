@@ -228,12 +228,15 @@ class TestSteamBlueprint:
     @pytest.fixture
     def client(self, db_engine):
         """Create test client with test database."""
-        with patch.dict('os.environ', {'STEAM_API_KEY': 'test_key_123'}):
-            app = create_app('testing')
-            app.db_engine = db_engine
-            from sqlalchemy.orm import sessionmaker
-            app.db_session_factory = sessionmaker(bind=db_engine)
-            return app.test_client()
+        app = create_app('testing')
+        # The config classes read STEAM_API_KEY from the environment at import
+        # time, so patching os.environ here would be too late. Set the key on
+        # the app config directly instead.
+        app.config['STEAM_API_KEY'] = 'test_key_123'
+        app.db_engine = db_engine
+        from sqlalchemy.orm import sessionmaker
+        app.db_session_factory = sessionmaker(bind=db_engine)
+        return app.test_client()
 
     def test_steam_blueprint_registered(self):
         """Test that steam blueprint is registered with the app."""
@@ -246,13 +249,13 @@ class TestSteamBlueprint:
     def test_lookup_player_endpoint_exists(self, client):
         """Test that the lookup-player endpoint is accessible."""
         # Test that route exists (even if it returns an error initially)
-        response = client.get('/api/steam/lookup-player?player_id=76561198000000000')
+        response = client.get('/steam/lookup-player?player_id=76561198000000000')
         assert response is not None
         # Initially may return 500 due to missing implementation
 
     def test_lookup_player_missing_parameter(self, client):
         """Test that missing player_id parameter returns 400."""
-        response = client.get('/api/steam/lookup-player')
+        response = client.get('/steam/lookup-player')
         assert response.status_code == 400
         data = json.loads(response.data)
         assert 'error' in data
@@ -260,7 +263,10 @@ class TestSteamBlueprint:
 
     def test_lookup_player_invalid_parameter(self, client):
         """Test that invalid player_id parameter returns 400."""
-        response = client.get('/api/steam/lookup-player?player_id=invalid')
+        # The endpoint accepts SteamID64s, vanity names and profile URLs, so a
+        # bare word like "invalid" is a legitimate vanity name. Use an id with
+        # characters that are not allowed in any of those formats.
+        response = client.get('/steam/lookup-player?player_id=not%20a%20valid%20id%21')
         assert response.status_code == 400
         data = json.loads(response.data)
         assert 'error' in data
@@ -294,11 +300,14 @@ class TestSteamBlueprint:
             with patch('asyncio.run') as mock_run:
                 mock_run.return_value = mock_steam_response
                 
-                response = client.get('/api/steam/lookup-player?player_id=76561198000000000')
+                response = client.get('/steam/lookup-player?player_id=76561198000000000')
                 
                 assert response.status_code == 200
                 data = json.loads(response.data)
-                assert data == mock_steam_response
+                # The endpoint unwraps Steam's {"response": {...}} envelope
+                # and returns the inner payload, which is the shape the
+                # frontend consumes.
+                assert data == mock_steam_response['response']
 
     def test_lookup_player_private_profile(self, client):
         """Test handling of private profiles."""
@@ -314,11 +323,14 @@ class TestSteamBlueprint:
             with patch('asyncio.run') as mock_run:
                 mock_run.return_value = mock_steam_response
                 
-                response = client.get('/api/steam/lookup-player?player_id=76561198000000001')
+                response = client.get('/steam/lookup-player?player_id=76561198000000001')
                 
                 assert response.status_code == 200
                 data = json.loads(response.data)
-                assert data == mock_steam_response
+                # The endpoint unwraps Steam's {"response": {...}} envelope
+                # and returns the inner payload, which is the shape the
+                # frontend consumes.
+                assert data == mock_steam_response['response']
 
     def test_lookup_player_steam_api_error(self, client):
         """Test handling of Steam API errors."""
@@ -338,7 +350,7 @@ class TestSteamBlueprint:
                     response=MagicMock(status_code=403)
                 )
                 
-                response = client.get('/api/steam/lookup-player?player_id=76561198000000000')
+                response = client.get('/steam/lookup-player?player_id=76561198000000000')
                 
                 assert response.status_code == 503
                 data = json.loads(response.data)
@@ -354,7 +366,7 @@ class TestSteamBlueprint:
             with patch('asyncio.run') as mock_run:
                 mock_run.side_effect = httpx.TimeoutException("Timeout")
                 
-                response = client.get('/api/steam/lookup-player?player_id=76561198000000000')
+                response = client.get('/steam/lookup-player?player_id=76561198000000000')
                 
                 assert response.status_code == 504
                 data = json.loads(response.data)
@@ -364,7 +376,7 @@ class TestSteamBlueprint:
         """Test handling when Steam API key is not configured."""
         # This will test configuration validation once implemented
         with patch.dict('os.environ', {}, clear=True):
-            response = client.get('/api/steam/lookup-player?player_id=76561198000000000')
+            response = client.get('/steam/lookup-player?player_id=76561198000000000')
             # Should return 500 for configuration error
             # Implementation will handle this appropriately
 
@@ -377,12 +389,17 @@ class TestSteamAPIConfiguration:
         import importlib
         import app.config
         
-        with patch.dict('os.environ', {'STEAM_API_KEY': 'test_key_123'}):
-            # Reload the config module to pick up the env var
+        try:
+            with patch.dict('os.environ', {'STEAM_API_KEY': 'test_key_123'}):
+                # Reload the config module to pick up the env var
+                importlib.reload(app.config)
+                config = app.config.DevelopmentConfig()
+                assert hasattr(config, 'STEAM_API_KEY')
+                assert config.STEAM_API_KEY == 'test_key_123'
+        finally:
+            # Reload once more with the real environment so the patched key
+            # does not leak into other tests.
             importlib.reload(app.config)
-            config = app.config.DevelopmentConfig()
-            assert hasattr(config, 'STEAM_API_KEY')
-            assert config.STEAM_API_KEY == 'test_key_123'
 
     def test_steam_api_base_url_configured(self):
         """Test that Steam API base URL is configured."""

@@ -2,6 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { PairService } from './pair.service';
 import { PreferenceService } from './preference.service';
 import { GameRecord, GamePair, ProgressInfo } from '../../types/game.types';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('PairService', () => {
   let service: PairService;
@@ -61,14 +63,18 @@ describe('PairService', () => {
     const mockPreferenceService = jasmine.createSpyObj('PreferenceService', [
       'updatePreferences',
       'calculateGameScore',
-      'resetPreferences'
+      'resetPreferences',
+      'recordSkip',
+      'getModelConfidence'
     ]);
     
     // Set default return values for calculateGameScore
     mockPreferenceService.calculateGameScore.and.returnValue(0.5);
+    mockPreferenceService.getModelConfidence.and.returnValue(0.5);
     
     TestBed.configureTestingModule({
       providers: [
+        provideHttpClient(), provideHttpClientTesting(),
         { provide: PreferenceService, useValue: mockPreferenceService }
       ]
     });
@@ -112,12 +118,18 @@ describe('PairService', () => {
       // Make some choices first
       const pair = service.getNextPair()!;
       service.recordChoice(pair.left, pair.right, 'left');
-      
-      expect(service.getProgress().current).toBe(1);
-      
-      // Re-initialize
+
+      expect(service.getComparisonCount()).toBe(1);
+
+      // Re-initialize. initializeWithGames() re-seeds the candidate pool
+      // (choiceHistory + usedPairs) but deliberately leaves actualVotes/getProgress()
+      // untouched - game-picker-page.component.ts#setupVotingSession() calls
+      // initializeWithGames() every time the voting drawer re-opens mid-session, and
+      // resetting vote progress there would incorrectly drop the user back into the
+      // actualVotes<3 bootstrap phase. The dedicated full reset is resetProgress()
+      // (see the resetProgress describe block below), which does zero actualVotes.
       service.initializeWithGames(mockGames);
-      expect(service.getProgress().current).toBe(0);
+      expect(service.getComparisonCount()).toBe(0);
     });
   });
 
@@ -189,15 +201,29 @@ describe('PairService', () => {
 
     it('should handle all choice types', () => {
       const choices: ('left' | 'right' | 'skip')[] = ['left', 'right', 'skip'];
-      
+
       choices.forEach(choice => {
         const pair = service.getNextPair()!;
         const initialProgress = service.getProgress().current;
-        
+        const initialHistoryLength = service.getChoiceHistory().length;
+
         service.recordChoice(pair.left, pair.right, choice);
-        
+
         const updatedProgress = service.getProgress().current;
-        expect(updatedProgress).toBe(initialProgress + 1);
+        const updatedHistoryLength = service.getChoiceHistory().length;
+
+        // Every choice type is logged to choiceHistory (total comparisons)...
+        expect(updatedHistoryLength).toBe(initialHistoryLength + 1);
+
+        // ...but getProgress().current tracks actualVotes, which only advances
+        // for real picks. A 'skip' routes to preferenceService.recordSkip() instead
+        // of contributing a vote, so progress does not move for it (see
+        // PairService.recordChoice / getProgress doc comments).
+        if (choice === 'skip') {
+          expect(updatedProgress).toBe(initialProgress);
+        } else {
+          expect(updatedProgress).toBe(initialProgress + 1);
+        }
       });
     });
 
@@ -410,14 +436,18 @@ describe('PairService', () => {
         'updatePreferences',
         'calculateGameScore',
         'resetPreferences',
-        'initializeModel'
+        'initializeModel',
+        'recordSkip',
+        'getModelConfidence'
       ]);
       mockPreferenceService.calculateGameScore.and.returnValue(0.5);
+      mockPreferenceService.getModelConfidence.and.returnValue(0.5);
 
       // Configure TestBed with fresh mock
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
         providers: [
+          provideHttpClient(), provideHttpClientTesting(),
           { provide: PreferenceService, useValue: mockPreferenceService }
         ]
       });
@@ -427,46 +457,31 @@ describe('PairService', () => {
       service.initializeWithGames(mockGames);
     });
 
-    describe('getHighPreferenceGames', () => {
-      it('should return empty array for invalid percentiles', () => {
-        // Access private method for testing
-        const getHighPreferenceGames = (service as any).getHighPreferenceGames.bind(service);
-        
-        expect(getHighPreferenceGames(0)).toEqual([]);
-        expect(getHighPreferenceGames(-0.1)).toEqual([]);
-        expect(getHighPreferenceGames(1.1)).toEqual([]);
-      });
-
-      it('should return top percentile of games', () => {
-        // Mock preference scores for different games
+    describe('batchComputeGameScores', () => {
+      it('should return all games sorted by preference score descending', () => {
         mockPreferenceService.calculateGameScore.and.callFake((game: GameRecord) => {
           const scores: { [key: number]: number } = {
             730: 0.8, // Counter-Strike: highest score
-            570: 0.6, // Dota 2: medium score  
+            570: 0.6, // Dota 2: medium score
             440: 0.4, // Team Fortress: lowest score
           };
           return scores[game.appId] || 0;
         });
 
-        const getHighPreferenceGames = (service as any).getHighPreferenceGames.bind(service);
-        
-        // Test top 50% (should return top 2 games out of 4)
-        const top50 = getHighPreferenceGames(0.5);
-        expect(top50.length).toBe(2);
-        expect(top50[0].appId).toBe(730); // Counter-Strike (highest)
-        expect(top50[1].appId).toBe(570); // Dota 2 (second highest)
-        
-        // Test top 25% (should return top 1 game out of 4)
-        const top25 = getHighPreferenceGames(0.25);
-        expect(top25.length).toBe(1);
-        expect(top25[0].appId).toBe(730); // Counter-Strike only
+        const batchComputeGameScores = (service as any).batchComputeGameScores.bind(service);
+        const ranked = batchComputeGameScores();
+
+        expect(ranked.length).toBe(mockGames.length);
+        expect(ranked.slice(0, 3).map((entry: any) => entry.game.appId)).toEqual([730, 570, 440]);
+        expect(ranked[0].score).toBeGreaterThanOrEqual(ranked[1].score);
+        expect(ranked[1].score).toBeGreaterThanOrEqual(ranked[2].score);
       });
     });
 
     describe('getPreferenceGuidedPair', () => {
       it('should fall back to uncertainty sampling when no preference data', () => {
-        // Mock empty preference games result
-        spyOn((service as any), 'getHighPreferenceGames').and.returnValue([]);
+        // With no scored games there is nothing to guide the pairing with.
+        spyOn((service as any), 'batchComputeGameScores').and.returnValue([]);
         const uncertaintySpyResult = jasmine.createSpyObj('GamePair', ['left', 'right']);
         spyOn((service as any), 'getUncertaintyBasedPair').and.returnValue(uncertaintySpyResult);
 
@@ -477,61 +492,79 @@ describe('PairService', () => {
         expect((service as any).getUncertaintyBasedPair).toHaveBeenCalled();
       });
 
-      it('should use progressive targeting based on comparison count', () => {
-        const getHighPreferenceGamesSpy = spyOn((service as any), 'getHighPreferenceGames').and.returnValue([mockGames[0]]);
+      it('should narrow the preference pool as the vote count grows', () => {
+        // Use a larger pool so each targeting percentile yields a distinct size.
+        const manyGames: GameRecord[] = Array.from({ length: 20 }, (_, i) => ({
+          ...mockGames[0],
+          appId: 1000 + i,
+          name: `Game ${i}`
+        }));
+        service.initializeWithGames(manyGames);
+
+        const generateCandidatePairsSpy = spyOn((service as any), 'generateCandidatePairs')
+          .and.returnValue([]);
+        spyOn((service as any), 'getUncertaintyBasedPair').and.returnValue(null);
         const getPreferenceGuidedPair = (service as any).getPreferenceGuidedPair.bind(service);
+        const lastPoolSize = () =>
+          (generateCandidatePairsSpy.calls.mostRecent().args[0] as GameRecord[]).length;
 
-        // Mock different comparison counts to test progressive targeting
-        (service as any).choiceHistory = new Array(5); // 5 comparisons
+        // Fewer than 7 votes: top 50% => ceil(20 * 0.5) = 10 games
+        (service as any).actualVotes = 5;
         getPreferenceGuidedPair();
-        expect(getHighPreferenceGamesSpy).toHaveBeenCalledWith(0.5); // Top 50%
+        expect(lastPoolSize()).toBe(10);
 
-        (service as any).choiceHistory = new Array(10); // 10 comparisons  
+        // Fewer than 15 votes: top 30% => ceil(20 * 0.3) = 6 games
+        (service as any).actualVotes = 10;
         getPreferenceGuidedPair();
-        expect(getHighPreferenceGamesSpy).toHaveBeenCalledWith(0.3); // Top 30%
+        expect(lastPoolSize()).toBe(6);
 
-        (service as any).choiceHistory = new Array(16); // 16 comparisons
+        // 15 or more votes: top 20% => ceil(20 * 0.2) = 4 games
+        (service as any).actualVotes = 16;
         getPreferenceGuidedPair();
-        expect(getHighPreferenceGamesSpy).toHaveBeenCalledWith(0.2); // Top 20%
+        expect(lastPoolSize()).toBe(4);
       });
 
-      it('should find best uncertainty pairing with preferred games', () => {
-        // Mock high preference games
+      it('should select the candidate pair with the highest uncertainty', () => {
         const preferredGame = mockGames[0]; // Counter-Strike
-        const candidateGame = mockGames[1]; // Dota 2
-        spyOn((service as any), 'getHighPreferenceGames').and.returnValue([preferredGame]);
-        
-        // Mock uncertainty calculation
-        spyOn((service as any), 'calculateUncertainty').and.returnValue(0.8);
-        
+        const lowUncertaintyPair = { left: preferredGame, right: mockGames[1] };
+        const highUncertaintyPair = { left: preferredGame, right: mockGames[2] };
+
+        spyOn((service as any), 'batchComputeGameScores').and.returnValue([
+          { game: preferredGame, score: 0.9 },
+          { game: mockGames[1], score: 0.5 },
+          { game: mockGames[2], score: 0.4 }
+        ]);
+        spyOn((service as any), 'generateCandidatePairs').and.returnValue([
+          lowUncertaintyPair,
+          highUncertaintyPair
+        ]);
+        spyOn((service as any), 'calculateUncertaintyFromCachedScores').and.callFake(
+          (_left: GameRecord, right: GameRecord) =>
+            right.appId === highUncertaintyPair.right.appId ? 0.75 : 0.3
+        );
+
         const getPreferenceGuidedPair = (service as any).getPreferenceGuidedPair.bind(service);
         const result = getPreferenceGuidedPair();
 
-        expect(result).toBeTruthy();
-        expect(result.left).toBe(preferredGame);
-        expect(result.right).toBe(candidateGame);
+        expect(result).toBe(highUncertaintyPair);
       });
 
-      it('should skip already used pairs and find alternative', () => {
+      it('should not offer pairs that have already been used', () => {
         const preferredGame = mockGames[0]; // Counter-Strike
-        spyOn((service as any), 'getHighPreferenceGames').and.returnValue([preferredGame]);
-        
-        // Mark one pair as already used
-        const pairKey1 = `${Math.min(preferredGame.appId, mockGames[1].appId)}-${Math.max(preferredGame.appId, mockGames[1].appId)}`;
-        (service as any).usedPairs.add(pairKey1);
-        
-        // Mock uncertainty calculation to prefer a specific pair
-        spyOn((service as any), 'calculateUncertainty').and.callFake((game1: any, game2: any) => {
-          if (game2.appId === mockGames[2].appId) return 0.9; // Prefer Team Fortress pairing
-          return 0.5;
-        });
-        
-        const getPreferenceGuidedPair = (service as any).getPreferenceGuidedPair.bind(service);
-        const result = getPreferenceGuidedPair();
+        const usedPartner = mockGames[1];   // Dota 2
 
-        expect(result).toBeTruthy();
-        expect(result.left).toBe(preferredGame);
-        expect(result.right.appId).toBe(440); // Should find Team Fortress (highest uncertainty)
+        const usedKey = (service as any).createPairKey({ left: preferredGame, right: usedPartner });
+        (service as any).usedPairs.add(usedKey);
+
+        // Isolate the used-pair filtering from the similarity heuristic.
+        spyOn((service as any), 'areGamesTooSimilar').and.returnValue(false);
+        spyOn((service as any), 'calculateUncertainty').and.returnValue(0.9);
+
+        const generateCandidatePairs = (service as any).generateCandidatePairs.bind(service);
+        const candidates: GamePair[] = generateCandidatePairs([preferredGame], 10);
+
+        expect(candidates.length).toBeGreaterThan(0);
+        expect(candidates.map(pair => pair.right.appId)).not.toContain(usedPartner.appId);
       });
     });
 
@@ -552,12 +585,14 @@ describe('PairService', () => {
       it('should transition to preference-guided after bootstrap', () => {
         const testPair = jasmine.createSpyObj('GamePair', ['left', 'right']);
         const guidedPairSpy = spyOn((service as any), 'getPreferenceGuidedPair').and.returnValue(testPair);
-        
-        // Set choice history to trigger preference-guided phase
-        (service as any).choiceHistory = new Array(4); // 4 comparisons (past bootstrap)
-        
+
+        // getNextPair()'s bootstrap gate checks actualVotes (real picks), not
+        // choiceHistory.length - simulate 4 real votes cast, past the
+        // `actualVotes < 3` bootstrap threshold.
+        (service as any).actualVotes = 4;
+
         const result = service.getNextPair();
-        
+
         expect(guidedPairSpy).toHaveBeenCalled();
         expect(result).toBe(testPair);
       });

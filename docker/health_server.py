@@ -29,9 +29,12 @@ class HealthHandler(http.server.SimpleHTTPRequestHandler):
 
 def start_cron_scheduler():
     """Start cron and run initial export"""
-    # Run initial export
-    print("Running initial export...")
-    subprocess.run(['/app/export_and_push.sh'])
+    # Run an initial export, but only if the published data is actually stale.
+    # An unconditional export here re-pushed master.json on every container
+    # start, which (with deploy_on_push on the same branch) redeployed the
+    # service and started the whole cycle again.
+    print("Running initial export (skipped if data is still fresh)...")
+    subprocess.run(['/app/export_and_push.sh', '--if-stale'])
     
     # Start cron daemon
     print("Starting cron daemon...")

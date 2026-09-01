@@ -1,9 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { By } from '@angular/platform-browser';
+import { of } from 'rxjs';
 import { RecommendationListComponent } from './recommendation-list.component';
 import { GameRecommendation } from '../../../types/game.types';
 import { PreferenceService } from '../../services/preference.service';
+import { GameDetailsService } from '../../services/game-details.service';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('RecommendationListComponent', () => {
   let component: RecommendationListComponent;
@@ -63,14 +67,23 @@ describe('RecommendationListComponent', () => {
 
   beforeEach(async () => {
     // Create mock PreferenceService
-    mockPreferenceService = jasmine.createSpyObj('PreferenceService', ['rankGames']);
+    mockPreferenceService = jasmine.createSpyObj('PreferenceService', [
+      'rankGames',
+      'rankGamesWithSteamData',
+      'getPreferenceSummary',
+      'getTagRarityAnalysis'
+    ]);
     
     // Configure default behavior - return mock recommendations when rankGames is called
     mockPreferenceService.rankGames.and.returnValue(mockRecommendations);
+    mockPreferenceService.rankGamesWithSteamData.and.returnValue(mockRecommendations);
+    mockPreferenceService.getPreferenceSummary.and.returnValue(of({ likedTags: [], dislikedTags: [] }));
+    mockPreferenceService.getTagRarityAnalysis.and.returnValue(null);
     
     await TestBed.configureTestingModule({
       imports: [RecommendationListComponent],
       providers: [
+        provideHttpClient(), provideHttpClientTesting(),
         { provide: PreferenceService, useValue: mockPreferenceService }
       ],
       schemas: [NO_ERRORS_SCHEMA]
@@ -112,27 +125,36 @@ describe('RecommendationListComponent', () => {
     });
 
     it('should display list header when recommendations available', () => {
-      const listHeader = fixture.debugElement.query(By.css('.list-header'));
+      // '.list-header' no longer exists post Material redesign; the top-level
+      // recommendations content is now the premium-recommendations section,
+      // which renders whenever recommendations are available.
+      const premiumSection = fixture.debugElement.query(By.css('.premium-section'));
       const noRecommendations = fixture.debugElement.query(By.css('.no-recommendations'));
 
-      expect(listHeader).toBeTruthy();
+      expect(premiumSection).toBeTruthy();
       expect(noRecommendations).toBeFalsy();
     });
 
     it('should display main title with recommendation count', () => {
-      const title = fixture.debugElement.query(By.css('.list-header h2'));
-      expect(title).toBeTruthy();
-      expect(title.nativeElement.textContent).toContain('Your Top 100 Game Recommendations');
+      // The dedicated "Your Top 100 Game Recommendations" heading moved up to the
+      // parent game-picker-page component. Within this component, the recommendation
+      // count is now communicated via the stats footer summary line.
+      const statsFooter = fixture.debugElement.query(By.css('.stats-footer'));
+      expect(statsFooter).toBeTruthy();
+      expect(statsFooter.nativeElement.textContent).toContain('3 personalized recommendations');
     });
 
     it('should display subtitle', () => {
-      const subtitle = fixture.debugElement.query(By.css('.subtitle'));
-      expect(subtitle).toBeTruthy();
-      expect(subtitle.nativeElement.textContent).toContain('Based on your preferences');
+      // The "Based on your preferences" subtitle also moved to the parent component.
+      // The closest remaining descriptive heading within this component is the
+      // premium section's title, introducing the recommendations that follow.
+      const sectionTitle = fixture.debugElement.query(By.css('.premium-section .section-title'));
+      expect(sectionTitle).toBeTruthy();
+      expect(sectionTitle.nativeElement.textContent).toContain('Top Recommendations');
     });
 
     it('should display recommendation items', () => {
-      const recommendationItems = fixture.debugElement.queryAll(By.css('.recommendation-item'));
+      const recommendationItems = fixture.debugElement.queryAll(By.css('.premium-card, .compact-item'));
       expect(recommendationItems.length).toBe(3);
     });
 
@@ -146,51 +168,66 @@ describe('RecommendationListComponent', () => {
     });
 
     it('should display score badges', () => {
-      const scoreBadges = fixture.debugElement.queryAll(By.css('.score-badge'));
+      // '.score-badge' was renamed to '.score' in the Material redesign.
+      const scoreBadges = fixture.debugElement.queryAll(By.css('.score'));
       expect(scoreBadges.length).toBe(3);
     });
 
     it('should display game cards', () => {
-      const gameCards = fixture.debugElement.queryAll(By.css('app-game-card'));
+      // This component no longer delegates to a reusable <app-game-card>; each
+      // top recommendation now renders inline as a Material 'premium-card'.
+      const gameCards = fixture.debugElement.queryAll(By.css('.premium-card'));
       expect(gameCards.length).toBe(3);
     });
 
     it('should display view details buttons', () => {
-      const viewButtons = fixture.debugElement.queryAll(By.css('.view-details-btn'));
+      // The dedicated "View Details" button was replaced by a whole-card click
+      // (see 'user interactions > should handle recommendation item clicks').
+      // The one action button that remains on every premium card links out to
+      // the Steam store page, so assert that specific, still-present button.
+      const viewButtons = fixture.debugElement.queryAll(By.css('.steam-link-button'));
       expect(viewButtons.length).toBe(3);
-      
+
       viewButtons.forEach(button => {
-        expect(button.nativeElement.textContent.trim()).toBe('View Details');
-        expect(button.nativeElement.type).toBe('button');
+        expect(button.nativeElement.tagName.toLowerCase()).toBe('button');
+        expect(button.nativeElement.textContent).toContain('Steam Store');
       });
     });
 
     it('should display rank numbers', () => {
+      // Premium cards render the bare rank number (no leading '#'); only the
+      // compact list items keep the '#' prefix. All 3 mock recommendations
+      // land in the premium section, so assert the plain numbers shown there.
       const rankNumbers = fixture.debugElement.queryAll(By.css('.rank-number'));
       expect(rankNumbers.length).toBe(3);
-      
-      expect(rankNumbers[0].nativeElement.textContent.trim()).toBe('#1');
-      expect(rankNumbers[1].nativeElement.textContent.trim()).toBe('#2');
-      expect(rankNumbers[2].nativeElement.textContent.trim()).toBe('#3');
+
+      expect(rankNumbers[0].nativeElement.textContent.trim()).toBe('1');
+      expect(rankNumbers[1].nativeElement.textContent.trim()).toBe('2');
+      expect(rankNumbers[2].nativeElement.textContent.trim()).toBe('3');
     });
 
     it('should display score badges', () => {
-      const scoreBadges = fixture.debugElement.queryAll(By.css('.score-badge'));
+      // '.score-badge' was renamed to '.score'; it now also contains a
+      // mat-icon, so check the formatted score is present rather than an
+      // exact text match.
+      const scoreBadges = fixture.debugElement.queryAll(By.css('.score'));
       expect(scoreBadges.length).toBe(3);
-      
-      expect(scoreBadges[0].nativeElement.textContent.trim()).toBe('0.95');
-      expect(scoreBadges[1].nativeElement.textContent.trim()).toBe('0.87');
+
+      expect(scoreBadges[0].nativeElement.textContent).toContain('0.95');
+      expect(scoreBadges[1].nativeElement.textContent).toContain('0.87');
     });
 
     it('should display recommendation items with correct structure', () => {
-      const recommendationItems = fixture.debugElement.queryAll(By.css('.recommendation-item'));
+      // '.rank-section' / '.game-section' / '.action-section' were replaced by
+      // the premium card's rank badge, Material card content, and card actions.
+      const recommendationItems = fixture.debugElement.queryAll(By.css('.premium-card'));
       expect(recommendationItems.length).toBe(3);
-      
+
       // Each item should have the expected sections
       recommendationItems.forEach(item => {
-        expect(item.query(By.css('.rank-section'))).toBeTruthy();
-        expect(item.query(By.css('.game-section'))).toBeTruthy();
-        expect(item.query(By.css('.action-section'))).toBeTruthy();
+        expect(item.query(By.css('.rank-badge'))).toBeTruthy();
+        expect(item.query(By.css('mat-card-content'))).toBeTruthy();
+        expect(item.query(By.css('mat-card-actions'))).toBeTruthy();
       });
     });
   });
@@ -203,12 +240,18 @@ describe('RecommendationListComponent', () => {
     });
 
     it('should display no recommendations message when empty', () => {
-      const listHeader = fixture.debugElement.query(By.css('.list-header'));
+      // '.list-header' no longer exists; use its replacement, '.premium-section',
+      // to confirm the recommendations content is absent in the empty state.
+      const premiumSection = fixture.debugElement.query(By.css('.premium-section'));
       const noRecommendations = fixture.debugElement.query(By.css('.no-recommendations'));
 
-      expect(listHeader).toBeFalsy();
+      expect(premiumSection).toBeFalsy();
       expect(noRecommendations).toBeTruthy();
       expect(noRecommendations.nativeElement.textContent).toContain('No Recommendations Available');
+      // NOTE: this assertion is intentionally left pointing at the original expected
+      // copy. It currently fails - see report: suspected GameFilterService bug makes
+      // isFiltering() true by default, so this branch always renders the "No games
+      // match your current filters" copy instead. Not fixed here (production code).
       expect(noRecommendations.nativeElement.textContent).toContain('Complete some game comparisons');
     });
   });
@@ -223,15 +266,19 @@ describe('RecommendationListComponent', () => {
     it('should handle recommendation item clicks', () => {
       spyOn(component, 'onRecommendationClick');
 
-      const firstRecommendationItem = fixture.debugElement.query(By.css('.recommendation-item'));
+      // '.recommendation-item' was replaced by '.premium-card' (top 3) and
+      // '.compact-item' (the rest); the whole card is now clickable.
+      const firstRecommendationItem = fixture.debugElement.query(By.css('.premium-card, .compact-item'));
       firstRecommendationItem.nativeElement.click();
 
       expect(component.onRecommendationClick).toHaveBeenCalledWith(mockRecommendations[0]);
     });
 
     it('should handle view details button clicks', () => {
-      const viewButtons = fixture.debugElement.queryAll(By.css('.view-details-btn'));
-      
+      // '.view-details-btn' was replaced by '.steam-link-button' (see above).
+      const viewButtons = fixture.debugElement.queryAll(By.css('.steam-link-button'));
+      expect(viewButtons.length).toBe(3);
+
       viewButtons.forEach(button => {
         spyOn(button.nativeElement, 'click');
         button.nativeElement.click();
@@ -278,9 +325,14 @@ describe('RecommendationListComponent', () => {
     });
 
     it('should implement onRecommendationClick method', () => {
-      spyOn(console, 'log');
+      // onRecommendationClick no longer just logs to the console - it now opens
+      // the game details modal via GameDetailsService. Verify that behavior instead.
+      const gameDetailsService = TestBed.inject(GameDetailsService);
+      spyOn(gameDetailsService, 'openGameDetails');
+
       component.onRecommendationClick(mockRecommendations[0]);
-      expect(console.log).toHaveBeenCalledWith('Clicked recommendation:', 'Counter-Strike: Global Offensive');
+
+      expect(gameDetailsService.openGameDetails).toHaveBeenCalledWith(mockRecommendations[0].game);
     });
 
     it('should implement trackByAppId method', () => {

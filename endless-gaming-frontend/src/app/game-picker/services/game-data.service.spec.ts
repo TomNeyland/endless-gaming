@@ -78,8 +78,8 @@ describe('GameDataService', () => {
 
   describe('loadMasterData', () => {
     it('should fetch master data from backend API', (done) => {
-      // Call the private fetchFromBackend method directly to bypass caching
-      (service as any).fetchFromBackend().subscribe({
+      // Call the private fetchFromStaticFile method directly to bypass caching
+      (service as any).fetchFromStaticFile().subscribe({
         next: (games: GameRecord[]) => {
           expect(games).toEqual(mockGameData);
           expect(games.length).toBe(2);
@@ -90,16 +90,16 @@ describe('GameDataService', () => {
         error: (err: any) => done.fail(err)
       });
 
-      const req = httpMock.expectOne('/api/discovery/games/master.json');
+      const req = httpMock.expectOne('./master.json');
       expect(req.request.method).toBe('GET');
       req.flush(mockGameData);
     });
 
     it('should cache data in IndexedDB after successful fetch', () => {
-      // Use fetchFromBackend to bypass cache checks
-      (service as any).fetchFromBackend().subscribe();
+      // Use fetchFromStaticFile to bypass cache checks
+      (service as any).fetchFromStaticFile().subscribe();
 
-      const req = httpMock.expectOne('/api/discovery/games/master.json');
+      const req = httpMock.expectOne('./master.json');
       req.flush(mockGameData);
 
       // After loading, cache should be valid
@@ -111,9 +111,9 @@ describe('GameDataService', () => {
 
   describe('getGameById', () => {
     beforeEach(() => {
-      // Load test data first using fetchFromBackend to bypass cache
-      (service as any).fetchFromBackend().subscribe();
-      const req = httpMock.expectOne('/api/discovery/games/master.json');
+      // Load test data first using fetchFromStaticFile to bypass cache
+      (service as any).fetchFromStaticFile().subscribe();
+      const req = httpMock.expectOne('./master.json');
       req.flush(mockGameData);
     });
 
@@ -145,9 +145,9 @@ describe('GameDataService', () => {
       // Initially should return empty array
       expect(service.getAllGames()).toEqual([]);
 
-      // Load data using fetchFromBackend to bypass cache
-      (service as any).fetchFromBackend().subscribe();
-      const req = httpMock.expectOne('/api/discovery/games/master.json');
+      // Load data using fetchFromStaticFile to bypass cache
+      (service as any).fetchFromStaticFile().subscribe();
+      const req = httpMock.expectOne('./master.json');
       req.flush(mockGameData);
 
       // Should now return all games
@@ -168,8 +168,8 @@ describe('GameDataService', () => {
     });
 
     it('should return true after successful data load', () => {
-      (service as any).fetchFromBackend().subscribe();
-      const req = httpMock.expectOne('/api/discovery/games/master.json');
+      (service as any).fetchFromStaticFile().subscribe();
+      const req = httpMock.expectOne('./master.json');
       req.flush(mockGameData);
 
       expect(service.isCacheValid()).toBe(true);
@@ -177,8 +177,8 @@ describe('GameDataService', () => {
 
     it('should return false after cache is cleared', async () => {
       // Load data first
-      (service as any).fetchFromBackend().subscribe();
-      const req = httpMock.expectOne('/api/discovery/games/master.json');
+      (service as any).fetchFromStaticFile().subscribe();
+      const req = httpMock.expectOne('./master.json');
       req.flush(mockGameData);
 
       expect(service.isCacheValid()).toBe(true);
@@ -194,8 +194,8 @@ describe('GameDataService', () => {
   describe('clearCache', () => {
     it('should clear cached data', async () => {
       // Load data first
-      (service as any).fetchFromBackend().subscribe();
-      const req = httpMock.expectOne('/api/discovery/games/master.json');
+      (service as any).fetchFromStaticFile().subscribe();
+      const req = httpMock.expectOne('./master.json');
       req.flush(mockGameData);
 
       expect(service.getAllGames().length).toBe(2);

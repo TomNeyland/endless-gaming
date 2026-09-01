@@ -5,11 +5,13 @@ on:
     branches: [ main, master ]
     paths: 
       - 'endless-gaming-frontend/**'
+      - '!endless-gaming-frontend/master.json'
       - '.github/workflows/frontend-test.yml'
   pull_request:
     branches: [ main, master ]
     paths: 
       - 'endless-gaming-frontend/**'
+      - '!endless-gaming-frontend/master.json'
 
 defaults:
   run:

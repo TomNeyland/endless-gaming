@@ -2,6 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { PreferenceService } from './preference.service';
 import { TagRarityService } from './tag-rarity.service';
 import { GameRecord, TagDictionary, UserPreferenceState, PreferenceSummary, GameRecommendation } from '../../types/game.types';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('PreferenceService', () => {
   let service: PreferenceService;
@@ -46,7 +48,9 @@ describe('PreferenceService', () => {
   ];
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()]
+    });
     service = TestBed.inject(PreferenceService);
     
     // Clear localStorage to ensure test isolation
@@ -81,7 +85,17 @@ describe('PreferenceService', () => {
       // Make some updates first
       service.updatePreferences(mockGames[0], mockGames[1]);
       expect(service.getComparisonCount()).toBe(1);
-      
+
+      // updatePreferences() just persisted actualVoteCount=1 to real localStorage.
+      // initializeModel() deliberately re-hydrates from localStorage when a saved
+      // session matches the current tag dictionary (see loadFromLocalStorage) -
+      // that's the "resume where I left off after a page reload" feature, mirrored
+      // by the outer beforeEach always clearing localStorage before the first
+      // initializeModel() call. To exercise the "brand new session" case here too,
+      // clear the persisted state first, exactly like resetGamePicker() does in
+      // game-picker-page.component.ts before calling the reset methods.
+      localStorage.clear();
+
       // Re-initialize
       service.initializeModel(mockTagDict);
       expect(service.getComparisonCount()).toBe(0);
