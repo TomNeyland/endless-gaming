@@ -3,6 +3,8 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { PreferenceSummaryComponent } from './preference-summary.component';
 import { PreferenceSummary } from '../../../types/game.types';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('PreferenceSummaryComponent', () => {
   let component: PreferenceSummaryComponent;
@@ -38,6 +40,7 @@ describe('PreferenceSummaryComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
       imports: [PreferenceSummaryComponent],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
@@ -81,20 +84,28 @@ describe('PreferenceSummaryComponent', () => {
 
     it('should implement getLikedTags method', () => {
       component.preferenceSummary = mockPreferenceSummary;
-      component.maxTags = 3;
-      
+
       const likedTags = component.getLikedTags();
-      expect(likedTags.length).toBe(3); // Limited by maxTags
+      // Component returns ALL liked tags (no maxTags slicing) - see
+      // PreferenceSummaryComponent.getLikedTags doc comment and
+      // PreferenceService.updatePreferenceSummary, which both intentionally
+      // return the full significant-tag list rather than a top-N slice.
+      expect(likedTags.length).toBe(mockPreferenceSummary.likedTags.length);
       expect(likedTags[0].tag).toBe('FPS');
+      expect(likedTags[likedTags.length - 1].tag).toBe('Action');
     });
 
     it('should implement getDislikedTags method', () => {
       component.preferenceSummary = mockPreferenceSummary;
-      component.maxTags = 2;
-      
+
       const dislikedTags = component.getDislikedTags();
-      expect(dislikedTags.length).toBe(2); // Limited by maxTags
+      // Component returns ALL disliked tags (no maxTags slicing) - see
+      // PreferenceSummaryComponent.getDislikedTags doc comment and
+      // PreferenceService.updatePreferenceSummary, which both intentionally
+      // return the full significant-tag list rather than a top-N slice.
+      expect(dislikedTags.length).toBe(mockPreferenceSummary.dislikedTags.length);
       expect(dislikedTags[0].tag).toBe('Strategy');
+      expect(dislikedTags[dislikedTags.length - 1].tag).toBe('Management');
     });
 
     it('should implement formatWeight method', () => {

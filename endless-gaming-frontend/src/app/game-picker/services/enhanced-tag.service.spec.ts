@@ -2,6 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { EnhancedTagService } from './enhanced-tag.service';
 import { TagRarityService } from './tag-rarity.service';
 import { GameRecord, TagRarityAnalysis, EnhancedTag, EnhancedTagDisplay } from '../../types/game.types';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('EnhancedTagService', () => {
   let service: EnhancedTagService;
@@ -49,6 +51,7 @@ describe('EnhancedTagService', () => {
     
     TestBed.configureTestingModule({
       providers: [
+        provideHttpClient(), provideHttpClientTesting(),
         { provide: TagRarityService, useValue: tagRaritySpy }
       ]
     });
@@ -109,20 +112,41 @@ describe('EnhancedTagService', () => {
   describe('getUniqueTags', () => {
     it('should return top tags sorted by TF-IDF score', () => {
       const uniqueTags = service.getUniqueTags(mockGame, mockTFIDFAnalysis, 3);
-      
+
+      // getUniqueTags computes a true TF-IDF score (see enhanced-tag.service.ts):
+      //   tf = votes / maxVotesInGame   (maxVotesInGame here = Action's 50000 votes)
+      //   tfidfScore = tf * idfScore    (idfScore comes from mockTFIDFAnalysis above)
+      //
+      // Action:       tf = 50000/50000 = 1.000 * idf 0.2 = 0.20
+      // FPS:          tf = 45000/50000 = 0.900 * idf 0.7 = 0.63
+      // Shooter:      tf = 40000/50000 = 0.800 * idf 0.8 = 0.64  <- highest
+      // Roguelike:    tf =  1500/50000 = 0.030 * idf 2.9 = 0.087
+      // Metroidvania: tf =   800/50000 = 0.016 * idf 3.4 = 0.0544
+      //
+      // Even though Metroidvania/Roguelike have the highest raw IDF (rarity),
+      // their vote counts within THIS game are tiny relative to Action/FPS/
+      // Shooter, so TF-weighting pulls their combined TF-IDF score below the
+      // game's mainstream tags. Shooter edges out FPS and Action for 1st.
       expect(uniqueTags.length).toBe(3);
-      expect(uniqueTags[0].tag).toBe('Metroidvania'); // Highest TF-IDF
-      expect(uniqueTags[0].tfidfScore).toBe(3.4);
-      expect(uniqueTags[1].tag).toBe('Roguelike');    // Second highest TF-IDF
-      expect(uniqueTags[1].tfidfScore).toBe(2.9);
-      expect(uniqueTags[2].tag).toBe('Shooter');      // Third highest TF-IDF
+      expect(uniqueTags[0].tag).toBe('Shooter');
+      expect(uniqueTags[0].tfidfScore).toBeCloseTo(0.64, 5);
+      expect(uniqueTags[1].tag).toBe('FPS');
+      expect(uniqueTags[1].tfidfScore).toBeCloseTo(0.63, 5);
+      expect(uniqueTags[2].tag).toBe('Action');
+      expect(uniqueTags[2].tfidfScore).toBeCloseTo(0.2, 5);
     });
 
     it('should include multiplier information when TagRarityService available', () => {
       const uniqueTags = service.getUniqueTags(mockGame, mockTFIDFAnalysis, 2, mockTagRarityService);
-      
-      expect(uniqueTags[0].multiplier).toBe(3.0); // Metroidvania multiplier
-      expect(uniqueTags[1].multiplier).toBe(2.8); // Roguelike multiplier
+
+      // Top 2 by TF-IDF score are now Shooter (0.64) and FPS (0.63) -- see the
+      // derivation in "should return top tags sorted by TF-IDF score" above.
+      // Multipliers are whatever the mocked TagRarityService.getTagImportanceMultiplier
+      // fake (configured in beforeEach) returns for those tag names.
+      expect(uniqueTags[0].tag).toBe('Shooter');
+      expect(uniqueTags[0].multiplier).toBe(1.3); // Shooter multiplier
+      expect(uniqueTags[1].tag).toBe('FPS');
+      expect(uniqueTags[1].multiplier).toBe(1.2); // FPS multiplier
     });
 
     it('should work without TagRarityService', () => {
@@ -154,10 +178,14 @@ describe('EnhancedTagService', () => {
       expect(display.popularTags[1].tag).toBe('FPS');
       expect(display.popularTags[2].tag).toBe('Shooter');
       
-      // Unique tags (top 2 by TF-IDF, excluding duplicates)
+      // Unique-tag candidates are ranked by TF-IDF (tf * idf) -- see the
+      // derivation in "should return top tags sorted by TF-IDF score" above:
+      // Shooter(0.64), FPS(0.63), Action(0.2), Roguelike(0.087), Metroidvania(0.0544).
+      // After removing tags already shown as "popular" (Action, FPS, Shooter),
+      // the top 2 remaining candidates are Roguelike then Metroidvania.
       expect(display.uniqueTags.length).toBe(2);
-      expect(display.uniqueTags[0].tag).toBe('Metroidvania'); // Not in popular list
-      expect(display.uniqueTags[1].tag).toBe('Roguelike');    // Not in popular list
+      expect(display.uniqueTags[0].tag).toBe('Roguelike');    // Not in popular list
+      expect(display.uniqueTags[1].tag).toBe('Metroidvania'); // Not in popular list
       
       // All tags combined
       expect(display.allTags.length).toBe(5); // 3 popular + 2 unique (no overlap in this case)

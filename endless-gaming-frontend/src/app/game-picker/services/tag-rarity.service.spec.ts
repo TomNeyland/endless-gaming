@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { TagRarityService } from './tag-rarity.service';
 import { GameRecord, TagRarityAnalysis, TFIDFConfig } from '../../types/game.types';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('TagRarityService', () => {
   let service: TagRarityService;
@@ -69,7 +71,9 @@ describe('TagRarityService', () => {
   ];
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()]
+    });
     service = TestBed.inject(TagRarityService);
   });
 
@@ -98,19 +102,51 @@ describe('TagRarityService', () => {
 
     it('should calculate correct inverse document frequency (IDF) values', () => {
       const analysis = service.calculateTagRarity(mockGames);
-      
-      // IDF = log(total_games / games_with_tag)
-      // For Action (4/5 games): log(5/4) ≈ 0.223
+
+      // IDF is VOTE-WEIGHTED (see tag-rarity.service.ts):
+      //   idf = log(total_votes / tag_vote_sum)
+      // where tag_vote_sum is the sum of a tag's vote counts across every game
+      // that has it, and total_votes is the sum of every tag's votes across
+      // every game. This deliberately replaced the older plain document-count
+      // formula (log(total_games / games_with_tag)) so that tags accumulating
+      // few total votes score as "rare" even if they appear in several games.
+      //
+      // Derive both totals directly from the mockGames fixture above (rather
+      // than hardcoding magic numbers) so this test stays tied to the actual
+      // input data and the documented formula.
+      const tagVoteSums = new Map<string, number>();
+      let totalVotes = 0;
+      mockGames.forEach(game => {
+        Object.entries(game.tags).forEach(([tag, votes]) => {
+          tagVoteSums.set(tag, (tagVoteSums.get(tag) || 0) + votes);
+          totalVotes += votes;
+        });
+      });
+      // totalVotes = 794850 (sum of every vote count in the fixture)
+
+      // Action: appears in 4/5 games (CS:GO, Dota 2, TF2, GTA IV) with vote sum
+      // 45123 + 67890 + 31205 + 78345 = 222563 -> log(794850 / 222563) ≈ 1.273
+      const actionVoteSum = tagVoteSums.get('Action')!;
       const actionIDF = analysis.inverseFrequency.get('Action');
-      expect(actionIDF).toBeCloseTo(Math.log(5 / 4), 3);
-      
-      // For MOBA (1/5 games): log(5/1) ≈ 1.609
+      expect(actionIDF).toBeCloseTo(Math.log(totalVotes / actionVoteSum), 3);
+
+      // MOBA: appears in only 1 game (Dota 2) with vote sum 55432, a much
+      // smaller share of total votes than Action -> log(794850 / 55432) ≈ 2.663
+      const mobaVoteSum = tagVoteSums.get('MOBA')!;
       const mobaIDF = analysis.inverseFrequency.get('MOBA');
-      expect(mobaIDF).toBeCloseTo(Math.log(5 / 1), 3);
-      
-      // For FPS (2/5 games): log(5/2) ≈ 0.916
+      expect(mobaIDF).toBeCloseTo(Math.log(totalVotes / mobaVoteSum), 3);
+
+      // FPS: appears in 2/5 games (CS:GO, TF2) with vote sum
+      // 91172 + 72134 = 163306 -> log(794850 / 163306) ≈ 1.583
+      const fpsVoteSum = tagVoteSums.get('FPS')!;
       const fpsIDF = analysis.inverseFrequency.get('FPS');
-      expect(fpsIDF).toBeCloseTo(Math.log(5 / 2), 3);
+      expect(fpsIDF).toBeCloseTo(Math.log(totalVotes / fpsVoteSum), 3);
+
+      // Sanity check the formula's intent still holds: a tag with a smaller
+      // share of total votes (MOBA) must score rarer (higher IDF) than one
+      // with a much larger share (Action), even though Action has more votes
+      // AND appears in more games.
+      expect(mobaIDF).toBeGreaterThan(actionIDF!);
     });
 
     it('should handle empty games array gracefully', () => {
